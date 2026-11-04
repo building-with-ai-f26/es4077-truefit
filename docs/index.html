@@ -137,6 +137,25 @@
       font-size: 13px;
       color: var(--muted);
     }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0 0 16px;
+      font-size: 15px;
+    }
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -170,22 +189,34 @@
       <h2>Living PRD (Product Requirements Document)</h2>
       <p class="meta">Updated every week as we test with real users and learn what works.</p>
 
+      <table>
+        <tr><th scope="row">Owner</th><td>Emma Schmidt (builder; product, design, and engineering)</td></tr>
+        <tr><th scope="row">Document status</th><td>Draft v1.1 · Build 1 (local prototype)</td></tr>
+        <tr><th scope="row">Target release</th><td>Local app through Week 4; cloud launch with Build 5 (Dec 7, 2026)</td></tr>
+        <tr><th scope="row">Testers</th><td>Second-year Stern MBA classmates in my section, pod, and recruiting clubs</td></tr>
+        <tr><th scope="row">Detailed spec</th><td><a href="https://github.com/building-with-ai-f26/es4077-truefit/tree/main/specs/001-start-date-truthful-resume">specs/001-start-date-truthful-resume</a> (requirements, plan, and tasks)</td></tr>
+        <tr><th scope="row">Last updated</th><td>Nov 4, 2026</td></tr>
+      </table>
+
+      <p><strong>Objective:</strong> Help MBA students spend their limited recruiting time only on roles they can actually start, and send a resume for each one that gets through applicant tracking systems without containing a single claim they can't back up. The test of success is simple: classmates use it instead of their current mix of reading postings closely, ChatGPT, and manual fact-checking.</p>
+
       <h3>1. Target User & The Job to Be Done</h3>
       <p><strong>Who is this for?</strong> Second-year NYU Stern MBA students (my classmates) who graduate in May 2027 and are recruiting for full-time roles that can start between June and October 2027. I can reach them directly through my section, my pod, and recruiting clubs.</p>
       <p><strong>The painful "Before" workflow:</strong> For every posting, they read the whole description hoping to find a start date. Often it's buried, vague ("Summer 2027"), or missing, so they apply to roles they can't take or skip roles they could. Next they tailor their resume by hand or with ChatGPT, then check every line because the AI invents skills and metrics. Finally they paste the resume into Workday or iCIMS, where the parser scrambles the formatting, and they spend more time fixing fields one by one.</p>
-      <p><strong>The "After" workflow with this product:</strong> They paste a job posting and their master resume. In one sitting, TrueFit first pulls out the start date and flags whether it falls in the June–October 2027 window, or says "not stated." It then writes a tailored resume in a plain, single-column, ATS-friendly format that pastes cleanly into Workday or iCIMS. Every bullet links to a line in their real resume, anything it can't back up is flagged, and the gaps between the posting and their experience are listed so they know what they can't claim.</p>
+      <p><strong>The "After" workflow with this product:</strong> They paste a job posting and their master resume. In one sitting, TrueFit first pulls out the start date, quotes where it found it, and flags whether it falls in their availability window (June–October 2027 by default, or a range they set, "Immediate," "ASAP," or "Flexible"), or says "not stated." It then writes a tailored resume in a plain, single-column, ATS-friendly format that pastes cleanly into Workday or iCIMS. Every bullet links to a line in their real resume, anything it can't back up is flagged, and they can remove, restore, or edit bullets (edits are re-checked). The gaps between the posting and their experience are listed as Required or Preferred so they know what they can't claim. Their master resume can be saved on their own device so they don't paste it every time.</p>
 
       <h3>2. Scope & Explicit Non-Goals</h3>
       <ul>
-        <li><strong>In Scope (Core Workflow):</strong> Paste one job posting and a master resume → get a start-date check against June–Oct 2027, then a tailored, ATS-friendly resume where every claim is verified against the master resume and any gaps are listed.</li>
+        <li><strong>In Scope (Core Workflow):</strong> Paste one job posting and a master resume → get a start-date check against the student's availability (default June–Oct 2027), then a tailored, ATS-friendly resume where every claim is verified against the master resume and any gaps are listed.</li>
         <li><strong>Out of Scope #1:</strong> Scraping job boards, auto-applying, or auto-filling Workday/iCIMS forms. Users paste postings in themselves.</li>
         <li><strong>Out of Scope #2:</strong> Application status tracking or pipeline management. That's a different job, and spreadsheets and tools like Huntr already handle it.</li>
         <li><strong>Out of Scope #3:</strong> Anything beyond the resume, including cover letters, LinkedIn rewrites, interview prep, and designed templates or PDF styling. The output is one plain, ATS-safe format.</li>
+        <li><strong>Also out of scope for v1:</strong> uploading PDF or Word files (text paste only), fetching postings from a URL, non-English postings, and user accounts or syncing across devices.</li>
       </ul>
 
       <h3>3. How It Works Under the Hood & Riskiest Assumption (Week 2+)</h3>
-      <p><strong>Riskiest Assumption:</strong> [What is the #1 technical or user risk that could sink this product?]</p>
-      <p><strong>Simple Architecture:</strong> [User Input] → [Your App / Server] → [AI Model / Tool] → [Output]</p>
+      <p><strong>Riskiest Assumption:</strong> That an AI model can tailor a resume without slipping in skills, numbers, or claims that aren't in the student's master resume. If one invented claim gets through, the "100% true" promise breaks and students go back to checking every line. <em>How we test it:</em> the model only drafts; plain code then checks every bullet against the resume lines it cites (exact numbers, no posting keywords the student doesn't have), plus a second AI support check. Anything that fails is flagged and left out by default. A fixed set of 10 test cases is re-run whenever prompts or models change.</p>
+      <p><strong>Simple Architecture (planned):</strong> [Web page: paste posting + resume] → [Small Python server holding the API key; stores nothing] → [AI model via OpenRouter: extracts and drafts] → [Python checks: start-date rules, quote check, fact trace check] → [Verdict, tailored plain-text resume, gap list]</p>
 
       <h3>4. Unit Economics & Analytics Snapshot (Updated Weekly)</h3>
       <div class="grid-2">
@@ -206,6 +237,54 @@
           <div class="stat-value">TBD</div>
         </div>
       </div>
+
+      <h3>5. Success Metrics</h3>
+      <table>
+        <thead><tr><th>Goal</th><th>Metric</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td>Fast answers</td><td>Time from paste to start-date verdict / to copy-ready resume</td><td>&lt; 30 s / &lt; 2 min</td></tr>
+          <tr><td>Correct start dates</td><td>Verdict matches a human reviewer on 10+ real postings</td><td>≥ 9 of 10, and never a date the posting doesn't state</td></tr>
+          <tr><td>100% true</td><td>Bullets in the copy-ready resume that trace to the master resume; altered numbers</td><td>100%; zero</td></tr>
+          <tr><td>ATS-ready</td><td>Pastes into Workday/iCIMS keeping order, no garbled characters</td><td>≥ 9 of 10 tests</td></tr>
+          <tr><td>Useful gap list</td><td>Unsupported requirements caught vs. a human reviewer; Required/Preferred grouping agreement</td><td>≥ 80%; ≥ 90%</td></tr>
+          <tr><td>Worth using</td><td>Classmate testers who say it's faster and they don't re-check every line</td><td>≥ 3</td></tr>
+        </tbody>
+      </table>
+
+      <h3>6. Requirements (User Stories)</h3>
+      <table>
+        <thead><tr><th>#</th><th>User story</th><th>Importance</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>As a student, I paste a posting and see its start date, where it came from, and whether it fits my availability.</td><td>Must have (P1)</td><td>Default June–Oct 2027; can be a range, Immediate, ASAP, or Flexible. "Not stated" instead of guessing.</td></tr>
+          <tr><td>2</td><td>As a student, I get a tailored resume where every bullet is traced to my master resume, and I can remove, restore, or edit bullets.</td><td>Must have (P1)</td><td>Unbacked lines and edits are flagged and left out by default. Numbers never change.</td></tr>
+          <tr><td>3</td><td>As a student, I copy a clean plain-text resume and see what the posting asks for that I can't claim.</td><td>Should have (P2)</td><td>Single column, standard headings, hyphen bullets. Gaps grouped Required / Preferred.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>7. Assumptions</h3>
+      <ul>
+        <li><strong>Users:</strong> Second-year Stern MBAs graduating May 2027; most are available June–October 2027.</li>
+        <li><strong>Inputs:</strong> Postings and resumes are in English and pasted as text.</li>
+        <li><strong>Vague dates:</strong> Spring = Mar–May, Summer = Jun–Aug, Fall = Sep–Nov. "Immediate" and "ASAP" mean the same thing.</li>
+        <li><strong>Rewording:</strong> Allowed (new verbs, reordering, shortening) as long as no facts are added and numbers stay exact.</li>
+        <li><strong>Privacy:</strong> No accounts. Nothing is stored on a server; the master resume is saved only on the student's device and can be cleared anytime.</li>
+        <li><strong>Output:</strong> About one page; one plain ATS-safe format is enough for Workday and iCIMS.</li>
+      </ul>
+
+      <h3>8. Open Questions</h3>
+      <table>
+        <thead><tr><th>Question</th><th>Answer</th><th>Date answered</th></tr></thead>
+        <tbody>
+          <tr><td>Should TrueFit remember a student's master resume between visits?</td><td>Yes, on their own device only; clearable; no accounts.</td><td>Nov 4, 2026</td></tr>
+          <tr><td>Can students set their own availability?</td><td>Yes: default June–Oct 2027, or a range, Immediate, ASAP, or Flexible.</td><td>Nov 4, 2026</td></tr>
+          <tr><td>Can students edit the tailored resume?</td><td>Yes: remove, restore, or edit bullets; edits are re-checked.</td><td>Nov 4, 2026</td></tr>
+          <tr><td>Should gaps separate required from preferred?</td><td>Yes; unlabeled requirements count as Required.</td><td>Nov 4, 2026</td></tr>
+          <tr><td>Should "Flexible" allow an optional end date?</td><td>Open</td><td>—</td></tr>
+          <tr><td>Which AI model gives the best accuracy for the cost?</td><td>Open (compare on the 10-case test set in Build 2)</td><td>—</td></tr>
+          <tr><td>How often does the fact check flag fair rewordings?</td><td>Open (measure in Build 4)</td><td>—</td></tr>
+          <tr><td>Can I get access to a real Workday or iCIMS form to test pasting?</td><td>Open</td><td>—</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <!-- WEEKLY BUILD LOG (Updated at least twice a week via Git commits) -->
