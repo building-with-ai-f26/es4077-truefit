@@ -1,0 +1,136 @@
+# Data Model: Start-Date Check & Truthful Tailored Resume
+
+**Feature**: [spec.md](./spec.md) | **Date**: 2026-11-04
+
+Nothing here is stored on the server. Everything lives in a single request/response, except the
+**Saved Profile** in the browser.
+
+## Availability
+
+The student's availability (FR-006a). It's parsed on the server from the text the student typed.
+
+| Field | Type | Notes |
+|---|---|---|
+| `mode` | `range` \| `immediate` \| `flexible` | "Immediate" and "ASAP" both become `immediate` |
+| `start` | date \| null | `range`: first day of the start month. `immediate`: today. `flexible`: null |
+| `end` | date \| null | Last day of the end month. Optional for `immediate`; null for `flexible` |
+| `label` | string | Display text, e.g. "June 2027 – October 2027", "ASAP through August 2027", "Flexible" |
+
+**Validation**:
+- Accepted input, case-insensitive:
+  - `<Month YYYY> – <Month YYYY>` (with `-`, `–`, or `to` between)
+  - `Immediate` or `ASAP`, optionally followed by `through`/`until`/`to` `<Month YYYY>`
+  - `Flexible`
+- Month names may be full or 3-letter.
+- `end` before `start` → error (FR-006b). Anything else → error listing the accepted forms. The
+  previous availability is kept.
+- Default when nothing is saved: `range`, June 1 2027 – October 31 2027.
+
+## StartDateMention
+
+One mention of a start date in a posting. The model extracts it and the server validates it.
+
+| Field | Type | Notes |
+|---|---|---|
+| `quote` | string | Must be an exact substring of the posting (whitespace collapsed) or the mention is dropped |
+| `kind` | `exact_date` \| `month` \| `range` \| `season` \| `immediate` \| `flexible` | |
+| `start` | date \| null | Set by the server from the kind (see research.md §R4) |
+| `end` | date \| null | For `exact_date`, `start = end` |
+| `role_hint` | string \| null | For multi-role postings, e.g. "NYC office" |
+| `is_vague` | bool | True for `season` and for a bare year |
+
+## StartDateResult
+
+| Field | Type | Notes |
+|---|---|---|
+| `mentions` | StartDateMention[] | Empty → verdict `not_stated` |
+| `verdict` | Verdict | Summary verdict (see below); with multiple mentions, each also carries its own verdict |
+| `availability` | Availability | The window it was checked against (shown next to the verdict) |
+| `note` | string \| null | e.g. "Exact date not specified", "This date has already passed" |
+
+### Verdict
+
+`in_window` · `outside_window` · `partly_in_window` · `likely_in_window_vague` · `flexible_to_discuss` · `not_stated`
+
+Display labels: In window · Outside window · Partly in window · Likely in window (vague) · Flexible / to discuss · Not stated
+
+### Verdict rules
+
+The posting interval `P` is `[start, end]`. The availability interval `A` is `[start, end]`, where
+`immediate` means `[today, end or ∞)` and `flexible` means `[today, ∞)`. Rules are checked in order:
+
+1. No valid mentions → `not_stated`.
+2. Posting `kind = flexible` → `flexible_to_discuss`.
+3. `P.end < today` → `outside_window`, note "date has passed".
+4. Posting `kind = immediate` → `in_window` if `A.mode` is `immediate` or `flexible`; otherwise
+   `outside_window`, note "starts before you're available".
+5. `A.mode = flexible` → `in_window`.
+6. `P` entirely inside `A` → `likely_in_window_vague` if `is_vague`, else `in_window`.
+7. `P` overlaps `A` partly → `partly_in_window`, note "exact date not specified" if `is_vague`.
+8. No overlap → `outside_window`.
+
+**Summary verdict for multiple mentions**: if they agree, use that verdict. Otherwise use
+`partly_in_window` and list each mention with its own verdict.
+
+## ResumeLine
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | string | `L1`, `L2`, … in order of appearance |
+| `text` | string | Original line, trimmed; blank lines skipped |
+| `section` | string \| null | Nearest heading above it (e.g., "Experience"), if one is detected |
+
+## TailoredResume
+
+| Field | Type | Notes |
+|---|---|---|
+| `sections` | Section[] | Ordered: Education, Experience, then others in master-resume order |
+| `plain_text` | string | Copy-ready text built from included bullets only (research.md §R10) |
+
+**Section**: `heading` (string), `entries` (Entry[])
+
+**Entry**: `header_line_ids` (string[], e.g., the role/company/date lines, copied verbatim), `bullets` (Bullet[])
+
+## Bullet
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | string | Stable within a response, e.g. `B1` |
+| `text` | string | Current text (generated or edited) |
+| `source_line_ids` | string[] | Cited master-resume lines |
+| `status` | `traced` \| `flagged` | From the trace check (research.md §R6) |
+| `flag_reason` | string \| null | e.g. "'8' not found in source lines", "'SQL' isn't in your master resume", "Team size not supported" |
+| `included` | bool | Default: `true` if traced, `false` if flagged (FR-012) |
+| `edited` | bool | True after the student changes the text |
+
+**State transitions** (in the browser):
+- Generated → `traced` + included, or `flagged` + excluded.
+- Remove → `included = false`. Put back → `included = true` (a flagged bullet stays `flagged`
+  and marked; FR-012c).
+- Edit text → `edited = true`, then re-check (`/api/verify-bullet`), which updates `status`,
+  `flag_reason`, and `source_line_ids`. `included` is unchanged.
+- Any change rebuilds `plain_text` on the client with the same rules as the server renderer.
+  The server renderer is the tested reference, and the client mirrors it.
+
+## Gap
+
+| Field | Type | Notes |
+|---|---|---|
+| `text` | string | Short requirement name, e.g. "CPA" |
+| `quote` | string | Exact posting substring |
+| `group` | `required` \| `preferred` | Unlabeled requirements become `required` (FR-016a) |
+| `note` | string \| null | e.g. "Related: financial modeling (L7), but Excel not stated" |
+
+`GapList`: `{ required: Gap[], preferred: Gap[], none_found: bool }` (FR-017)
+
+## Saved Profile (browser only)
+
+`localStorage["truefit.v1"]`:
+
+| Field | Type | Notes |
+|---|---|---|
+| `masterResume` | string | Pre-filled on load (FR-020); always shown and editable before tailoring |
+| `availabilityText` | string | What the student typed; empty means the default window |
+| `savedAt` | ISO datetime | Shown as "Saved on this device on …" |
+
+Clearing it removes the key entirely (FR-021). Postings and results are never written here.
