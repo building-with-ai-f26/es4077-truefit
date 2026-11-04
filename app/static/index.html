@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TrueFit</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>TrueFit</h1>
+      <p class="tagline">Paste a job posting. Know if the start date works, then get a resume for it that's ATS-ready and 100% true.</p>
+    </header>
+
+    <div id="error" class="error" role="alert" hidden></div>
+
+    <!-- 1. Availability + posting -->
+    <section id="step-posting" aria-labelledby="posting-heading">
+      <h2 id="posting-heading">1. Check the start date</h2>
+
+      <label for="availability">Your availability</label>
+      <input id="availability" type="text" autocomplete="off"
+             placeholder="June 2027 – October 2027 (or Immediate, ASAP, Flexible)" />
+      <p class="hint">Leave blank for June 2027 – October 2027. You can also type a range like "August 2027 – December 2027", "ASAP through August 2027", or "Flexible".</p>
+
+      <label for="posting">Job posting</label>
+      <textarea id="posting" rows="12" placeholder="Paste the full job posting text"></textarea>
+
+      <button id="check-start-date" type="button">Check start date</button>
+
+      <div id="start-date-result" class="result" hidden aria-live="polite"></div>
+    </section>
+
+    <!-- 2. Master resume -->
+    <section id="step-resume" aria-labelledby="resume-heading">
+      <h2 id="resume-heading">2. Your master resume</h2>
+      <p class="hint">Tailoring is coming in the next build.</p>
+    </section>
+
+    <!-- 3. Results -->
+    <section id="step-results" aria-labelledby="results-heading" hidden>
+      <h2 id="results-heading">3. Tailored resume</h2>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+:root {
+  --bg: #fafafa;
+  --card: #ffffff;
+  --text: #111827;
+  --muted: #4b5563;
+  --border: #e5e7eb;
+  --accent: #1d63dc;
+  --good: #166534;
+  --good-bg: #dcfce7;
+  --warn: #92400e;
+  --warn-bg: #fef3c7;
+  --bad: #991b1b;
+  --bad-bg: #fee2e2;
+  --neutral-bg: #f3f4f6;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.container { max-width: 760px; margin: 0 auto; padding: 32px 20px 64px; }
+
+h1 { margin: 0 0 4px; font-size: 32px; }
+.tagline { margin: 0 0 24px; color: var(--muted); }
+
+section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+h2 { margin: 0 0 12px; font-size: 19px; }
+
+label { display: block; font-weight: 600; margin: 12px 0 4px; }
+
+input[type="text"], textarea {
+  width: 100%;
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+textarea { resize: vertical; }
+
+.hint { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
+
+button {
+  margin-top: 14px;
+  font: inherit;
+  font-weight: 600;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled { opacity: 0.6; cursor: wait; }
+
+.error {
+  background: var(--bad-bg);
+  color: var(--bad);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+
+.result { margin-top: 18px; border-top: 1px solid var(--border); padding-top: 16px; }
+
+.verdict {
+  display: inline-block;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--neutral-bg);
+}
+
+.verdict.in_window { background: var(--good-bg); color: var(--good); }
+.verdict.likely_in_window_vague, .verdict.partly_in_window, .verdict.flexible_to_discuss { background: var(--warn-bg); color: var(--warn); }
+.verdict.outside_window { background: var(--bad-bg); color: var(--bad); }
+
+.note { margin: 8px 0 0; }
+.checked-against { margin: 8px 0 0; font-size: 14px; color: var(--muted); }
+
+.mention { margin-top: 12px; }
+.mention-verdict { font-size: 14px; font-weight: 600; }
+
+blockquote {
+  margin: 6px 0 0;
+  padding: 6px 12px;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}

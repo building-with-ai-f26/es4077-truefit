@@ -27,10 +27,10 @@ confirm they fail before implementing.
 
 **Purpose**: Project initialization
 
-- [ ] T001 Create `pyproject.toml` as a uv project with `requires-python = ">=3.12"`. Add runtime dependencies `fastapi`, `uvicorn[standard]`, `httpx`, a dev dependency group with `pytest`, and `[tool.pytest.ini_options] testpaths = ["tests/unit", "tests/api"]`. Then run `uv sync` to create `.venv`.
-- [ ] T002 [P] Create `.python-version` containing `3.12`
-- [ ] T003 [P] Create package skeleton: `app/__init__.py`, `app/static/`, `tests/unit/__init__.py`, `tests/api/__init__.py`, `tests/eval/cases/start_date/.gitkeep`, `tests/eval/cases/tailor/.gitkeep`
-- [ ] T004 [P] Add `OPENROUTER_MODEL=replace-with-model-slug-from-openrouter.ai/models` to `.env.example` under the existing key (placeholder only; never a real value)
+- [X] T001 Create `pyproject.toml` as a uv project with `requires-python = ">=3.12"`. Add runtime dependencies `fastapi`, `uvicorn[standard]`, `httpx`, a dev dependency group with `pytest`, and `[tool.pytest.ini_options] testpaths = ["tests/unit", "tests/api"]`. Then run `uv sync` to create `.venv`.
+- [X] T002 [P] Create `.python-version` containing `3.12`
+- [X] T003 [P] Create package skeleton: `app/__init__.py`, `app/static/`, `tests/unit/__init__.py`, `tests/api/__init__.py`, `tests/eval/cases/start_date/.gitkeep`, `tests/eval/cases/tailor/.gitkeep`
+- [X] T004 [P] Add `OPENROUTER_MODEL=replace-with-model-slug-from-openrouter.ai/models` to `.env.example` under the existing key (placeholder only; never a real value)
 
 ---
 
@@ -40,21 +40,21 @@ confirm they fail before implementing.
 
 **⚠️ CRITICAL**: No user-story work starts until this phase is complete.
 
-- [ ] T005 Implement `app/config.py`. It reads `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` from the environment (loading `.env` if present). If either is missing, it raises a clear startup error that names the missing variable and never prints its value.
-- [ ] T006 Implement `app/llm.py` with an async `call(system: str, user: str) -> dict`. It POSTs to `https://openrouter.ai/api/v1/chat/completions` via httpx with `response_format={"type": "json_object"}`, `temperature=0`, and a 60 s timeout. It parses the JSON content and retries once on an HTTP error, timeout, or unparseable JSON. After that it raises `ModelUnavailable`. It never logs prompts or responses (FR-019).
-- [ ] T007 Implement `app/quotes.py` with `quote_in(source: str, quote: str) -> bool`. It's true only if `quote` is a non-empty exact substring of `source` after collapsing all whitespace runs to single spaces (contracts/api.md guarantee 1). This file is a small addition to plan.md's layout, shared by start-date and gap checks.
-- [ ] T008 Implement `app/main.py`:
+- [X] T005 Implement `app/config.py`. It reads `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` from the environment (loading `.env` if present). If either is missing, it raises a clear startup error that names the missing variable and never prints its value.
+- [X] T006 Implement `app/llm.py` with an async `call(system: str, user: str) -> dict`. It POSTs to `https://openrouter.ai/api/v1/chat/completions` via httpx with `response_format={"type": "json_object"}`, `temperature=0`, and a 60 s timeout. It parses the JSON content and retries once on an HTTP error, timeout, or unparseable JSON. After that it raises `ModelUnavailable`. It never logs prompts or responses (FR-019).
+- [X] T007 Implement `app/quotes.py` with `quote_in(source: str, quote: str) -> bool`. It's true only if `quote` is a non-empty exact substring of `source` after collapsing all whitespace runs to single spaces (contracts/api.md guarantee 1). This file is a small addition to plan.md's layout, shared by start-date and gap checks.
+- [X] T008 Implement `app/main.py`:
   - a FastAPI app serving `app/static/` and `GET /` → `index.html`
   - an `ApiError(status, code, message)` exception and handler returning `{"error": {"code", "message"}}`
   - a `ModelUnavailable` → 502 `model_unavailable` handler
   - a `check_length(text, field, min, max)` helper raising `<field>_too_short` / `<field>_too_long` (posting 100–20,000 chars, master_resume 200–20,000, bullet_text 1–600)
   - request-logging middleware that records only route, status, duration ms, and model, never bodies
-- [ ] T009 [P] Create `app/static/index.html` and `app/static/styles.css`. Lay out three areas in order (1. Availability + Posting, 2. Master resume, 3. Results) with no logic yet. Use plain semantic HTML with labeled inputs.
-- [ ] T010 Create `app/static/app.js` with shared helpers:
+- [X] T009 [P] Create `app/static/index.html` and `app/static/styles.css`. Lay out three areas in order (1. Availability + Posting, 2. Master resume, 3. Results) with no logic yet. Use plain semantic HTML with labeled inputs.
+- [X] T010 Create `app/static/app.js` with shared helpers:
   - `api(path, body)`: a fetch wrapper that shows `error.message` in a visible error area
   - `loadProfile()` / `saveProfile({masterResume, availabilityText})` / `clearProfile()` using only `localStorage` key `truefit.v1` with value `{ masterResume: string, availabilityText: string, savedAt: ISO datetime }` (contracts/api.md, Browser storage). Postings are never stored.
-- [ ] T011 Create `tests/api/conftest.py` with a `client` fixture (FastAPI `TestClient`) and a `fake_llm` fixture. `fake_llm` monkeypatches `app.llm.call` to return queued canned dicts (or raise `ModelUnavailable`) and records the calls made.
-- [ ] T012 [P] Write `tests/unit/test_quotes.py` covering exact match, whitespace/newline differences, a paraphrase (false), an empty quote (false), and a case difference (false)
+- [X] T011 Create `tests/api/conftest.py` with a `client` fixture (FastAPI `TestClient`) and a `fake_llm` fixture. `fake_llm` monkeypatches `app.llm.call` to return queued canned dicts (or raise `ModelUnavailable`) and records the calls made.
+- [X] T012 [P] Write `tests/unit/test_quotes.py` covering exact match, whitespace/newline differences, a paraphrase (false), an empty quote (false), and a case difference (false)
 
 **Checkpoint**: `uv run uvicorn app.main:app` serves an empty page; `uv run pytest` passes.
 
@@ -68,7 +68,7 @@ confirm they fail before implementing.
 
 ### Tests for User Story 1 ⚠️ write first, confirm they fail
 
-- [ ] T013 [P] [US1] Write `tests/unit/test_availability.py` covering:
+- [X] T013 [P] [US1] Write `tests/unit/test_availability.py` covering:
   - `<Month YYYY> – <Month YYYY>` with `-`, `–`, and `to`
   - full and 3-letter month names
   - case-insensitive `Immediate`/`immediate`/`ASAP`/`asap`, all giving `mode: immediate` with `start = today`
@@ -77,7 +77,7 @@ confirm they fail before implementing.
   - empty input, giving the default range June 1 2027 – October 31 2027
   - end before start, giving `availability_end_before_start`
   - `soonish`, giving `availability_invalid` with a message listing the accepted forms
-- [ ] T014 [P] [US1] Write `tests/unit/test_verdict.py`: a table-driven test of the 8 ordered verdict rules in data-model.md §Verdict rules with a fixed `today = 2026-11-04`. Include:
+- [X] T014 [P] [US1] Write `tests/unit/test_verdict.py`: a table-driven test of the 8 ordered verdict rules in data-model.md §Verdict rules with a fixed `today = 2026-11-04`. Include:
   - spec US1 scenarios 1–8
   - date already passed → `outside_window` + note
   - posting immediate vs range availability → `outside_window` "starts before you're available"
@@ -87,7 +87,7 @@ confirm they fail before implementing.
   - Summer 2027 → `likely_in_window_vague`
   - Fall 2027 with the default window → `partly_in_window` + "exact date not specified"
   - two mentions that disagree → summary `partly_in_window` with per-mention verdicts
-- [ ] T015 [P] [US1] Write `tests/api/test_start_date_route.py` using `fake_llm`. Cover:
+- [X] T015 [P] [US1] Write `tests/api/test_start_date_route.py` using `fake_llm`. Cover:
   - a valid mention, giving 200 with the contract shape
   - a model quote that's not in the posting, which is dropped and gives `not_stated`
   - a `verdict` field the model sends anyway, which is ignored
@@ -98,29 +98,29 @@ confirm they fail before implementing.
 
 ### Implementation for User Story 1
 
-- [ ] T016 [P] [US1] Implement `parse_availability(text: str, today: date) -> Availability` in `app/availability.py` per data-model.md §Availability:
+- [X] T016 [P] [US1] Implement `parse_availability(text: str, today: date) -> Availability` in `app/availability.py` per data-model.md §Availability:
   - `mode` is one of `range | immediate | flexible`; "Immediate" and "ASAP" both become `immediate`
   - `start`: first day of the start month (range), today (immediate), or null (flexible)
   - `end`: last day of the end month, optional for immediate, null for flexible
   - `label` is the display text
   - errors are raised as `ApiError(422, ...)`
-- [ ] T017 [US1] Implement the verdict logic in `app/start_date.py`:
+- [X] T017 [US1] Implement the verdict logic in `app/start_date.py`:
   - `mention_interval()`: exact_date gives start = end; month gives the whole month; seasons are Spring = Mar–May, Summer = Jun–Aug, Fall = Sep–Nov; a bare year is vague
   - `compute_verdict(mentions, availability, today)`, which applies the 8 ordered rules and the summary rule from data-model.md
   - the `VERDICT_LABELS` map with the exact display labels: In window · Outside window · Partly in window · Likely in window (vague) · Flexible / to discuss · Not stated
-- [ ] T018 [US1] Implement `check_start_date(posting, availability_text)` in `app/start_date.py`. Its extraction prompt asks the model for JSON `{is_job_posting, is_english, mentions: [{quote, kind, start, end, role_hint}]}` with `kind` in `exact_date | month | range | season | immediate | flexible`. The prompt tells the model to quote verbatim, never invent dates, and return an empty list when no start date is stated (FR-007). The function then:
+- [X] T018 [US1] Implement `check_start_date(posting, availability_text)` in `app/start_date.py`. Its extraction prompt asks the model for JSON `{is_job_posting, is_english, mentions: [{quote, kind, start, end, role_hint}]}` with `kind` in `exact_date | month | range | season | immediate | flexible`. The prompt tells the model to quote verbatim, never invent dates, and return an empty list when no start date is stated (FR-007). The function then:
   - drops mentions failing `quotes.quote_in`
   - sets `is_vague`
   - computes `today` in `America/New_York` with `zoneinfo`
   - returns a `StartDateResult`
-- [ ] T019 [US1] Add `POST /api/start-date` to `app/main.py` per contracts/api.md, with request `{posting, availability_text?}` and a 200 `StartDateResult` including `verdict_label` and `availability.label`
-- [ ] T020 [US1] Build the start-date UI in `app/static/index.html` and `app/static/app.js`:
+- [X] T019 [US1] Add `POST /api/start-date` to `app/main.py` per contracts/api.md, with request `{posting, availability_text?}` and a 200 `StartDateResult` including `verdict_label` and `availability.label`
+- [X] T020 [US1] Build the start-date UI in `app/static/index.html` and `app/static/app.js`:
   - an availability input pre-filled from `truefit.v1.availabilityText`, with placeholder "June 2027 – October 2027 (or Immediate, ASAP, Flexible)"
   - posting textarea and "Check start date" button
   - result card with the verdict label, each quote in a blockquote with its role hint, "Checked against: <availability.label>", and the note
   - save `availabilityText` to the profile on a successful check
   - on an `availability_*` error, show the message and leave the saved value unchanged
-- [ ] T021 [US1] Create at least 10 anonymized posting cases in `tests/eval/cases/start_date/*.json` as `{posting, availability_text, expected_verdict}`. Cover explicit date, month, range crossing the window, Summer, Fall, missing, application deadline + start date, multi-role, "ASAP" posting, and "flexible start" posting. Then write `tests/eval/run_eval.py --suite start_date`, which calls the real app logic and prints agreement and any case that returned a date where expected was `not_stated` (SC-002).
+- [X] T021 [US1] Create at least 10 anonymized posting cases in `tests/eval/cases/start_date/*.json` as `{posting, availability_text, expected_verdict}`. Cover explicit date, month, range crossing the window, Summer, Fall, missing, application deadline + start date, multi-role, "ASAP" posting, and "flexible start" posting. Then write `tests/eval/run_eval.py --suite start_date`, which calls the real app logic and prints agreement and any case that returned a date where expected was `not_stated` (SC-002).
 
 **Checkpoint**: US1 works on its own. It's demo-able for Build 1 and Build 2 as the start-date check.
 

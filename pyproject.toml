@@ -1,0 +1,19 @@
+[project]
+name = "truefit"
+version = "0.1.0"
+description = "Start-date check and truthful, ATS-ready tailored resumes for MBA job postings"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "httpx",
+]
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit", "tests/api"]

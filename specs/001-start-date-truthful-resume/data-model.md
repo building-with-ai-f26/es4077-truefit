@@ -62,7 +62,8 @@ The posting interval `P` is `[start, end]`. The availability interval `A` is `[s
 1. No valid mentions → `not_stated`.
 2. Posting `kind = flexible` → `flexible_to_discuss`.
 3. `P.end < today` → `outside_window`, note "date has passed".
-4. Posting `kind = immediate` → `in_window` if `A.mode` is `immediate` or `flexible`; otherwise
+4. Posting `kind = immediate` → `in_window` if the student is available today (`A.mode` is
+   `immediate` or `flexible`, or today falls inside their month range); otherwise
    `outside_window`, note "starts before you're available".
 5. `A.mode = flexible` → `in_window`.
 6. `P` entirely inside `A` → `likely_in_window_vague` if `is_vague`, else `in_window`.
