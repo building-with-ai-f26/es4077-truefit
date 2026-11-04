@@ -163,15 +163,15 @@ def _mention_verdict(m: Mention, a: Availability, today: date) -> tuple[str, str
     if m.end < today:
         return "outside_window", NOTE_PASSED
     if m.kind == "immediate":
-        available_now = a.mode == "flexible" or (a.start <= today and (a.end is None or today <= a.end))
+        available_now = a.mode == "flexible" or a.start <= today
         return ("in_window", None) if available_now else ("outside_window", NOTE_TOO_EARLY)
     if a.mode == "flexible":
         return "in_window", vague_note
 
-    a_start, a_end = a.start, a.end or date.max
-    if a_start <= m.start and m.end <= a_end:
+    # Availability is open-ended: anything starting on or after the student's start month fits.
+    if m.start >= a.start:
         return ("likely_in_window_vague", vague_note) if m.is_vague else ("in_window", None)
-    if m.start <= a_end and m.end >= a_start:
+    if m.end >= a.start:
         return "partly_in_window", vague_note
     return "outside_window", None
 

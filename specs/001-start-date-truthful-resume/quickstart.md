@@ -46,12 +46,13 @@ uv run python tests/eval/run_eval.py   # real model calls; costs money; prints S
 
 | # | Do this | Expect | Covers |
 |---|---|---|---|
-| 1 | Paste a posting with "Start date: July 13, 2027", leave availability as default | "In window", quote shown, availability "June 2027 – October 2027" shown | US1-1, FR-005, FR-006a |
+| 1 | Paste a posting with "Start date: July 13, 2027", leave availability blank | "In window", quote shown, "Starting June 2027" shown | US1-1, FR-005, FR-006a |
+| 1b | Same, but the posting says "Start date: October 4, 2027" | "In window" (any later start fits) | US1-9, FR-006 |
 | 2 | Paste a posting that only says "Summer 2027" | "Likely in window (vague)" + note | US1-3 |
 | 3 | Paste a posting with no start date | "Not stated", no date shown | US1-4, FR-007 |
-| 4 | Set availability to `asap through August 2027`, then paste "Start date: September 8, 2027" | "Outside window" | US1-5, FR-006a (case-insensitive) |
+| 4 | Set availability to `august 2027`, then paste "Start date: July 13, 2027" | "Outside window" | US1-5, FR-006a (case-insensitive) |
 | 5 | Set availability to `Flexible`, then paste "Start date: March 6, 2028" | "In window", date still shown | US1-7 |
-| 6 | Set availability to `soonish` | Plain error listing accepted forms; previous availability kept | Edge case, FR-006b |
+| 6 | Set availability to `soonish`, then to `June 2027 – October 2027` | Plain error listing accepted forms; then a message asking for just the start month; previous availability kept | Edge cases, FR-006b |
 | 7 | Continue to tailoring with a master resume that never mentions SQL, for a posting that asks for SQL | No bullet claims SQL; SQL appears in the gap list | US2-2, US3-2 |
 | 8 | Find a bullet with a number; compare to its source line | Number matches exactly; source line shown | US2-1, US2-3 |
 | 9 | Edit a bullet to add "led a team of 8" | Bullet becomes flagged with a reason within ~15 s | US2-5, FR-012b |

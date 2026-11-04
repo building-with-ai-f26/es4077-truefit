@@ -13,7 +13,8 @@
 ### Session 2026-11-04
 
 - Q: When a student returns for a second posting, should TrueFit remember their master resume? → A: Yes, saved only in the student's own browser on their device, and they can clear it anytime. No accounts and no server-side storage.
-- Q: Should every student use the fixed June–October 2027 window, or set their own? → A: Default to June 1 – October 31, 2027. The student can replace it with a month range, or type "Immediate" or "ASAP" (available from today) or "Flexible" (any start date works). Saved on their device.
+- Q: Should every student use the fixed June–October 2027 window, or set their own? → A: Default to June 1 – October 31, 2027. The student can replace it with a month range, or type "Immediate" or "ASAP" (available from today) or "Flexible" (any start date works). Saved on their device. *(Superseded by the revised answer below.)*
+- Q (revised 2026-11-04): Should availability be a range or a single start? → A: A single "available starting" month, defaulting to June 2027. Any start date in or after that month counts as in window (e.g., October 2027 or later). The student can also type "Immediate", "ASAP", or "Flexible". Ranges and end months are no longer used.
 - Q: What can the student do with the tailored resume before copying it? → A: Remove any bullet, put a flagged bullet back, and edit any bullet's text. Edited text is re-checked against the master resume and flagged if it can't be traced.
 - Q: Should the gap list separate required from preferred qualifications? → A: Yes. Two groups, Required and Preferred, based on the posting's wording; unlabeled requirements count as Required.
 
@@ -21,22 +22,23 @@
 
 ### User Story 1 - Start-date check (Priority: P1)
 
-A second-year MBA student finds a full-time posting and pastes its full text into TrueFit. Before anything else, TrueFit tells them the role's start date, quoting the posting text it came from. It also gives a clear verdict on whether that date fits their availability: June–October 2027 by default, or what they set instead (a month range, "Immediate", "ASAP", or "Flexible"). If the posting gives no start date, TrueFit says "not stated" instead of guessing.
+A second-year MBA student finds a full-time posting and pastes its full text into TrueFit. Before anything else, TrueFit tells them the role's start date, quoting the posting text it came from. It also gives a clear verdict on whether that date fits when they can start: June 2027 by default, or the month they set instead, or "Immediate", "ASAP", or "Flexible". Any start in or after their month fits. If the posting gives no start date, TrueFit says "not stated" instead of guessing.
 
 **Why this priority**: This decides whether the student should apply at all. It saves the most wasted effort: no more reading whole postings to hunt for a date, applying to roles they can't take, or skipping roles they could. It's useful even without the resume step.
 
 **Independent Test**: Paste a set of real postings with known start dates (explicit, vague, missing). Check that each verdict and quoted snippet matches what a careful human reader would conclude.
 
-**Acceptance Scenarios** (1–4 use the default June–October 2027 window):
+**Acceptance Scenarios** (1–4 use the default "available starting June 2027"):
 
 1. **Given** a posting that says "Start date: July 13, 2027", **When** the student submits it, **Then** TrueFit shows the date "July 13, 2027", the quoted source sentence, and the verdict "In window".
 2. **Given** a posting that says "Program begins January 2027", **When** submitted, **Then** the verdict is "Outside window" and the quoted text is shown.
 3. **Given** a posting that only says "Summer 2027", **When** submitted, **Then** the verdict is "Likely in window (vague)", with the quoted text and a note that the exact date is not specified.
 4. **Given** a posting with no start-date information, **When** submitted, **Then** the verdict is "Not stated" and no date is invented.
-5. **Given** a student whose availability is "Immediate" through August 2027, **When** they submit a posting that says "Start date: September 8, 2027", **Then** the verdict is "Outside window".
+5. **Given** a student available starting August 2027, **When** they submit a posting that says "Start date: July 13, 2027", **Then** the verdict is "Outside window".
 6. **Given** a student whose availability is "ASAP" (or "Immediate"), **When** they submit a posting that says "immediate start" or "start ASAP", **Then** the verdict is "In window" in all four combinations.
 7. **Given** a student whose availability is "Flexible", **When** they submit a posting that says "Start date: January 11, 2027" or "Start date: March 6, 2028", **Then** the verdict is "In window" for both, and the date is still shown.
 8. **Given** a student whose availability is "Flexible", **When** they submit a posting with no start date, **Then** the verdict is still "Not stated".
+9. **Given** the default availability (starting June 2027), **When** a posting says "Start date: October 4, 2027" (or any later date, e.g., "September 2028"), **Then** the verdict is "In window".
 
 ---
 
@@ -82,7 +84,8 @@ The student copies the tailored resume and pastes it straight into Workday or iC
 - The posting gives a range that crosses the window edge (e.g., "May–July 2027"). The verdict shows partial overlap ("Partly in window") with the quoted text.
 - The posting says "immediate", "immediately", "ASAP", or "as soon as possible". These all count as the same immediate start. The verdict is "In window" if the student's availability is Immediate, ASAP, or Flexible. Otherwise it's "Outside window", noting that the role starts before the student is available.
 - The student's availability is Immediate, ASAP, or Flexible and a posting gives a start date that has already passed. The verdict is "Outside window", noting that the date has passed.
-- The student types something TrueFit doesn't recognize as availability (e.g., "soonish"). They're asked to enter a month range, "Immediate", "ASAP", or "Flexible", and the previous availability stays in place.
+- The student types something TrueFit doesn't recognize as availability (e.g., "soonish"). They're asked to enter a start month, "Immediate", "ASAP", or "Flexible", and the previous availability stays in place.
+- The student types a range (e.g., "June 2027 – October 2027"). They're asked to enter just their start month, since any later start fits.
 - The posting says "flexible start date" or "rolling start". The verdict is "Flexible / to discuss", not "In window".
 - The posting includes several roles or locations with different start dates. All the dates found are listed, each with its quoted text.
 - The pasted text isn't a job posting (empty, very short, or unrelated). The student is told that no posting was recognized.
@@ -106,9 +109,9 @@ The student copies the tailored resume and pastes it straight into Workday or iC
 
 - **FR-004**: System MUST find the role's start date in the posting, or report "Not stated" when the posting has none.
 - **FR-005**: System MUST show the exact posting text the start date came from.
-- **FR-006**: System MUST classify the start date against the student's availability window as one of: In window, Outside window, Partly in window, Likely in window (vague), Flexible / to discuss, or Not stated.
-- **FR-006a**: The student's availability MUST default to June 1 – October 31, 2027. The student MUST be able to replace it with one of: a start and end month (e.g., "August 2027 – December 2027"); "Immediate" or "ASAP", meaning available from today (treated the same, optionally with an end month); or "Flexible", meaning any future start date works. Matching of these words MUST ignore capitalization. The availability MUST be saved on the student's device with the master resume and shown next to every verdict.
-- **FR-006b**: System MUST reject availability whose end comes before its start, or that isn't one of the accepted forms in FR-006a, with a plain-language message.
+- **FR-006**: System MUST classify the start date against the student's availability as one of: In window, Outside window, Partly in window, Likely in window (vague), Flexible / to discuss, or Not stated. A start date in or after the student's start month MUST count as in window; there is no end date.
+- **FR-006a**: The student's availability MUST default to "starting June 2027". The student MUST be able to replace it with one of: a start month (e.g., "August 2027", optionally written "Starting August 2027"); "Immediate" or "ASAP", meaning available from today (treated the same); or "Flexible", meaning any future start date works. Matching of these words MUST ignore capitalization. The availability MUST be saved on the student's device with the master resume and shown next to every verdict.
+- **FR-006b**: System MUST reject availability that isn't one of the accepted forms in FR-006a with a plain-language message. Ranges get a message asking for just the start month.
 - **FR-007**: System MUST NOT invent or infer a specific date that the posting doesn't state.
 - **FR-008**: System MUST show the start-date result before the student commits to the resume step, so they can stop if the date doesn't work.
 
@@ -145,7 +148,7 @@ The student copies the tailored resume and pastes it straight into Workday or iC
 
 - **Job Posting**: The pasted posting text. Attributes include the role title and company (if stated), the stated requirements, and any start-date text.
 - **Master Resume**: The student's complete source of truth. It can be saved on the student's device and cleared by them; it's never stored on a server. It's made of individual lines (bullets, roles, education entries, skills) that can be referenced.
-- **Availability Window**: The student's availability. It's one of: a start and end month; Immediate/ASAP (from today, optional end month); or Flexible (any future date). Defaults to June–October 2027 and is saved on the student's device.
+- **Availability**: When the student can start. It's one of: a start month; Immediate/ASAP (from today); or Flexible (any future date). There's no end date. Defaults to starting June 2027 and is saved on the student's device.
 - **Start-Date Result**: The extracted date or range (or "Not stated"), the quoted source text, the window it was checked against, and the verdict.
 - **Tailored Resume**: The ordered sections and bullets generated for one posting. Each bullet links to one or more Master Resume lines or is flagged as unverified. Each bullet also records whether it's included in the copy-ready resume and whether the student edited it.
 - **Gap**: A requirement from the posting with no support in the Master Resume. It's grouped as Required or Preferred and can carry an optional note.
@@ -163,9 +166,9 @@ The student copies the tailored resume and pastes it straight into Workday or iC
 
 ## Assumptions
 
-- Users are second-year NYU Stern MBA students graduating May 2027. Most are available June–October 2027, so that's the default window (FR-006a).
+- Users are second-year NYU Stern MBA students graduating May 2027. Most can start from June 2027, so that's the default (FR-006a). A later start is never a problem for them.
 - Postings and resumes are in English and pasted as text. Uploading files (PDF, Word) and fetching postings from URLs are out of scope for v1.
-- Vague season terms are read as Spring = March–May, Summer = June–August, Fall = September–November. A season fully inside the student's window → Likely in window (vague). A season that partly overlaps → Partly in window (vague). No overlap → Outside window. With the default window, "Summer 2027" is Likely in window and "Fall 2027" is Partly in window.
+- Vague season terms are read as Spring = March–May, Summer = June–August, Fall = September–November. A season entirely in or after the student's start month → Likely in window (vague). A season that begins before it but ends after → Partly in window (vague). A season that ends before it → Outside window. With the default, "Summer 2027" and "Fall 2027" are both Likely in window.
 - Rewording is allowed (changing verbs, reordering, combining, or shortening bullets) as long as no new facts are added and all numbers stay exact.
 - The tailored resume targets about one page of content.
 - No user accounts are needed for v1. The only thing kept between visits is the master resume, saved on the student's own device and browser (FR-020). It doesn't carry over to other devices or browsers.

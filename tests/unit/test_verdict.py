@@ -44,9 +44,22 @@ def test_us1_4_no_mentions_not_stated():
     assert r.mentions == []
 
 
-def test_us1_5_immediate_through_august_vs_september():
-    a = parse_availability("Immediate through August 2027", TODAY)
-    assert verdict([mention("exact_date", "2027-09-08")], a).verdict == "outside_window"
+def test_us1_5_starting_august_vs_july_posting():
+    a = parse_availability("August 2027", TODAY)
+    assert verdict([mention("exact_date", "2027-07-13")], a).verdict == "outside_window"
+
+
+@pytest.mark.parametrize("start", ["2027-06-01", "2027-10-04", "2027-12-01", "2028-09-05"])
+def test_any_start_on_or_after_default_june_is_in_window(start):
+    assert verdict([mention("exact_date", start)]).verdict == "in_window"
+
+
+def test_october_2027_month_in_window_with_default():
+    assert verdict([mention("month", "2027-10")]).verdict == "in_window"
+
+
+def test_may_2027_before_default_start_is_outside():
+    assert verdict([mention("exact_date", "2027-05-31")]).verdict == "outside_window"
 
 
 @pytest.mark.parametrize("availability", ["ASAP", "Immediate"])
@@ -76,7 +89,7 @@ def test_date_already_passed(availability):
     assert r.note == "This date has already passed"
 
 
-def test_immediate_posting_vs_future_range():
+def test_immediate_posting_vs_future_start_month():
     r = verdict([mention("immediate")])
     assert r.verdict == "outside_window"
     assert r.note == "The role starts before you're available"
@@ -86,8 +99,8 @@ def test_immediate_posting_vs_flexible_student():
     assert verdict([mention("immediate")], parse_availability("Flexible", TODAY)).verdict == "in_window"
 
 
-def test_immediate_posting_vs_range_that_includes_today():
-    a = parse_availability("November 2026 – March 2027", TODAY)
+def test_immediate_posting_vs_start_month_already_reached():
+    a = parse_availability("November 2026", TODAY)
     assert verdict([mention("immediate")], a).verdict == "in_window"
 
 
@@ -99,8 +112,15 @@ def test_flexible_posting():
     assert verdict([mention("flexible")]).verdict == "flexible_to_discuss"
 
 
-def test_fall_with_default_window_is_partly_vague():
+def test_fall_with_default_is_likely_vague():
     r = verdict([mention("season", season="fall", year=2027)])
+    assert r.verdict == "likely_in_window_vague"
+    assert r.note == "Exact date not specified"
+
+
+def test_season_straddling_start_month_is_partly_vague():
+    a = parse_availability("July 2027", TODAY)
+    r = verdict([mention("season", season="summer", year=2027)], a)
     assert r.verdict == "partly_in_window"
     assert r.note == "Exact date not specified"
 
@@ -109,7 +129,7 @@ def test_spring_is_outside():
     assert verdict([mention("season", season="spring", year=2027)]).verdict == "outside_window"
 
 
-def test_month_fully_inside():
+def test_month_after_start():
     assert verdict([mention("month", "2027-08")]).verdict == "in_window"
 
 

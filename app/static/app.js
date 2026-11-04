@@ -123,7 +123,7 @@ function renderStartDate(result) {
     startDateResult.append(el("p", { class: "note" }, "The posting doesn't say when the role starts."));
   }
 
-  startDateResult.append(el("p", { class: "checked-against" }, `Checked against: ${result.availability.label}`));
+  startDateResult.append(el("p", { class: "checked-against" }, `Checked against your availability: ${result.availability.label}`));
   startDateResult.hidden = false;
 }
 

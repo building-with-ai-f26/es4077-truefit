@@ -7,24 +7,24 @@ Nothing here is stored on the server. Everything lives in a single request/respo
 
 ## Availability
 
-The student's availability (FR-006a). It's parsed on the server from the text the student typed.
+When the student can start (FR-006a). It's open-ended: any start on or after it fits. It's
+parsed on the server from the text the student typed.
 
 | Field | Type | Notes |
 |---|---|---|
-| `mode` | `range` \| `immediate` \| `flexible` | "Immediate" and "ASAP" both become `immediate` |
-| `start` | date \| null | `range`: first day of the start month. `immediate`: today. `flexible`: null |
-| `end` | date \| null | Last day of the end month. Optional for `immediate`; null for `flexible` |
-| `label` | string | Display text, e.g. "June 2027 – October 2027", "ASAP through August 2027", "Flexible" |
+| `mode` | `month` \| `immediate` \| `flexible` | "Immediate" and "ASAP" both become `immediate` |
+| `start` | date \| null | `month`: first day of the start month. `immediate`: today. `flexible`: null |
+| `label` | string | Display text, e.g. "Starting June 2027", "ASAP", "Immediate", "Flexible" |
 
 **Validation**:
 - Accepted input, case-insensitive:
-  - `<Month YYYY> – <Month YYYY>` (with `-`, `–`, or `to` between)
-  - `Immediate` or `ASAP`, optionally followed by `through`/`until`/`to` `<Month YYYY>`
+  - `<Month YYYY>`, optionally prefixed with `Starting` or `From`
+  - `Immediate` (or `Immediately`) or `ASAP`
   - `Flexible`
 - Month names may be full or 3-letter.
-- `end` before `start` → error (FR-006b). Anything else → error listing the accepted forms. The
-  previous availability is kept.
-- Default when nothing is saved: `range`, June 1 2027 – October 31 2027.
+- A range (e.g., "June 2027 – October 2027") → error asking for just the start month. Anything
+  else → error listing the accepted forms. The previous availability is kept (FR-006b).
+- Default when nothing is saved: `month`, starting June 1 2027.
 
 ## StartDateMention
 
@@ -45,7 +45,7 @@ One mention of a start date in a posting. The model extracts it and the server v
 |---|---|---|
 | `mentions` | StartDateMention[] | Empty → verdict `not_stated` |
 | `verdict` | Verdict | Summary verdict (see below); with multiple mentions, each also carries its own verdict |
-| `availability` | Availability | The window it was checked against (shown next to the verdict) |
+| `availability` | Availability | What it was checked against (shown next to the verdict) |
 | `note` | string \| null | e.g. "Exact date not specified", "This date has already passed" |
 
 ### Verdict
@@ -56,19 +56,21 @@ Display labels: In window · Outside window · Partly in window · Likely in win
 
 ### Verdict rules
 
-The posting interval `P` is `[start, end]`. The availability interval `A` is `[start, end]`, where
-`immediate` means `[today, end or ∞)` and `flexible` means `[today, ∞)`. Rules are checked in order:
+The posting interval `P` is `[start, end]`. Availability `A` is open-ended: `[A.start, ∞)`, where
+`immediate` means `[today, ∞)` and `flexible` means any future date. Rules are checked in order:
 
 1. No valid mentions → `not_stated`.
 2. Posting `kind = flexible` → `flexible_to_discuss`.
 3. `P.end < today` → `outside_window`, note "date has passed".
 4. Posting `kind = immediate` → `in_window` if the student is available today (`A.mode` is
-   `immediate` or `flexible`, or today falls inside their month range); otherwise
+   `immediate` or `flexible`, or their start month has already arrived); otherwise
    `outside_window`, note "starts before you're available".
 5. `A.mode = flexible` → `in_window`.
-6. `P` entirely inside `A` → `likely_in_window_vague` if `is_vague`, else `in_window`.
-7. `P` overlaps `A` partly → `partly_in_window`, note "exact date not specified" if `is_vague`.
-8. No overlap → `outside_window`.
+6. `P.start ≥ A.start` (starts in or after the student's month) → `likely_in_window_vague` if
+   `is_vague`, else `in_window`.
+7. `P.start < A.start ≤ P.end` (begins before, ends after) → `partly_in_window`, note "exact date
+   not specified" if `is_vague`.
+8. `P.end < A.start` → `outside_window`.
 
 **Summary verdict for multiple mentions**: if they agree, use that verdict. Otherwise use
 `partly_in_window` and list each mention with its own verdict.

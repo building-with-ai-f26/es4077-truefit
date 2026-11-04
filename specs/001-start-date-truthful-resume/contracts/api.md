@@ -17,7 +17,7 @@ Checks a posting's start date against the student's availability (User Story 1).
 ```json
 {
   "posting": "string, 100–20,000 chars",
-  "availability_text": "string, optional; empty or missing = default June 2027 – October 2027"
+  "availability_text": "string, optional; e.g. \"August 2027\", \"ASAP\", \"Flexible\"; empty or missing = starting June 2027"
 }
 ```
 
@@ -26,8 +26,7 @@ Checks a posting's start date against the student's availability (User Story 1).
 {
   "verdict": "likely_in_window_vague",
   "verdict_label": "Likely in window (vague)",
-  "availability": { "mode": "range", "start": "2027-06-01", "end": "2027-10-31",
-                    "label": "June 2027 – October 2027" },
+  "availability": { "mode": "month", "start": "2027-06-01", "label": "Starting June 2027" },
   "mentions": [
     { "quote": "Associates join us in Summer 2027", "kind": "season",
       "start": "2027-06-01", "end": "2027-08-31", "role_hint": null, "is_vague": true,
@@ -44,8 +43,7 @@ Checks a posting's start date against the student's availability (User Story 1).
 | 422 | `posting_too_short` / `posting_too_long` | Length out of range |
 | 422 | `not_a_posting` | The model reports the text isn't a job posting |
 | 422 | `not_english` | The posting isn't in English |
-| 422 | `availability_invalid` | Availability doesn't match an accepted form (message lists them) |
-| 422 | `availability_end_before_start` | FR-006b |
+| 422 | `availability_invalid` | Availability doesn't match an accepted form; a range gets a message asking for just the start month (FR-006b) |
 | 502 | `model_unavailable` | OpenRouter failed or timed out after one retry |
 
 ## POST /api/tailor

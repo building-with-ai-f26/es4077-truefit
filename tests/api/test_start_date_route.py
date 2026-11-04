@@ -18,8 +18,7 @@ def test_valid_mention_returns_contract_shape(client, fake_llm):
     body = r.json()
     assert body["verdict"] == "in_window"
     assert body["verdict_label"] == "In window"
-    assert body["availability"] == {"mode": "range", "start": "2027-06-01", "end": "2027-10-31",
-                                    "label": "June 2027 – October 2027"}
+    assert body["availability"] == {"mode": "month", "start": "2027-06-01", "label": "Starting June 2027"}
     assert body["mentions"][0]["quote"] == "Start date: July 13, 2027."
     assert body["mentions"][0]["start"] == "2027-07-13"
     assert body["mentions"][0]["verdict"] == "in_window"
@@ -28,9 +27,9 @@ def test_valid_mention_returns_contract_shape(client, fake_llm):
 
 def test_custom_availability_used(client, fake_llm):
     fake_llm.queue(reply([{"quote": "Start date: July 13, 2027.", "kind": "exact_date", "start": "2027-07-13"}]))
-    r = client.post("/api/start-date", json={"posting": POSTING, "availability_text": "asap through june 2027"})
+    r = client.post("/api/start-date", json={"posting": POSTING, "availability_text": "september 2027"})
     assert r.json()["verdict"] == "outside_window"
-    assert r.json()["availability"]["label"] == "ASAP through June 2027"
+    assert r.json()["availability"]["label"] == "Starting September 2027"
 
 
 def test_quote_not_in_posting_is_dropped(client, fake_llm):
