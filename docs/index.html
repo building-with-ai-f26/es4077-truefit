@@ -231,7 +231,7 @@
       <h3>1. Target User & The Job to Be Done</h3>
       <p><strong>Who is this for?</strong> Second-year NYU Stern MBA students (my classmates) who graduate in May 2027 and are recruiting for full-time roles that start in June 2027 or later. I can reach them directly through my section, my pod, and recruiting clubs.</p>
       <p><strong>The painful "Before" workflow:</strong> For every posting, they read the whole description hoping to find a start date. Often it's buried, vague ("Summer 2027"), or missing, so they apply to roles they can't take or skip roles they could. Next they tailor their resume by hand or with ChatGPT, then check every line because the AI invents skills and metrics. Finally they paste the resume into Workday or iCIMS, where the parser scrambles the formatting, and they spend more time fixing fields one by one.</p>
-      <p><strong>The "After" workflow with this product:</strong> They paste a job posting and their master resume. In one sitting, TrueFit first pulls out the start date, quotes where it found it, and flags whether it works for when they can start (June 2027 or later by default, or another start month, "Immediate," "ASAP," or "Flexible"), or says "not stated." It then writes a tailored resume in a plain, single-column, ATS-friendly format that pastes cleanly into Workday or iCIMS. Every bullet links to a line in their real resume, anything it can't back up is flagged, and they can remove, restore, or edit bullets (edits are re-checked). The gaps between the posting and their experience are listed as Required or Preferred so they know what they can't claim. Their master resume can be saved on their own device so they don't paste it every time.</p>
+      <p><strong>The "After" workflow with this product:</strong> They paste a job posting and their master resume. In one sitting, TrueFit first pulls out the start date, quotes where it found it, and flags whether it works for when they can start (June 2027 or later by default, or another start month, "ASAP," or "Flexible"), or says "not stated." It then writes a tailored resume in a plain, single-column, ATS-friendly format that pastes cleanly into Workday or iCIMS. Every bullet links to a line in their real resume, anything it can't back up is flagged, and they can remove, restore, or edit bullets (edits are re-checked). The gaps between the posting and their experience are listed as Required or Preferred so they know what they can't claim. Their master resume can be saved on their own device so they don't paste it every time.</p>
 
       <h3>2. Scope & Explicit Non-Goals</h3>
       <ul>
@@ -283,7 +283,7 @@
       <table>
         <thead><tr><th>#</th><th>User story</th><th>Importance</th><th>Notes</th></tr></thead>
         <tbody>
-          <tr><td>1</td><td>As a student, I paste a posting and see its start date, where it came from, and whether it fits my availability.</td><td>Must have (P1)</td><td>Default: starting June 2027, so any later start fits. Can be another start month, Immediate, ASAP, or Flexible. "Not stated" instead of guessing.</td></tr>
+          <tr><td>1</td><td>As a student, I paste a posting and see its start date, where it came from, and whether it fits my availability.</td><td>Must have (P1)</td><td>Default: starting June 2027, so any later start fits. Can be another start month, ASAP, or Flexible. "Not stated" instead of guessing.</td></tr>
           <tr><td>2</td><td>As a student, I get a tailored resume where every bullet is traced to my master resume, and I can remove, restore, or edit bullets.</td><td>Must have (P1)</td><td>Unbacked lines and edits are flagged and left out by default. Numbers never change.</td></tr>
           <tr><td>3</td><td>As a student, I copy a clean plain-text resume and see what the posting asks for that I can't claim.</td><td>Should have (P2)</td><td>Single column, standard headings, hyphen bullets. Gaps grouped Required / Preferred.</td></tr>
         </tbody>
@@ -293,7 +293,7 @@
       <ul>
         <li><strong>Users:</strong> Second-year Stern MBAs graduating May 2027; most can start from June 2027, and a later start is never a problem.</li>
         <li><strong>Inputs:</strong> Postings and resumes are in English and pasted as text.</li>
-        <li><strong>Vague dates:</strong> Spring = Mar–May, Summer = Jun–Aug, Fall = Sep–Nov. "Immediate" and "ASAP" mean the same thing.</li>
+        <li><strong>Vague dates:</strong> Spring = Mar–May, Summer = Jun–Aug, Fall = Sep–Nov.</li>
         <li><strong>Rewording:</strong> Allowed (new verbs, reordering, shortening) as long as no facts are added and numbers stay exact.</li>
         <li><strong>Privacy:</strong> No accounts. Nothing is stored on a server; the master resume is saved only on the student's device and can be cleared anytime.</li>
         <li><strong>Output:</strong> About one page; one plain ATS-safe format is enough for Workday and iCIMS.</li>
@@ -304,7 +304,7 @@
         <thead><tr><th>Question</th><th>Answer</th><th>Date answered</th></tr></thead>
         <tbody>
           <tr><td>Should TrueFit remember a student's master resume between visits?</td><td>Yes, on their own device only; clearable; no accounts.</td><td>Nov 4, 2026</td></tr>
-          <tr><td>Can students set their own availability?</td><td>Yes: an "available starting" month (default June 2027; any later start fits), or Immediate, ASAP, or Flexible. Changed from a June–Oct range the same day.</td><td>Nov 4, 2026</td></tr>
+          <tr><td>Can students set their own availability?</td><td>Yes: an "available starting" month (default June 2027; any later start fits), or ASAP or Flexible. Changed from a June–Oct range the same day.</td><td>Nov 4, 2026</td></tr>
           <tr><td>Can students edit the tailored resume?</td><td>Yes: remove, restore, or edit bullets; edits are re-checked.</td><td>Nov 4, 2026</td></tr>
           <tr><td>Should gaps separate required from preferred?</td><td>Yes; unlabeled requirements count as Required.</td><td>Nov 4, 2026</td></tr>
           <tr><td>Should "Flexible" allow an optional end date?</td><td>No: availability no longer has end dates.</td><td>Nov 4, 2026</td></tr>

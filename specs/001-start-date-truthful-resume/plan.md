@@ -7,7 +7,7 @@
 ## Summary
 
 A student pastes a job posting. They get a start-date verdict against their availability (starting June
-2027 by default, or another start month, Immediate, ASAP, or Flexible). Then they get a tailored,
+2027 by default, or another start month, ASAP, or Flexible). Then they get a tailored,
 plain-text resume where every bullet is traced to their master resume, with gaps grouped as
 Required or Preferred.
 
@@ -94,7 +94,7 @@ app/
 ├── main.py              # FastAPI app: serves static page, defines 3 API routes
 ├── config.py            # Reads OPENROUTER_API_KEY / OPENROUTER_MODEL from env
 ├── llm.py               # One function that calls OpenRouter and returns parsed JSON
-├── availability.py      # Parses a start month ("June 2027") / Immediate / ASAP / Flexible
+├── availability.py      # Parses a start month ("June 2027") / ASAP / Flexible
 ├── start_date.py        # Model extraction prompt + deterministic verdict rules
 ├── resume_lines.py      # Splits master resume into numbered, referenceable lines
 ├── tailor.py            # Tailoring + gap-list prompts, orchestration

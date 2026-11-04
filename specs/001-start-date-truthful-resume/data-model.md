@@ -12,14 +12,14 @@ parsed on the server from the text the student typed.
 
 | Field | Type | Notes |
 |---|---|---|
-| `mode` | `month` \| `immediate` \| `flexible` | "Immediate" and "ASAP" both become `immediate` |
-| `start` | date \| null | `month`: first day of the start month. `immediate`: today. `flexible`: null |
-| `label` | string | Display text, e.g. "Starting June 2027", "ASAP", "Immediate", "Flexible" |
+| `mode` | `month` \| `asap` \| `flexible` | |
+| `start` | date \| null | `month`: first day of the start month. `asap`: today. `flexible`: null |
+| `label` | string | Display text, e.g. "Starting June 2027", "ASAP", "Flexible" |
 
 **Validation**:
 - Accepted input, case-insensitive:
   - `<Month YYYY>`, optionally prefixed with `Starting` or `From`
-  - `Immediate` (or `Immediately`) or `ASAP`
+  - `ASAP` ("Immediate" is not accepted for availability)
   - `Flexible`
 - Month names may be full or 3-letter.
 - A range (e.g., "June 2027 – October 2027") → error asking for just the start month. Anything
@@ -57,13 +57,13 @@ Display labels: In window · Outside window · Partly in window · Likely in win
 ### Verdict rules
 
 The posting interval `P` is `[start, end]`. Availability `A` is open-ended: `[A.start, ∞)`, where
-`immediate` means `[today, ∞)` and `flexible` means any future date. Rules are checked in order:
+`asap` means `[today, ∞)` and `flexible` means any future date. Rules are checked in order:
 
 1. No valid mentions → `not_stated`.
 2. Posting `kind = flexible` → `flexible_to_discuss`.
 3. `P.end < today` → `outside_window`, note "date has passed".
 4. Posting `kind = immediate` → `in_window` if the student is available today (`A.mode` is
-   `immediate` or `flexible`, or their start month has already arrived); otherwise
+   `asap` or `flexible`, or their start month has already arrived); otherwise
    `outside_window`, note "starts before you're available".
 5. `A.mode = flexible` → `in_window`.
 6. `P.start ≥ A.start` (starts in or after the student's month) → `likely_in_window_vague` if

@@ -27,16 +27,18 @@ def test_other_month_and_sept():
     assert parse_availability("August 2027", TODAY).label == "Starting August 2027"
 
 
-@pytest.mark.parametrize("text,label", [
-    ("Immediate", "Immediate"),
-    ("immediate", "Immediate"),
-    ("IMMEDIATELY", "Immediate"),
-    ("ASAP", "ASAP"),
-    ("asap", "ASAP"),
-])
-def test_immediate_and_asap_are_the_same_mode(text, label):
+@pytest.mark.parametrize("text", ["ASAP", "asap", "Starting ASAP"])
+def test_asap(text):
     a = parse_availability(text, TODAY)
-    assert (a.mode, a.start, a.label) == ("immediate", TODAY, label)
+    assert (a.mode, a.start, a.label) == ("asap", TODAY, "ASAP")
+
+
+@pytest.mark.parametrize("text", ["Immediate", "immediately"])
+def test_immediate_is_no_longer_accepted(text):
+    with pytest.raises(ApiError) as exc:
+        parse_availability(text, TODAY)
+    assert exc.value.code == "availability_invalid"
+    assert "Immediate" not in exc.value.message
 
 
 def test_flexible():
@@ -58,5 +60,5 @@ def test_unrecognized_rejected_with_accepted_forms(text):
     with pytest.raises(ApiError) as exc:
         parse_availability(text, TODAY)
     assert exc.value.code == "availability_invalid"
-    for form in ("June 2027", "Immediate", "ASAP", "Flexible"):
+    for form in ("June 2027", "ASAP", "Flexible"):
         assert form in exc.value.message

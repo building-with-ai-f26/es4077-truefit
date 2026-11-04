@@ -64,7 +64,7 @@ confirm they fail before implementing.
 
 **Goal**: Paste a posting and see its start date, the quoted source, and a verdict against the student's availability.
 
-> **Revised 2026-11-04:** availability is now a single "available starting" month (default June 2027) instead of a range; any later start is in window. T013, T016, T017, and T020 were updated to match (see spec Clarifications).
+> **Revised 2026-11-04:** availability is now a single "available starting" month (default June 2027) instead of a range; any later start is in window. T013, T016, T017, and T020 were updated to match. "Immediate" was then dropped as an availability option (students type "ASAP"). See spec Clarifications.
 
 **Independent Test**: Run scenarios 1–6 in quickstart.md plus the start-date eval set. Verdicts match expected results in at least 9 of 10 cases, and there's never a date for a posting that doesn't state one.
 

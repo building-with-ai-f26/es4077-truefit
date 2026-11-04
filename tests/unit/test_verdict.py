@@ -62,9 +62,8 @@ def test_may_2027_before_default_start_is_outside():
     assert verdict([mention("exact_date", "2027-05-31")]).verdict == "outside_window"
 
 
-@pytest.mark.parametrize("availability", ["ASAP", "Immediate"])
-def test_us1_6_immediate_posting_vs_immediate_student(availability):
-    a = parse_availability(availability, TODAY)
+def test_us1_6_immediate_posting_vs_asap_student():
+    a = parse_availability("ASAP", TODAY)
     assert verdict([mention("immediate")], a).verdict == "in_window"
 
 
@@ -139,7 +138,7 @@ def test_bare_year_is_vague_partial():
     assert r.mentions[0].is_vague
 
 
-def test_immediate_student_open_ended_includes_far_future():
+def test_asap_student_open_ended_includes_far_future():
     assert verdict([mention("exact_date", "2028-01-15")], parse_availability("ASAP", TODAY)).verdict == "in_window"
 
 
