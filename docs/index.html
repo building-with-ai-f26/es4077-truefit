@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>[Your Product Name] · Building with AI (Fall 2026)</title>
+  <title>TrueFit · Building with AI (Fall 2026)</title>
 
   <!-- Week 1: create your PostHog account only.
        Build 2: paste your project's current PostHog web snippet here,
@@ -144,8 +144,8 @@
     <!-- HERO / PRODUCT PITCH -->
     <header>
       <span class="eyebrow">NYU Stern · Building with AI · Fall 2026</span>
-      <h1>[Your Product Name]</h1>
-      <p class="tagline">[One clear sentence: Who is this for, and what painful job does it do for them?]</p>
+      <h1>TrueFit</h1>
+      <p class="tagline">Paste a job posting. Know if the start date works, and get a resume for it that's ATS-ready and 100% true. Built for MBA students recruiting for roles starting in 2027.</p>
       <div class="cta-row">
         <a class="btn" href="#live-demo" onclick="window.posthog && posthog.capture('clicked_try_product')">See the Product →</a>
         <a class="btn btn-secondary" href="#prd">Read the Living PRD</a>
@@ -171,16 +171,16 @@
       <p class="meta">Updated every week as we test with real users and learn what works.</p>
 
       <h3>1. Target User & The Job to Be Done</h3>
-      <p><strong>Who is this for?</strong> [Name a specific, reachable person or role you have direct access to.]</p>
-      <p><strong>The painful "Before" workflow:</strong> [How do they do this today, and why is it slow, manual, or broken?]</p>
-      <p><strong>The "After" workflow with this product:</strong> [What does your tool do for them in one sitting?]</p>
+      <p><strong>Who is this for?</strong> Second-year NYU Stern MBA students (my classmates) who graduate in May 2027 and are recruiting for full-time roles that can start between June and October 2027. I can reach them directly through my section, my pod, and recruiting clubs.</p>
+      <p><strong>The painful "Before" workflow:</strong> For every posting, they read the whole description hoping to find a start date. Often it's buried, vague ("Summer 2027"), or missing, so they apply to roles they can't take or skip roles they could. Next they tailor their resume by hand or with ChatGPT, then check every line because the AI invents skills and metrics. Finally they paste the resume into Workday or iCIMS, where the parser scrambles the formatting, and they spend more time fixing fields one by one.</p>
+      <p><strong>The "After" workflow with this product:</strong> They paste a job posting and their master resume. In one sitting, TrueFit first pulls out the start date and flags whether it falls in the June–October 2027 window, or says "not stated." It then writes a tailored resume in a plain, single-column, ATS-friendly format that pastes cleanly into Workday or iCIMS. Every bullet links to a line in their real resume, anything it can't back up is flagged, and the gaps between the posting and their experience are listed so they know what they can't claim.</p>
 
       <h3>2. Scope & Explicit Non-Goals</h3>
       <ul>
-        <li><strong>In Scope (Core Workflow):</strong> [The 1 main workflow this product does reliably]</li>
-        <li><strong>Out of Scope #1:</strong> [Feature you are deliberately NOT building in 6 weeks]</li>
-        <li><strong>Out of Scope #2:</strong> [Feature you are deliberately NOT building in 6 weeks]</li>
-        <li><strong>Out of Scope #3:</strong> [Feature you are deliberately NOT building in 6 weeks]</li>
+        <li><strong>In Scope (Core Workflow):</strong> Paste one job posting and a master resume → get a start-date check against June–Oct 2027, then a tailored, ATS-friendly resume where every claim is verified against the master resume and any gaps are listed.</li>
+        <li><strong>Out of Scope #1:</strong> Scraping job boards, auto-applying, or auto-filling Workday/iCIMS forms. Users paste postings in themselves.</li>
+        <li><strong>Out of Scope #2:</strong> Application status tracking or pipeline management. That's a different job, and spreadsheets and tools like Huntr already handle it.</li>
+        <li><strong>Out of Scope #3:</strong> Anything beyond the resume, including cover letters, LinkedIn rewrites, interview prep, and designed templates or PDF styling. The output is one plain, ATS-safe format.</li>
       </ul>
 
       <h3>3. How It Works Under the Hood & Riskiest Assumption (Week 2+)</h3>

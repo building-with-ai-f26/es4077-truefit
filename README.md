@@ -1,6 +1,6 @@
 # TrueFit
 
-> **One-line pitch:** An AI agent that analyzes a job posting, scores your fit, rewrites your resume to match, and tracks your status with a built-in check that every claim is backed by your real experience.
+> **One-line pitch:** Paste a job posting. Know if the start date works, and get a resume for it that's ATS-ready and 100% true. Built for MBA students recruiting for roles starting in 2027.
 
 - **Builder:** Emma Schmidt (@emmaclaire816)
 - **Pod:** [Pod Name / 12]
