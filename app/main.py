@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from app import config, start_date
-from app.errors import ApiError, ConfigError, ModelUnavailable
+from app.errors import ApiError, ConfigError, ModelAccountProblem, ModelUnavailable
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 
@@ -57,6 +57,12 @@ async def handle_model_unavailable(_request: Request, _exc: ModelUnavailable):
         content={"error": {"code": "model_unavailable",
                            "message": "The AI service didn't respond in time. Please try again in a minute."}},
     )
+
+
+@app.exception_handler(ModelAccountProblem)
+async def handle_model_account_problem(_request: Request, exc: ModelAccountProblem):
+    logger.error("OpenRouter: %s", exc.code)
+    return JSONResponse(status_code=502, content={"error": {"code": exc.code, "message": exc.message}})
 
 
 @app.exception_handler(ConfigError)

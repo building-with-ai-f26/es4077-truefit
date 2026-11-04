@@ -15,5 +15,14 @@ class ModelUnavailable(Exception):
     """The model call failed, timed out, or returned unusable output after one retry."""
 
 
+class ModelAccountProblem(Exception):
+    """OpenRouter rejected the request for a reason retrying won't fix (bad key, no credit, unknown model)."""
+
+    def __init__(self, code: str, message: str):
+        super().__init__(message)
+        self.code = code
+        self.message = message
+
+
 class ConfigError(Exception):
     """A required environment variable is missing."""

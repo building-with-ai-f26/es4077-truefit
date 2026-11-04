@@ -100,3 +100,15 @@ def test_missing_config_gives_plain_error(client, monkeypatch):
     r = client.post("/api/start-date", json={"posting": POSTING})
     assert r.status_code == 500
     assert r.json()["error"]["code"] == "not_configured"
+
+
+def test_account_problem_shown_with_reason(client, monkeypatch):
+    from app.errors import ModelAccountProblem
+
+    async def out_of_credit(system, user):
+        raise ModelAccountProblem("model_out_of_credit", "TrueFit's AI account is out of credit.")
+
+    monkeypatch.setattr("app.llm.call", out_of_credit)
+    r = client.post("/api/start-date", json={"posting": POSTING})
+    assert r.status_code == 502
+    assert r.json()["error"]["code"] == "model_out_of_credit"
