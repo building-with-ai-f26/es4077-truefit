@@ -3,7 +3,7 @@
 > **One-line pitch:** Paste a job posting. Know if the start date works, and get a resume for it that's ATS-ready and 100% true. Built for MBA students recruiting for roles starting in 2027.
 
 - **Builder:** Emma Schmidt (@emmaclaire816)
-- **Pod:** [Pod Name / 12]
+- **Pod:** Pod 12
 - **Product Page & Living PRD:** [Add your GitHub Pages URL]
 - **App:** runs locally through Week 4; add a cloud URL in Build 5.
 
