@@ -118,6 +118,16 @@
     p, ul { margin: 0 0 14px; }
     .meta { font-size: 14px; color: var(--muted); }
 
+    figure { margin: 0 0 18px; }
+    figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    figcaption { margin-top: 8px; }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -204,12 +214,16 @@
     <section id="live-demo">
       <h2>Product Showcase (Prototype / Live App / 2-Min Video)</h2>
       <p>
-        <strong>Current Status:</strong> [Build 1: local prototype / Builds 2–4: local app / Build 5: cloud app]<br />
-        <strong>Demo:</strong> [Add a screenshot or GIF now; add the live cloud app URL in Build 5.]
+        <strong>Current Status:</strong> Build 1: local prototype<br />
+        <strong>Demo:</strong> Screenshot below; live cloud app URL coming in Build 5.
       </p>
-      <p class="meta">
-        Ask your coding agent to embed a screenshot or GIF of your local prototype for Build 1. Keep this evidence current, then add your cloud app link and two-minute video in Build 5.
-      </p>
+      <figure>
+        <img src="images/prototype-build1.png" width="1100" height="1114"
+             alt="TrueFit local prototype: a pasted job posting with 'Start date: July 13, 2027' is checked against availability starting June 2027 and marked 'In window', with the start-date line quoted from the posting." />
+        <figcaption class="meta">
+          Build 1 prototype running locally (Nov 6, 2026). The start-date check reads a sample posting, quotes the line it relied on, and gives a verdict against the default June 2027 availability. Resume tailoring comes in the next build.
+        </figcaption>
+      </figure>
     </section>
 
     <!-- LIVING PRD (Updated every week!) -->
