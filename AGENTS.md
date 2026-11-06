@@ -3,15 +3,21 @@
 > Give this file to your coding agent and check that it is using these instructions. Keep the stack, commands, and ground rules current.
 
 ## 1. Project Overview
-- **What this repo builds:** [1–2 sentence summary]
-- **Primary user & core workflow:** [See the living PRD in `docs/index.html`]
-- **Tech stack:** [e.g., Python 3.12 / FastAPI / Next.js / SQLite / OpenRouter API]
+- **What this repo builds:** TrueFit — paste a job posting, learn whether its start date fits
+  your availability, and get a tailored, ATS-ready resume where every bullet traces back to
+  your master resume (nothing invented, numbers never altered).
+- **Primary user & core workflow:** MBA students recruiting for roles starting in 2027.
+  Paste posting → start-date verdict with quoted evidence → tailored resume + gap list → copy.
+  See the living PRD in `docs/index.html` and the feature spec in `specs/001-start-date-truthful-resume/`.
+- **Tech stack:** Python 3.12 / FastAPI + Uvicorn / plain HTML-CSS-JS frontend (`app/static/`) /
+  OpenRouter API via httpx / uv for dependencies / pytest.
 
 ## 2. Commands
-- **Install dependencies:** `[e.g., npm install / uv sync]`
-- **Run locally:** `[e.g., npm run dev]`
-- **Run deterministic tests:** `[e.g., pytest / npm test]`
-- **Run model evals:** `[e.g., python tests/eval.py]`
+- **Install dependencies:** `cp .env.example .env` (add your key and model), then `uv sync`
+- **Run locally:** `uv run uvicorn app.main:app --reload` → http://localhost:8000
+- **Run deterministic tests:** `uv run pytest` (unit + API tests; no API key, no cost)
+- **Run model evals:** `uv run python tests/eval/run_eval.py --suite start_date`
+  (real model calls — costs money; ask before running)
 
 ## 3. Non-Negotiable Engineering Rules
 1. **Plan before coding:** Before touching multiple files, propose a brief plan and wait for approval.
