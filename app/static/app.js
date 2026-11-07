@@ -103,7 +103,7 @@ const VERDICT_DISPLAY = {
   partly_in_window: { icon: "~", text: "Some start dates in this posting fit and some don't. See each one below." },
   flexible_to_discuss: { icon: "~", text: "The start date is open, so you can likely agree on one that works for you." },
   outside_window: { icon: "✕", text: "The start date doesn't fit when you can start." },
-  not_stated: { icon: "?", text: "The posting doesn't say when the role starts. Ask the recruiter before you apply." },
+  not_stated: { icon: "?", text: "No start date is listed. That often means as soon as possible; ask the recruiter before you apply." },
 };
 
 function setChecking(checking) {
