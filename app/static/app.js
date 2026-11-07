@@ -82,9 +82,39 @@ const startDateResult = document.getElementById("start-date-result");
 
 let lastStartDate = null; // the tailoring step waits for this (FR-008)
 
+const SAMPLE_POSTING = `Associate, Corporate Strategy — Summer 2027 Start
+Acme Consumer Brands · New York, NY
+
+About the role
+Join our Corporate Strategy team to size new markets, build business cases, and present recommendations to the executive team.
+
+Qualifications
+- MBA expected by May 2027
+- Strong financial modeling and Excel skills
+- SQL a plus
+
+Start date: July 13, 2027
+Applications close December 1, 2026.`;
+
+// Icon and one plain sentence per verdict. Server notes still show underneath.
+const VERDICT_DISPLAY = {
+  in_window: { icon: "✓", text: "This role starts on or after the month you're available, so the timing works." },
+  likely_in_window_vague: { icon: "~", text: "The posting only gives a rough time, but it looks like it fits. Confirm the exact date with the recruiter." },
+  partly_in_window: { icon: "~", text: "Some start dates in this posting fit and some don't. See each one below." },
+  flexible_to_discuss: { icon: "~", text: "The start date is open, so you can likely agree on one that works for you." },
+  outside_window: { icon: "✕", text: "The start date doesn't fit when you can start." },
+  not_stated: { icon: "?", text: "The posting doesn't say when the role starts. Ask the recruiter before you apply." },
+};
+
+function setChecking(checking) {
+  checkButton.disabled = checking;
+  checkButton.replaceChildren();
+  if (checking) checkButton.append(el("span", { class: "spinner", "aria-hidden": "true" }), "Checking…");
+  else checkButton.append("Check start date");
+}
+
 async function checkStartDate() {
-  checkButton.disabled = true;
-  checkButton.textContent = "Checking…";
+  setChecking(true);
   try {
     const result = await api("/api/start-date", {
       posting: postingInput.value,
@@ -96,14 +126,20 @@ async function checkStartDate() {
   } catch (_) {
     // The error is already shown; the saved availability stays as it was.
   } finally {
-    checkButton.disabled = false;
-    checkButton.textContent = "Check start date";
+    setChecking(false);
   }
 }
 
 function renderStartDate(result) {
   startDateResult.replaceChildren();
-  startDateResult.append(el("span", { class: `verdict ${result.verdict}` }, result.verdict_label));
+  startDateResult.className = `result ${result.verdict}`;
+  const display = VERDICT_DISPLAY[result.verdict] || { icon: "?", text: null };
+  startDateResult.append(
+    el("div", { class: "verdict-head" },
+      el("span", { class: "verdict-icon", "aria-hidden": "true" }, display.icon),
+      el("span", { class: "verdict" }, result.verdict_label)),
+  );
+  if (display.text) startDateResult.append(el("p", { class: "explanation" }, display.text));
 
   if (result.note) startDateResult.append(el("p", { class: "note" }, result.note));
 
@@ -119,15 +155,15 @@ function renderStartDate(result) {
     startDateResult.append(item);
   }
 
-  if (result.verdict === "not_stated") {
-    startDateResult.append(el("p", { class: "note" }, "The posting doesn't say when the role starts."));
-  }
-
   startDateResult.append(el("p", { class: "checked-against" }, `Checked against your availability: ${result.availability.label}`));
   startDateResult.hidden = false;
 }
 
 checkButton.addEventListener("click", checkStartDate);
+document.getElementById("sample-posting").addEventListener("click", () => {
+  postingInput.value = SAMPLE_POSTING;
+  postingInput.focus();
+});
 availabilityInput.value = loadProfile().availabilityText;
 
 function el(tag, attrs = {}, ...children) {

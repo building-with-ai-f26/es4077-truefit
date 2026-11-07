@@ -7,40 +7,47 @@
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
-  <main class="container">
-    <header>
+  <header class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow">For MBA students recruiting for 2027</span>
       <h1>TrueFit</h1>
       <p class="tagline">Paste a job posting. Know if the start date works, then get a resume for it that's ATS-ready and 100% true.</p>
-    </header>
+    </div>
+  </header>
+
+  <main class="container">
 
     <div id="error" class="error" role="alert" hidden></div>
 
     <!-- 1. Availability + posting -->
     <section id="step-posting" aria-labelledby="posting-heading">
-      <h2 id="posting-heading">1. Check the start date</h2>
+      <h2 id="posting-heading"><span class="step" aria-hidden="true">1</span>Check the start date</h2>
 
       <label for="availability">Available starting</label>
       <input id="availability" type="text" autocomplete="off"
              placeholder="June 2027 (or ASAP, Flexible)" />
       <p class="hint">Leave blank for June 2027. Any start date in or after your month counts as in window. You can also type another month like "August 2027", or "ASAP" or "Flexible".</p>
 
-      <label for="posting">Job posting</label>
+      <div class="label-row">
+        <label for="posting">Job posting</label>
+        <button id="sample-posting" class="link-button" type="button">Try a sample posting</button>
+      </div>
       <textarea id="posting" rows="12" placeholder="Paste the full job posting text"></textarea>
 
-      <button id="check-start-date" type="button">Check start date</button>
+      <button id="check-start-date" class="primary" type="button">Check start date</button>
 
       <div id="start-date-result" class="result" hidden aria-live="polite"></div>
     </section>
 
     <!-- 2. Master resume -->
     <section id="step-resume" aria-labelledby="resume-heading">
-      <h2 id="resume-heading">2. Your master resume</h2>
+      <h2 id="resume-heading"><span class="step" aria-hidden="true">2</span>Your master resume</h2>
       <p class="hint">Tailoring is coming in the next build.</p>
     </section>
 
     <!-- 3. Results -->
     <section id="step-results" aria-labelledby="results-heading" hidden>
-      <h2 id="results-heading">3. Tailored resume</h2>
+      <h2 id="results-heading"><span class="step" aria-hidden="true">3</span>Tailored resume</h2>
     </section>
   </main>
 
