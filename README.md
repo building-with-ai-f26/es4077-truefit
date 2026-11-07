@@ -4,7 +4,7 @@
 
 - **Builder:** Emma Schmidt (@emmaclaire816)
 - **Pod:** Pod 12
-- **Product Page & Living PRD:** [Add your GitHub Pages URL]
+- **Product Page & Living PRD:** https://building-with-ai-f26.github.io/es4077-truefit/
 - **App:** runs locally through Week 4; add a cloud URL in Build 5.
 
 ## Start here: Build 1
