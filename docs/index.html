@@ -350,7 +350,7 @@
         <h3>Build 2 · Smallest Local Version & PostHog (Due Nov 16)</h3>
         <ul>
           <li><strong>What shipped (so far):</strong> Redesigned the app to match this Product Page: violet header, numbered steps, and a verdict card with an icon and one plain-language sentence for each verdict. Added a "Try a sample posting" button for quick demos and a loading spinner while the check runs. When a posting lists no start date, TrueFit still says "Not stated" rather than guessing, and now adds that this often means as soon as possible and to ask the recruiter. Local install and run commands are documented in <code>AGENTS.md</code>. Still to do: PostHog on this page and the local app, and PRD v2.</li>
-          <li><strong>What broke / changed in PRD:</strong> [Fill in]</li>
+          <li><strong>What broke / changed in PRD:</strong> Nothing broke. I considered two changes and kept the PRD as written. (1) Pasting a job posting link instead of the text: many job sites (Workday, iCIMS, LinkedIn) block automated reading or need a login, so links would often fail; TrueFit stays paste-only, and fetching from a URL stays out of scope. (2) Treating a posting with no start date as ASAP: because ASAP counts as "starts now," students available from June 2027 would see "Outside window" on roles they could actually take. TrueFit keeps "Not stated" (it never guesses a date) and now adds a hint that a missing date often means as soon as possible.</li>
           <li><strong>Cost & time this week:</strong> $[0.00] · [0] hours</li>
         </ul>
       </div>
