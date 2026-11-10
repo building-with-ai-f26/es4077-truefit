@@ -33,11 +33,11 @@ One mention of a start date in a posting. The model extracts it and the server v
 | Field | Type | Notes |
 |---|---|---|
 | `quote` | string | Must be an exact substring of the posting (whitespace collapsed) or the mention is dropped |
-| `kind` | `exact_date` \| `month` \| `range` \| `season` \| `immediate` \| `flexible` | |
+| `kind` | `exact_date` \| `month` \| `range` \| `season` \| `immediate` \| `flexible` \| `graduation` | `graduation`: the window when eligible candidates graduate (needs an end month); used only if no start date is stated |
 | `start` | date \| null | Set by the server from the kind (see research.md §R4) |
 | `end` | date \| null | For `exact_date`, `start = end` |
 | `role_hint` | string \| null | For multi-role postings, e.g. "NYC office" |
-| `is_vague` | bool | True for `season` and for a bare year |
+| `is_vague` | bool | True for `season`, a bare year, and `graduation` |
 
 ## StartDateResult
 
@@ -61,6 +61,10 @@ The posting interval `P` is `[start, end]`. Availability `A` is open-ended: `[A.
 
 1. No valid mentions → `not_stated`.
 2. Posting `kind = flexible` → `flexible_to_discuss`.
+2a. Posting `kind = graduation` (only kept when no other mention exists) → `in_window`
+   if `A.mode = flexible` or the month after the graduation window's end ≥ `A.start` (the role hires
+   people graduating as late as that month, and they start after graduating); otherwise
+   `outside_window`. A season end uses its last month ("Spring 2027" → May 2027). The note names the month.
 3. `P.end < today` → `outside_window`, note "date has passed".
 4. Posting `kind = immediate` → `in_window` if the student is available today (`A.mode` is
    `asap` or `flexible`, or their start month has already arrived); otherwise

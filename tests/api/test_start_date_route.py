@@ -111,3 +111,17 @@ def test_account_problem_shown_with_reason(client, monkeypatch):
     r = client.post("/api/start-date", json={"posting": POSTING})
     assert r.status_code == 502
     assert r.json()["error"]["code"] == "model_out_of_credit"
+
+
+GRAD_POSTING = (
+    "Associate, Corporate Strategy. Acme Corp is hiring MBA candidates graduating between December 2026 "
+    "and June 2027 for our New York office. Requirements: MBA, 3+ years of experience, strong Excel skills."
+)
+
+
+def test_graduation_window_gives_in_window(client, fake_llm):
+    fake_llm.queue(reply([{"quote": "graduating between December 2026 and June 2027", "kind": "graduation",
+                           "start": "2026-12", "end": "2027-06"}]))
+    body = client.post("/api/start-date", json={"posting": GRAD_POSTING}).json()
+    assert body["verdict"] == "in_window"
+    assert body["mentions"][0]["quote"] == "graduating between December 2026 and June 2027"

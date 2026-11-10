@@ -1,11 +1,13 @@
 """Start-date check (User Story 1).
 
 The model only finds and quotes start-date text. Python checks the quote and decides the verdict.
+When a posting gives no start date but quotes a graduation window, that window is used instead:
+jobs for graduates start after graduation, so it is evidence, never a stated date.
 """
 
 import calendar
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from app import llm
@@ -25,11 +27,13 @@ VERDICT_LABELS = {
 NOTE_VAGUE = "Exact date not specified"
 NOTE_PASSED = "This date has already passed"
 NOTE_TOO_EARLY = "The role starts before you're available"
+NOTE_GRADUATION = "No start date is listed, but this role is for people graduating through {month}, so it starts after graduation."
+NOTE_GRADUATION_EARLY = "No start date is listed. This role is for people graduating by {month}, before you're available."
 NOTE_DIFFERENT = "Different start dates are listed (for example, for different roles or offices). See each one below."
 
 # Season → (first month, last month). Winter runs Dec of the year before through Feb.
 SEASONS = {"spring": (3, 5), "summer": (6, 8), "fall": (9, 11), "autumn": (9, 11), "winter": (12, 2), "year": (1, 12)}
-KINDS = {"exact_date", "month", "range", "season", "immediate", "flexible"}
+KINDS = {"exact_date", "month", "range", "season", "immediate", "flexible", "graduation"}
 
 
 @dataclass
@@ -148,6 +152,18 @@ def normalize_mention(raw: dict, today: date) -> Mention | None:
         is_vague = True
     elif kind == "immediate":
         start = end = today
+    elif kind == "graduation":
+        # The latest graduation month matters most: it's the last cohort the role hires.
+        # The end can be a month or a season ("Spring 2027" ends in May 2027).
+        start = _parse_day_or_month(raw.get("start"), as_end=False)
+        season_end = _season_bounds(raw.get("season"), raw.get("year"))
+        end = _parse_day_or_month(raw.get("end"), as_end=True) or (season_end and season_end[1])
+        if end is None and start is not None:
+            end = _month_bounds(start)[1]
+        if end is None:
+            return None
+        start = start or date(end.year, end.month, 1)
+        is_vague = True
     # "flexible" has no dates.
 
     return Mention(quote=quote.strip(), kind=kind, start=start, end=end, role_hint=role_hint, is_vague=is_vague)
@@ -160,6 +176,12 @@ def _mention_verdict(m: Mention, a: Availability, today: date) -> tuple[str, str
 
     if m.kind == "flexible":
         return "flexible_to_discuss", None
+    if m.kind == "graduation":
+        # The role hires people graduating as late as m.end, so it can start the month after.
+        month = f"{calendar.month_name[m.end.month]} {m.end.year}"
+        if a.mode == "flexible" or m.end + timedelta(days=1) >= a.start:
+            return "in_window", NOTE_GRADUATION.format(month=month)
+        return "outside_window", NOTE_GRADUATION_EARLY.format(month=month)
     if m.end < today:
         return "outside_window", NOTE_PASSED
     if m.kind == "immediate":
@@ -177,6 +199,9 @@ def _mention_verdict(m: Mention, a: Availability, today: date) -> tuple[str, str
 
 
 def compute_verdict(mentions: list[Mention], availability: Availability, today: date) -> StartDateResult:
+    # A stated start date always wins over a graduation window.
+    if any(m.kind != "graduation" for m in mentions):
+        mentions = [m for m in mentions if m.kind != "graduation"]
     if not mentions:
         return StartDateResult("not_stated", availability, [], None)
 
@@ -192,7 +217,7 @@ def compute_verdict(mentions: list[Mention], availability: Availability, today: 
 
 # ---- Model extraction ------------------------------------------------------
 
-EXTRACTION_PROMPT = """You read job postings and find when the job STARTS. Reply with one JSON object only.
+EXTRACTION_PROMPT = """You read job postings and find when the job STARTS. If no start date is given, you instead find the graduation window candidates must fall in (e.g., "Must be graduating in December 2026 or Spring 2027"), because such jobs start after graduation. Reply with one JSON object only.
 
 Shape:
 {"is_job_posting": true|false, "is_english": true|false,
@@ -201,7 +226,8 @@ Shape:
 Rules:
 - Only the date the job itself starts. Ignore application deadlines, interview dates, event dates, posting dates, and end dates.
 - "quote" MUST be copied character for character from the posting: the shortest phrase or sentence that states the start date. Do not paraphrase, fix typos, or change capitalization.
-- Never invent or guess a date. If the posting doesn't say when the job starts, return "mentions": [].
+- Never invent or guess a date. If the posting gives neither a start date nor a graduation window, return "mentions": [].
+- Graduation requirements are often listed under "Requirements", "What We Require", or "Qualifications". Check them.
 - If no year is written, use a year only if the posting states it elsewhere (e.g., "MBA Class of 2027"). Otherwise set start to null.
 - kind and fields:
   - "exact_date": a specific day. start = "YYYY-MM-DD".
@@ -210,6 +236,7 @@ Rules:
   - "season": a season or only a year. season = "spring" | "summer" | "fall" | "winter" | "year"; year = the year as a number.
   - "immediate": "immediately", "ASAP", "as soon as possible", "immediate start".
   - "flexible": "flexible start date", "rolling start", "start date to be discussed".
+  - "graduation": ONLY if the posting gives no start date at all, a window or deadline for when eligible candidates graduate, written with a month, e.g. "graduating between December 2026 and June 2027" or "expected graduation by May 2027". start and end = "YYYY-MM" (start null if only a "by" month). If the latest graduation time is a season ("Spring 2027"), set end null and give it as season and year. A class year alone ("Class of 2027") is not a graduation window.
   Use null for fields that don't apply.
 - If different roles, offices, or programs start at different times, return one mention for each and name it in "role_hint". Otherwise role_hint is null.
 - is_job_posting is false if the text is not a job or internship posting. is_english is false if the posting is not in English."""

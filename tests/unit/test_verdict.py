@@ -170,3 +170,45 @@ def test_unusable_mentions_are_dropped(raw):
 def test_month_is_whole_month():
     m = mention("month", "2027-02")
     assert (m.start, m.end) == (date(2027, 2, 1), date(2027, 2, 28))
+
+
+# --- Graduation window used when no start date is given ----------------------
+
+def test_graduation_window_through_june_is_in_window():
+    r = verdict([mention("graduation", "2026-12", "2027-06")])
+    assert r.verdict == "in_window"
+    assert "graduating through June 2027" in r.note
+
+
+def test_graduation_by_december_is_outside_for_june_availability():
+    r = verdict([mention("graduation", None, "2026-12")])
+    assert r.verdict == "outside_window"
+    assert "graduating by December 2026" in r.note
+
+
+def test_graduation_window_ignored_when_start_date_stated():
+    r = verdict([mention("graduation", "2026-12", "2027-06"), mention("month", "2027-01")])
+    assert r.verdict == "outside_window"
+    assert [m.kind for m in r.mentions] == ["month"]
+
+
+def test_graduation_needs_a_month_or_season():
+    assert normalize_mention({"quote": "x", "kind": "graduation"}, TODAY) is None
+
+
+def test_graduation_ending_in_a_season_uses_its_last_month():
+    # "Must be graduating in December 2026 or Spring 2027": Spring 2027 grads finish in May,
+    # so the role can start in June 2027 at the earliest.
+    r = verdict([mention("graduation", "2026-12", season="spring", year=2027)])
+    assert r.mentions[0].end == date(2027, 5, 31)
+    assert r.verdict == "in_window"
+
+
+def test_graduation_month_before_availability_month_still_fits():
+    # Graduating by May 2027 → can start June 2027.
+    assert verdict([mention("graduation", None, "2027-05")]).verdict == "in_window"
+
+
+def test_graduation_single_month():
+    m = mention("graduation", "2027-05")
+    assert m.end == date(2027, 5, 31)

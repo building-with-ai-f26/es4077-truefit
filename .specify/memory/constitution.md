@@ -19,6 +19,9 @@ general-purpose AI tools. One invented claim costs the user the trust the produc
 Any fact TrueFit extracts or asserts (a start date, a requirement, a bullet's backing) MUST be
 shown with the exact source text it came from. When the source does not state something, the
 product MUST say "Not stated" (or the equivalent) instead of guessing or inferring a specific value.
+Quoted evidence that bounds a value without stating it (for example, a graduation window when no
+start date is given) MAY inform a verdict only if it is shown with its quote and a note saying what
+the verdict is based on, and no specific value is presented as stated.
 Verdicts MUST use the fixed, documented categories in the active spec.
 
 **Rationale**: Users can only trust output they can check in seconds. Quoting the source makes
@@ -95,4 +98,4 @@ day-to-day operating instructions for coding agents and MUST stay consistent wit
   after design. Violations MUST be justified in Complexity Tracking or the design MUST change.
   Principle I can never be waived.
 
-**Version**: 1.0.0 | **Ratified**: 2026-11-04 | **Last Amended**: 2026-11-04
+**Version**: 1.1.0 | **Ratified**: 2026-11-04 | **Last Amended**: 2026-11-10
