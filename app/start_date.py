@@ -1,6 +1,8 @@
 """Start-date check (User Story 1).
 
 The model only finds and quotes start-date text. Python checks the quote and decides the verdict.
+When a posting gives no start date but quotes a graduation window, that window is used instead:
+jobs for graduates start after graduation, so it is evidence, never a stated date.
 """
 
 import calendar
@@ -25,11 +27,13 @@ VERDICT_LABELS = {
 NOTE_VAGUE = "Exact date not specified"
 NOTE_PASSED = "This date has already passed"
 NOTE_TOO_EARLY = "The role starts before you're available"
+NOTE_GRADUATION = "No start date is listed. This role is for people graduating through {month}, so it likely starts after graduation."
+NOTE_GRADUATION_EARLY = "No start date is listed. This role is for people graduating by {month}, before you're available."
 NOTE_DIFFERENT = "Different start dates are listed (for example, for different roles or offices). See each one below."
 
 # Season → (first month, last month). Winter runs Dec of the year before through Feb.
 SEASONS = {"spring": (3, 5), "summer": (6, 8), "fall": (9, 11), "autumn": (9, 11), "winter": (12, 2), "year": (1, 12)}
-KINDS = {"exact_date", "month", "range", "season", "immediate", "flexible"}
+KINDS = {"exact_date", "month", "range", "season", "immediate", "flexible", "graduation"}
 
 
 @dataclass
@@ -148,6 +152,13 @@ def normalize_mention(raw: dict, today: date) -> Mention | None:
         is_vague = True
     elif kind == "immediate":
         start = end = today
+    elif kind == "graduation":
+        # Only the latest graduation month matters: it's the last cohort the role hires.
+        end = _parse_day_or_month(raw.get("end"), as_end=True)
+        if end is None:
+            return None
+        start = _parse_day_or_month(raw.get("start"), as_end=False) or date(end.year, end.month, 1)
+        is_vague = True
     # "flexible" has no dates.
 
     return Mention(quote=quote.strip(), kind=kind, start=start, end=end, role_hint=role_hint, is_vague=is_vague)
@@ -160,6 +171,12 @@ def _mention_verdict(m: Mention, a: Availability, today: date) -> tuple[str, str
 
     if m.kind == "flexible":
         return "flexible_to_discuss", None
+    if m.kind == "graduation":
+        # The role hires people graduating as late as m.end, so it can start then or later.
+        month = f"{calendar.month_name[m.end.month]} {m.end.year}"
+        if a.mode == "flexible" or m.end >= a.start:
+            return "likely_in_window_vague", NOTE_GRADUATION.format(month=month)
+        return "outside_window", NOTE_GRADUATION_EARLY.format(month=month)
     if m.end < today:
         return "outside_window", NOTE_PASSED
     if m.kind == "immediate":
@@ -177,6 +194,9 @@ def _mention_verdict(m: Mention, a: Availability, today: date) -> tuple[str, str
 
 
 def compute_verdict(mentions: list[Mention], availability: Availability, today: date) -> StartDateResult:
+    # A stated start date always wins over a graduation window.
+    if any(m.kind != "graduation" for m in mentions):
+        mentions = [m for m in mentions if m.kind != "graduation"]
     if not mentions:
         return StartDateResult("not_stated", availability, [], None)
 
@@ -210,6 +230,7 @@ Rules:
   - "season": a season or only a year. season = "spring" | "summer" | "fall" | "winter" | "year"; year = the year as a number.
   - "immediate": "immediately", "ASAP", "as soon as possible", "immediate start".
   - "flexible": "flexible start date", "rolling start", "start date to be discussed".
+  - "graduation": ONLY if the posting gives no start date at all, a window or deadline for when eligible candidates graduate, written with a month, e.g. "graduating between December 2026 and June 2027" or "expected graduation by May 2027". start and end = "YYYY-MM" (start null if only a "by" month). A class year alone ("Class of 2027") is not a graduation window.
   Use null for fields that don't apply.
 - If different roles, offices, or programs start at different times, return one mention for each and name it in "role_hint". Otherwise role_hint is null.
 - is_job_posting is false if the text is not a job or internship posting. is_english is false if the posting is not in English."""

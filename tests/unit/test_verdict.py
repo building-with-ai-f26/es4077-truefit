@@ -170,3 +170,27 @@ def test_unusable_mentions_are_dropped(raw):
 def test_month_is_whole_month():
     m = mention("month", "2027-02")
     assert (m.start, m.end) == (date(2027, 2, 1), date(2027, 2, 28))
+
+
+# --- Graduation window used when no start date is given ----------------------
+
+def test_graduation_window_through_june_is_likely_in_window():
+    r = verdict([mention("graduation", "2026-12", "2027-06")])
+    assert r.verdict == "likely_in_window_vague"
+    assert "graduating through June 2027" in r.note
+
+
+def test_graduation_by_december_is_outside_for_june_availability():
+    r = verdict([mention("graduation", None, "2026-12")])
+    assert r.verdict == "outside_window"
+    assert "graduating by December 2026" in r.note
+
+
+def test_graduation_window_ignored_when_start_date_stated():
+    r = verdict([mention("graduation", "2026-12", "2027-06"), mention("month", "2027-01")])
+    assert r.verdict == "outside_window"
+    assert [m.kind for m in r.mentions] == ["month"]
+
+
+def test_graduation_needs_an_end_month():
+    assert normalize_mention({"quote": "x", "kind": "graduation", "start": "2026-12"}, TODAY) is None
