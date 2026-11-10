@@ -20,6 +20,7 @@ def normalize_chars(text: str) -> str:
     for old, new in _REPLACEMENTS.items():
         text = text.replace(old, new)
     text = _LEADING_BULLET.sub("", text.strip())
+    text = re.sub(r"\s*[•●▪◦·]\s*", " | ", text)  # "Coho Consulting • Los Angeles" keeps a separator
     text = _DATE_RANGE.sub(lambda m: f"{m.group(1)} \x00 {m.group(2)}", text)  # protect date-range dashes
     text = text.replace("–", "-").replace("—", "-")
     text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")  # é → e

@@ -378,6 +378,7 @@ function normalizeChars(text) {
     .replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/…/g, "...").replace(/ /g, " ")
     .trim()
     .replace(/^[-*•●▪◦·]\s*/, "")
+    .replace(/\s*[•●▪◦·]\s*/g, " | ")
     .replace(DATE_RANGE, "$1 \u0000 $2")
     .replace(/[–—]/g, "-")
     .normalize("NFKD").replace(/[^\x20-\x7E\u0000]/g, "")

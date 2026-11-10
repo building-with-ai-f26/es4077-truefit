@@ -10,6 +10,7 @@ Associate, Café Corp | New York, NY | Jun 2022—Present""")}
 def test_normalize_keeps_date_range_dash_only():
     assert normalize_chars("• “Led” work — fast | Jun 2022—Present") == '"Led" work - fast | Jun 2022 – Present'
     assert normalize_chars("Café") == "Cafe"
+    assert normalize_chars("Senior Associate — Coho Consulting • Los Angeles") == "Senior Associate - Coho Consulting | Los Angeles"
 
 
 def test_render_includes_only_included_bullets_and_is_ascii():

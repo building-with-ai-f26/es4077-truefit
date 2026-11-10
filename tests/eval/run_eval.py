@@ -2,19 +2,27 @@
 
 Usage:
     uv run python tests/eval/run_eval.py --suite start_date
+    uv run python tests/eval/run_eval.py --suite tailor
 """
 
 import argparse
 import asyncio
 import json
 import sys
+import time
 from pathlib import Path
+
+import httpx
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
 from app.errors import ApiError, ModelUnavailable  # noqa: E402
+from app import llm  # noqa: E402
+from app.resume_lines import split_lines  # noqa: E402
 from app.start_date import check_start_date  # noqa: E402
+from app.tailor import tailor_resume  # noqa: E402
+from app.trace_check import GENERIC_JOB_WORDS, _stem, extract_numbers, posting_only_terms  # noqa: E402
 
 CASES_DIR = Path(__file__).resolve().parent / "cases"
 
@@ -51,7 +59,72 @@ async def run_start_date() -> bool:
     return agreed / total >= 0.9 and not invented
 
 
-SUITES = {"start_date": run_start_date}
+class CostMeter(httpx.AsyncHTTPTransport):
+    """Adds up the cost OpenRouter reports in each response's usage block."""
+
+    def __init__(self):
+        super().__init__()
+        self.cost = 0.0
+
+    async def handle_async_request(self, request):
+        response = await super().handle_async_request(request)
+        await response.aread()
+        try:
+            self.cost += float(json.loads(response.content).get("usage", {}).get("cost") or 0)
+        except ValueError:
+            pass
+        return response
+
+
+async def run_tailor() -> bool:
+    """SC-003: no kept bullet with a number or posting-only word missing from its sources, and none claiming an expected gap."""
+    meter = CostMeter()
+    llm._transport = meter
+    cases = load_cases("tailor")
+    violations, flagged_for_review, seconds = [], [], []
+    print(f"{'case':30} {'bullets':>7} {'kept':>5} {'flagged':>8} {'cost':>7} {'time':>6}")
+    for name, case in cases:
+        lines = split_lines(case["master_resume"], case.get("background_notes"))
+        by_id = {line.id: line for line in lines}
+        only = posting_only_terms(case["posting"], " ".join(line.text for line in lines))
+        gap_terms = [t.lower() for group in case.get("expected_gaps", {}).values() for t in group]
+        before, started = meter.cost, time.time()
+        try:
+            result = await tailor_resume(case["posting"], case["master_resume"], case.get("background_notes"))
+        except (ApiError, ModelUnavailable) as exc:
+            print(f"{name:30} error:{getattr(exc, 'code', 'model_unavailable')}")
+            violations.append(f"{name}: no result")
+            continue
+        seconds.append(time.time() - started)
+        bullets = [b for s in result["resume"]["sections"] for e in s["entries"] for b in e["bullets"]]
+        kept = [b for b in bullets if b["included"]]
+        for b in kept:
+            cited = " ".join(by_id[i].text for i in b["source_line_ids"] if i in by_id)
+            if not extract_numbers(b["text"]) <= extract_numbers(cited):
+                violations.append(f"{name} {b['id']}: number not in sources: {b['text']!r}")
+            words = {w.strip(".,;:()").lower() for w in b["text"].split()}
+            if any(_stem(w) in only for w in words if w not in GENERIC_JOB_WORDS):
+                violations.append(f"{name} {b['id']}: posting-only word: {b['text']!r}")
+            for term in gap_terms:
+                if term in b["text"].lower():
+                    violations.append(f"{name} {b['id']}: claims a gap ({term}): {b['text']!r}")
+        flagged = [b for b in bullets if b["status"] == "flagged"]
+        flagged_for_review += [(name, b) for b in flagged]
+        print(f"{name:30} {len(bullets):7} {len(kept):5} {len(flagged):8} ${meter.cost - before:6.4f} {seconds[-1]:5.1f}s")
+
+    total = len(cases)
+    print(f"\nCost: ${meter.cost:.4f} total, ${meter.cost / total:.4f} per tailoring run; "
+          f"avg {sum(seconds) / max(len(seconds), 1):.1f}s")
+    print(f"Violations (target 0): {len(violations)}")
+    for v in violations:
+        print("  " + v)
+    print(f"\nFlagged bullets to review by hand (false flag = a fair rewording you'd accept): {len(flagged_for_review)}")
+    for name, b in flagged_for_review:
+        print(f"  {name} {b['id']}: {b['text']!r}\n      reason: {b['flag_reason']}")
+    return not violations
+
+
+SUITES = {"start_date": run_start_date, "tailor": run_tailor}
 
 
 def main() -> None:
