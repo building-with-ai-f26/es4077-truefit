@@ -214,7 +214,7 @@
     <section id="live-demo">
       <h2>Product Showcase (Prototype / Live App / 2-Min Video)</h2>
       <p>
-        <strong>Current Status:</strong> Build 1: local prototype<br />
+        <strong>Current Status:</strong> Build 2: smallest local version with analytics<br />
         <strong>Demo:</strong> Screenshot below; live cloud app URL coming in Build 5.
       </p>
       <figure>
@@ -233,11 +233,11 @@
 
       <table>
         <tr><th scope="row">Owner</th><td>Emma Schmidt (builder; product, design, and engineering)</td></tr>
-        <tr><th scope="row">Document status</th><td>Draft v1.1 · Build 1 (local prototype)</td></tr>
+        <tr><th scope="row">Document status</th><td>Draft v2 · Build 2 (smallest local version)</td></tr>
         <tr><th scope="row">Target release</th><td>Local app through Week 4; cloud launch with Build 5 (Dec 7, 2026)</td></tr>
         <tr><th scope="row">Testers</th><td>Second-year Stern MBA classmates in my section, pod, and recruiting clubs</td></tr>
         <tr><th scope="row">Detailed spec</th><td><a href="https://github.com/building-with-ai-f26/es4077-truefit/tree/main/specs/001-start-date-truthful-resume">specs/001-start-date-truthful-resume</a> (requirements, plan, and tasks)</td></tr>
-        <tr><th scope="row">Last updated</th><td>Nov 6, 2026</td></tr>
+        <tr><th scope="row">Last updated</th><td>Nov 10, 2026</td></tr>
       </table>
 
       <p><strong>Objective:</strong> Help MBA students spend their limited recruiting time only on roles they can actually start, and send a resume for each one that gets through applicant tracking systems without containing a single claim they can't back up. The test of success is simple: classmates use it instead of their current mix of reading postings closely, ChatGPT, and manual fact-checking.</p>
@@ -258,7 +258,9 @@
 
       <h3>3. How It Works Under the Hood & Riskiest Assumption (Week 2+)</h3>
       <p><strong>Riskiest Assumption:</strong> That an AI model can tailor a resume without slipping in skills, numbers, or claims that aren't in the student's master resume. If one invented claim gets through, the "100% true" promise breaks and students go back to checking every line. <em>How we test it:</em> the model only drafts; plain code then checks every bullet against the resume lines it cites (exact numbers, no posting keywords the student doesn't have), plus a second AI support check. Anything that fails is flagged and left out by default. A fixed set of 10 test cases is re-run whenever prompts or models change.</p>
-      <p><strong>Simple Architecture (planned):</strong> [Web page: paste posting + resume] → [Small Python server holding the API key; stores nothing] → [AI model via OpenRouter: extracts and drafts] → [Python checks: start-date rules, quote check, fact trace check] → [Verdict, tailored plain-text resume, gap list]</p>
+      <p><strong>How Build 2 tests it:</strong> Tailoring isn't built yet, so Build 2 tests a smaller version of the same risk on the start-date check: will the model report only text that is really in the posting? The model's only job is to find and quote start-date lines. Plain Python code then confirms each quote appears word for word in the posting, drops any that don't, and works out the verdict itself, so the model never decides whether a date fits. On the 14-case start-date eval run against the real model, TrueFit got 14 of 14 right and never stated a date the posting didn't contain. The same pattern (model drafts, code verifies) is what tailoring will use in Build 3.</p>
+      <p><strong>How the app works (Build 2):</strong> [Web page: paste posting + availability] → [Small Python (FastAPI) server on my laptop that holds the API key in <code>.env</code> and stores nothing] → [AI model via OpenRouter: finds and quotes start-date lines] → [Python checks: quote really in posting, date rules, verdict] → [Verdict card with the quoted evidence]. PostHog records page views, clicks, and funnel events from the web page (never posting or resume text) and errors from the server.</p>
+      <p><strong>Planned for Build 3:</strong> the same path adds the master resume, a tailoring call, and a fact-trace check on every bullet, ending in a tailored plain-text resume and gap list.</p>
 
       <h3>4. Unit Economics & Analytics Snapshot (Updated Weekly)</h3>
       <div class="grid-2">
@@ -349,7 +351,7 @@
       <div class="log-entry">
         <h3>Build 2 · Smallest Local Version & PostHog (Due Nov 16)</h3>
         <ul>
-          <li><strong>What shipped (so far):</strong> Redesigned the app to match this Product Page: violet header, numbered steps, and a verdict card with an icon and one plain-language sentence for each verdict. Added a "Try a sample posting" button for quick demos and a loading spinner while the check runs. When a posting lists no start date, TrueFit still says "Not stated" rather than guessing, and now adds that this often means as soon as possible and to ask the recruiter. Local install and run commands are documented in <code>AGENTS.md</code>. Still to do: PostHog on this page and the local app, and PRD v2.</li>
+          <li><strong>What shipped (so far):</strong> Redesigned the app to match this Product Page: violet header, numbered steps, and a verdict card with an icon and one plain-language sentence for each verdict. Added a "Try a sample posting" button for quick demos and a loading spinner while the check runs. When a posting lists no start date, TrueFit still says "Not stated" rather than guessing, and now adds that this often means as soon as possible and to ask the recruiter. Added PostHog to this page and the local app: page views, clicks, and three funnel events (sample posting used, start date checked, check failed), sending only the verdict or error code, never posting text. Updated the PRD to v2 (how this build tests the riskiest assumption, how the app works now) and added a project structure section to <code>AGENTS.md</code>. [Add: PostHog events verified on (date); new screenshot.]</li>
           <li><strong>What broke / changed in PRD:</strong> Nothing broke. I considered two changes and kept the PRD as written. (1) Pasting a job posting link instead of the text: many job sites (Workday, iCIMS, LinkedIn) block automated reading or need a login, so links would often fail; TrueFit stays paste-only, and fetching from a URL stays out of scope. (2) Treating a posting with no start date as ASAP: because ASAP counts as "starts now," students available from June 2027 would see "Outside window" on roles they could actually take. TrueFit keeps "Not stated" (it never guesses a date) and now adds a hint that a missing date often means as soon as possible.</li>
           <li><strong>Cost & time this week:</strong> $[0.00] · [0] hours</li>
         </ul>

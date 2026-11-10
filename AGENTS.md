@@ -19,7 +19,19 @@
 - **Run model evals:** `uv run python tests/eval/run_eval.py --suite start_date`
   (real model calls — costs money; ask before running)
 
-## 3. Non-Negotiable Engineering Rules
+## 3. Project Structure
+- `app/main.py` — FastAPI app: serves the page, the `/api/start-date` route, error handlers, and the PostHog server client.
+- `app/start_date.py` — Start-date check. The model only finds and quotes start-date text; Python checks the quote and decides the verdict.
+- `app/llm.py` — The one place TrueFit calls the model (OpenRouter). Prompts and responses are never logged.
+- `app/quotes.py` — Confirms each quote really appears in the posting.
+- `app/availability.py` — Parses the student's "available starting" text (month, ASAP, Flexible).
+- `app/config.py`, `app/errors.py` — Reads `.env`; shared error types.
+- `app/static/` — Plain HTML/CSS/JS frontend (`index.html`, `styles.css`, `app.js`, `posthog.js`).
+- `docs/index.html` — Public Product Page, living PRD, and weekly build log (GitHub Pages from `main` → `/docs`).
+- `specs/001-start-date-truthful-resume/` — Feature spec, plan, data model, and tasks.
+- `tests/unit/`, `tests/api/` — Deterministic tests (`uv run pytest`). `tests/eval/` — real-model eval cases (cost money).
+
+## 4. Non-Negotiable Engineering Rules
 1. **Plan before coding:** Before touching multiple files, propose a brief plan and wait for approval.
 2. **Small batches:** Make small, focused changes that can be reviewed and explained by a human in a single Pull Request.
 3. **Explainability:** Avoid unnecessary abstractions or dependencies. Help the human builder understand the main components, what changed, why it matters, what could break, and how it was checked.
