@@ -47,6 +47,11 @@ function clearError() {
   errorBox.textContent = "";
 }
 
+// Send a funnel event to PostHog if it loaded. Never pass posting or resume text.
+function track(event, properties) {
+  window.posthog?.capture(event, properties);
+}
+
 // POST JSON to the API. Returns the parsed body, or throws an Error whose
 // message is the plain-language text from the server (and shows it).
 async function api(path, body) {
@@ -123,8 +128,10 @@ async function checkStartDate() {
     lastStartDate = result;
     saveProfile({ availabilityText: availabilityInput.value.trim() });
     renderStartDate(result);
-  } catch (_) {
+    track("start_date_checked", { verdict: result.verdict });
+  } catch (err) {
     // The error is already shown; the saved availability stays as it was.
+    track("start_date_check_failed", { error_code: err.code || "network_error" });
   } finally {
     setChecking(false);
   }
@@ -162,6 +169,7 @@ function renderStartDate(result) {
 checkButton.addEventListener("click", checkStartDate);
 document.getElementById("sample-posting").addEventListener("click", () => {
   postingInput.value = SAMPLE_POSTING;
+  track("sample_posting_used");
   postingInput.focus();
 });
 availabilityInput.value = loadProfile().availabilityText;

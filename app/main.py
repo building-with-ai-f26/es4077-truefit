@@ -1,5 +1,7 @@
 """TrueFit web app: serves the page and the JSON API."""
 
+import atexit
+import html
 import logging
 import os
 import time
@@ -8,10 +10,12 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from pydantic import BaseModel
+from posthog import Posthog
+from posthog.integrations.asgi import PosthogASGIMiddleware
 
 from app import config, start_date
 from app.errors import ApiError, ConfigError, ModelAccountProblem, ModelUnavailable
@@ -22,15 +26,51 @@ logger = logging.getLogger("truefit")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 
+def create_posthog_client() -> Posthog | None:
+    """Create the process-wide PostHog client when its optional config is present."""
+    config._load_env_file()
+    token = os.environ.get("POSTHOG_PROJECT_TOKEN")
+    host = os.environ.get("POSTHOG_HOST")
+    missing = [
+        name
+        for name, value in (("POSTHOG_PROJECT_TOKEN", token), ("POSTHOG_HOST", host))
+        if not value
+    ]
+    if missing:
+        if os.environ.get("ENVIRONMENT") != "production":
+            for name in missing:
+                logger.warning(
+                    "%s variable required by PostHog is missing or un-configured, this causes events to be silently missed. "
+                    "This error stops appearing once %s is configured",
+                    name,
+                    name,
+                )
+        return None
+
+    return Posthog(project_api_key=token, host=host, enable_exception_autocapture=True)
+
+
+posthog_client = create_posthog_client()
+if posthog_client is not None:
+    atexit.register(posthog_client.shutdown)
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     missing = config.missing_settings()
     if missing:
         logger.warning("Missing %s in .env; model calls will fail until set.", ", ".join(missing))
     yield
+    if posthog_client is not None:
+        try:
+            posthog_client.flush()
+        except Exception:
+            logger.warning("PostHog flush failed during shutdown", exc_info=True)
 
 
 app = FastAPI(title="TrueFit", lifespan=lifespan)
+if posthog_client is not None:
+    app.add_middleware(PosthogASGIMiddleware, client=posthog_client)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
@@ -95,7 +135,11 @@ def check_length(text: str, field: str, minimum: int, maximum: int) -> None:
 
 @app.get("/", include_in_schema=False)
 async def index():
-    return FileResponse(STATIC_DIR / "index.html")
+    """Serve the page with the PostHog token and host filled in (empty if unset)."""
+    page = (STATIC_DIR / "index.html").read_text()
+    for name in ("POSTHOG_PROJECT_TOKEN", "POSTHOG_HOST"):
+        page = page.replace("{{" + name + "}}", html.escape(os.environ.get(name, ""), quote=True))
+    return HTMLResponse(page)
 
 
 class StartDateRequest(BaseModel):
