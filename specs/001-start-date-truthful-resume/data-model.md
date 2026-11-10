@@ -139,6 +139,7 @@ The posting interval `P` is `[start, end]`. Availability `A` is open-ended: `[A.
 | Field | Type | Notes |
 |---|---|---|
 | `masterResume` | string | Pre-filled on load (FR-020); always shown and editable before tailoring |
+| `backgroundNotes` | string | Optional notes about past roles; saved and cleared with the resume |
 | `availabilityText` | string | What the student typed; empty means the default window |
 | `savedAt` | ISO datetime | Shown as "Saved on this device on …" |
 

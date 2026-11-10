@@ -231,6 +231,34 @@ blockquote {
   font-style: italic;
 }
 
+/* Step 2: experience inputs */
+.optional { font-weight: 400; color: var(--muted); }
+.save-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 16px; margin-top: 12px; }
+.save-row .hint { margin: 0; }
+#tailor:disabled { cursor: not-allowed; opacity: 0.5; }
+
+/* Step 3: tailored resume */
+.tailor-summary { margin: 12px 0 4px; font-size: 14px; font-weight: 600; color: var(--violet); }
+.resume-section { margin: 22px 0 6px; font-size: 17px; color: var(--violet-dark); border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+.entry { margin: 10px 0 14px; }
+.entry-header { font-weight: 600; color: var(--text); }
+.bullets { list-style: none; margin: 8px 0 0; padding: 0; }
+.bullet { margin: 0 0 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: #fff; }
+.bullet.flagged { border-color: #fde68a; background: var(--warn-bg); }
+.bullet.excluded { opacity: 0.6; }
+.bullet.excluded .bullet-text { text-decoration: line-through; }
+.bullet-row { display: flex; gap: 10px; align-items: baseline; }
+.badge { flex: none; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.badge.traced { color: var(--good); background: var(--good-bg); }
+.badge.flagged { color: var(--warn); background: #fef3c7; }
+.flag-reason { margin: 6px 0 0; font-size: 14px; color: var(--warn); }
+.sources { margin-top: 6px; font-size: 13px; color: var(--muted); font-style: italic; }
+.bullet-controls { display: flex; gap: 16px; margin-top: 6px; }
+.bullet-edit { margin-top: 4px; }
+.copy-row { margin-top: 22px; align-items: center; }
+.copy-row .primary { margin-top: 0; }
+#plain-text { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; background: var(--neutral-bg); }
+
 @media (max-width: 600px) {
   h1 { font-size: 30px; }
   section { padding: 20px; }
