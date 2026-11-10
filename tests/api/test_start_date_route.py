@@ -125,3 +125,29 @@ def test_graduation_window_gives_in_window(client, fake_llm):
     body = client.post("/api/start-date", json={"posting": GRAD_POSTING}).json()
     assert body["verdict"] == "in_window"
     assert body["mentions"][0]["quote"] == "graduating between December 2026 and June 2027"
+
+
+UNDERGRAD_POSTING = (
+    "Business Analyst, Class of 2027. Acme Corp is hiring students pursuing a Bachelor's degree in economics "
+    "or business for our New York office. Start date: July 13, 2027. Requirements: strong Excel skills."
+)
+
+
+def test_undergrad_posting_gets_warning_with_quote(client, fake_llm):
+    fake_llm.queue(reply([{"quote": "Start date: July 13, 2027.", "kind": "exact_date", "start": "2027-07-13"}],
+                         audience={"level": "undergraduate", "quote": "pursuing a Bachelor's degree"}))
+    body = client.post("/api/start-date", json={"posting": UNDERGRAD_POSTING}).json()
+    assert body["verdict"] == "in_window"
+    assert body["undergrad_warning"] == {"quote": "pursuing a Bachelor's degree"}
+
+
+def test_undergrad_warning_dropped_when_quote_not_in_posting(client, fake_llm):
+    fake_llm.queue(reply([], audience={"level": "undergraduate", "quote": "for college seniors only"}))
+    body = client.post("/api/start-date", json={"posting": UNDERGRAD_POSTING}).json()
+    assert body["undergrad_warning"] is None
+
+
+def test_graduate_posting_has_no_warning(client, fake_llm):
+    fake_llm.queue(reply([], audience={"level": "graduate", "quote": "MBA graduates"}))
+    body = client.post("/api/start-date", json={"posting": POSTING}).json()
+    assert body["undergrad_warning"] is None

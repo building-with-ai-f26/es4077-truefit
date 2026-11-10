@@ -128,7 +128,7 @@ async function checkStartDate() {
     lastStartDate = result;
     saveProfile({ availabilityText: availabilityInput.value.trim() });
     renderStartDate(result);
-    track("start_date_checked", { verdict: result.verdict });
+    track("start_date_checked", { verdict: result.verdict, undergrad_warning: Boolean(result.undergrad_warning) });
   } catch (err) {
     // The error is already shown; the saved availability stays as it was.
     track("start_date_check_failed", { error_code: err.code || "network_error" });
@@ -140,6 +140,14 @@ async function checkStartDate() {
 function renderStartDate(result) {
   startDateResult.replaceChildren();
   startDateResult.className = `result ${result.verdict}`;
+  if (result.undergrad_warning) {
+    startDateResult.append(
+      el("div", { class: "undergrad-warning", role: "note" },
+        el("strong", {}, "This role looks aimed at undergraduates."),
+        " TrueFit is built for MBA and graduate roles, so check the posting before applying.",
+        el("blockquote", {}, `“${result.undergrad_warning.quote}”`)),
+    );
+  }
   const display = VERDICT_DISPLAY[result.verdict] || { icon: "?", text: null };
   startDateResult.append(
     el("div", { class: "verdict-head" },

@@ -24,7 +24,7 @@ def load_cases(suite: str) -> list[tuple[str, dict]]:
 
 
 async def run_start_date() -> bool:
-    """SC-002: verdict matches expected in >= 90% of cases, and never a date for a posting that states none."""
+    """SC-002: verdict (and undergrad warning) match expected in >= 90% of cases, and never a date for a posting that states none."""
     cases = load_cases("start_date")
     agreed = 0
     invented = []
@@ -35,11 +35,12 @@ async def run_start_date() -> bool:
             got = result["verdict"]
         except (ApiError, ModelUnavailable) as exc:
             result, got = None, f"error:{getattr(exc, 'code', 'model_unavailable')}"
-        ok = got == case["expected_verdict"]
+        warned = bool(result and result["undergrad_warning"])
+        ok = got == case["expected_verdict"] and warned == case.get("expected_undergrad_warning", False)
         agreed += ok
         if case["expected_verdict"] == "not_stated" and result and result["mentions"]:
             invented.append(name)
-        print(f"{name:32} {case['expected_verdict']:24} {got:24} {'✓' if ok else '✗'}")
+        print(f"{name:32} {case['expected_verdict']:24} {got:24} {'✓' if ok else '✗'}{'  (undergrad warning)' if warned else ''}")
         if result and not ok:
             for m in result["mentions"]:
                 print(f"{'':32}   quote: {m['quote']!r} → {m['verdict']}")
