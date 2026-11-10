@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TrueFit</title>
-  <link rel="stylesheet" href="/static/styles.css?v=3" />
+  <link rel="stylesheet" href="/static/styles.css?v=4" />
   <!-- Filled from .env by the "/" route in app/main.py -->
   <meta name="posthog-token" content="{{POSTHOG_PROJECT_TOKEN}}" />
   <meta name="posthog-host" content="{{POSTHOG_HOST}}" />
@@ -43,18 +43,43 @@
       <div id="start-date-result" class="result" hidden aria-live="polite"></div>
     </section>
 
-    <!-- 2. Master resume -->
+    <!-- 2. Master resume + background notes -->
     <section id="step-resume" aria-labelledby="resume-heading">
-      <h2 id="resume-heading"><span class="step" aria-hidden="true">2</span>Your master resume</h2>
-      <p class="hint">Tailoring is coming in the next build.</p>
+      <h2 id="resume-heading"><span class="step" aria-hidden="true">2</span>Your experience</h2>
+
+      <label for="master-resume">Master resume</label>
+      <textarea id="master-resume" rows="14" placeholder="Paste your full resume: every role, school, and bullet you might use"></textarea>
+
+      <label for="background-notes">Background notes <span class="optional">(optional)</span></label>
+      <textarea id="background-notes" rows="6" placeholder="- At Acme I also trained 3 new analysts on our pricing model.&#10;- Led the summer intern recruiting event for my team."></textarea>
+      <p class="hint">Bullets or paragraphs about past jobs, projects, or details that aren't on your resume. TrueFit can use these, and nothing else, to write bullets.</p>
+
+      <div class="save-row">
+        <button id="save-profile" class="link-button" type="button">Save on this device</button>
+        <button id="clear-profile" class="link-button" type="button">Clear saved</button>
+        <span id="saved-at" class="hint" aria-live="polite"></span>
+      </div>
+
+      <button id="tailor" class="primary" type="button" disabled>Tailor resume</button>
+      <p id="tailor-hint" class="hint">Check the start date first.</p>
     </section>
 
     <!-- 3. Results -->
     <section id="step-results" aria-labelledby="results-heading" hidden>
       <h2 id="results-heading"><span class="step" aria-hidden="true">3</span>Tailored resume</h2>
+      <p class="hint">Every bullet shows the lines it came from. <strong>Unverified</strong> bullets couldn't be traced and are left out unless you put them back.</p>
+      <div id="tailor-summary" class="tailor-summary" aria-live="polite"></div>
+      <div id="tailored-resume"></div>
+
+      <div class="label-row copy-row">
+        <label for="plain-text">Copy-ready resume</label>
+        <button id="copy-resume" class="primary" type="button">Copy</button>
+      </div>
+      <textarea id="plain-text" rows="14" readonly></textarea>
+      <p id="copy-status" class="hint" aria-live="polite">Plain text for Workday or iCIMS: only the bullets you've kept.</p>
     </section>
   </main>
 
-  <script src="/static/app.js?v=3"></script>
+  <script src="/static/app.js?v=4"></script>
 </body>
 </html>

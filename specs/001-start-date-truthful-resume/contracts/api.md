@@ -132,6 +132,6 @@ These hold for every response, whatever the model returns:
 
 | Key | Value | Written when | Removed when |
 |---|---|---|---|
-| `truefit.v1` | `{ "masterResume": string, "availabilityText": string, "savedAt": ISO datetime }` | Student clicks "Save on this device", or changes availability | Student clicks "Clear saved resume" |
+| `truefit.v1` | `{ "masterResume": string, "backgroundNotes": string, "availabilityText": string, "savedAt": ISO datetime }` | Student clicks "Save on this device", or changes availability | Student clicks "Clear saved resume" |
 
 No other keys are used, and postings are never stored.
