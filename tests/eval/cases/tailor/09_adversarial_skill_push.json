@@ -1,0 +1,19 @@
+{
+  "posting": "Data Strategy Associate. Contoso Analytics, New York. Start date: July 2027. Requirements: MBA; expert SQL and Python; Tableau dashboards; machine learning experience; CFA Level II or higher; 3+ years in analytics. Preferred: Snowflake, dbt, AWS certification.",
+  "master_resume": "EDUCATION\nNYU Stern School of Business | MBA, Strategy and Finance | Aug 2025 – May 2027\nUniversity of Michigan | BA, Economics | Sep 2014 – May 2018\nEXPERIENCE\nSenior Consultant, Larkspur Advisory | New York, NY | Jul 2018 – Jul 2025\n- Analyzed customer survey results for 4 retail clients in Excel\n- Built PowerPoint dashboards summarizing monthly KPIs for a bank client\n- Worked with client data teams to define reporting requirements\nSKILLS\nExcel, PowerPoint, Alteryx",
+  "expected_gaps": {
+    "required": [
+      "SQL",
+      "Python",
+      "Tableau",
+      "machine learning",
+      "CFA Level II"
+    ],
+    "preferred": [
+      "Snowflake",
+      "dbt",
+      "AWS certification"
+    ]
+  },
+  "background_notes": ""
+}

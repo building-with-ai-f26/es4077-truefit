@@ -136,8 +136,8 @@ confirm they fail before implementing.
 
 ### Tests for User Story 2 ⚠️ write first, confirm they fail
 
-- [ ] T022 [P] [US2] Write `tests/unit/test_resume_lines.py`: blank lines are skipped, IDs run `L1…Ln` in order, text is trimmed, and `section` is the nearest heading above (e.g., "Experience", "Education")
-- [ ] T023 [P] [US2] Write `tests/unit/test_trace_check.py`, covering:
+- [x] T022 [P] [US2] Write `tests/unit/test_resume_lines.py`: blank lines are skipped, IDs run `L1…Ln` in order, text is trimmed, and `section` is the nearest heading above (e.g., "Experience", "Education")
+- [x] T023 [P] [US2] Write `tests/unit/test_trace_check.py`, covering:
   - number extraction for `12%`, `$1.2M`, `3x`, `2023`, `Jun 2024`, and `1,500`
   - a bullet with "15%" citing a line with "12%" → flagged "'15%' not found in source lines"
   - an unknown line ID → flagged
@@ -145,35 +145,35 @@ confirm they fail before implementing.
   - a generic job word in the posting (e.g., "team", "experience") → not flagged
   - support check returns unsupported → flagged with its claim
   - all checks pass → `traced`
-- [ ] T024 [P] [US2] Write `tests/api/test_tailor_route.py` using `fake_llm`, covering:
+- [x] T024 [P] [US2] Write `tests/api/test_tailor_route.py` using `fake_llm`, covering:
   - 200 contract shape with `resume_lines` and `resume.sections`
   - a fake bullet with a fabricated metric → `status: flagged`, `included: false`
   - every flagged bullet has `included: false` (guarantee 4)
   - malformed model JSON twice → 502 `model_unavailable`, with no partial output
   - `master_resume` length outside 200–20,000 → 422
-- [ ] T025 [P] [US2] Write `tests/api/test_verify_bullet_route.py` using `fake_llm`, covering:
+- [x] T025 [P] [US2] Write `tests/api/test_verify_bullet_route.py` using `fake_llm`, covering:
   - an edited bullet "Led a team of 8 …" whose master has no "8" → `flagged` with a reason naming "8"
   - an unchanged-meaning rewording → `traced`
   - `bullet_text` length outside 1–600 → 422
 
 ### Implementation for User Story 2
 
-- [ ] T026 [P] [US2] Implement `split_lines(master_resume) -> list[ResumeLine]` in `app/resume_lines.py`. Each line has `id` `L1`, `L2`, … in order of appearance, with `text` as the original line trimmed and blank lines skipped. `section` is the nearest heading above it if one is detected (a short line in caps or matching common headings), else null.
-- [ ] T027 [US2] Implement the deterministic checks in `app/trace_check.py` (research.md §R6, checks 1–3): `extract_numbers(text)`, `posting_only_terms(posting, master)` (with a stopword list and a generic-job-word list in the same file), and `deterministic_check(bullet, lines, posting, master) -> (ok, reason)`
-- [ ] T028 [US2] Implement `support_check(bullets, lines)` in `app/trace_check.py`. It makes one batched `llm.call` returning `{results: [{bullet_id, supported, unsupported_claim}]}`. Add `check_bullets(...)`, which sets `status: traced` only if the deterministic check and the support check both pass, and otherwise `flagged` with `flag_reason` set. It also sets `included = (status == "traced")` for generated bullets.
-- [ ] T029 [US2] Implement `tailor_resume(posting, master_resume)` in `app/tailor.py`. The tailoring prompt sends numbered lines and the posting. It asks for JSON `{sections: [{heading, entries: [{header_line_ids, bullets: [{text, source_line_ids}]}]}]}`. Instructions: only reword/select/reorder, keep numbers exactly, cite line IDs for every bullet, aim for about one page, order Education, Experience, then others in master-resume order. The function then assigns bullet IDs `B1…` and runs `trace_check.check_bullets`.
-- [ ] T030 [US2] Add `POST /api/tailor` to `app/main.py`. It takes `{posting, master_resume}`, validates lengths, and returns `{resume_lines, resume: {sections}}` per contracts/api.md. US3 adds `plain_text` and `gaps`.
-- [ ] T031 [US2] Add `POST /api/verify-bullet` to `app/main.py`. It takes `{bullet_text, master_resume, posting, source_line_ids}`, runs `check_bullets` on the single bullet, and returns `{status, source_line_ids, flag_reason}`. Only existing line IDs count.
-- [ ] T032 [US2] Build the master-resume UI in `app/static/index.html` and `app/static/app.js`:
+- [x] T026 [P] [US2] Implement `split_lines(master_resume) -> list[ResumeLine]` in `app/resume_lines.py`. Each line has `id` `L1`, `L2`, … in order of appearance, with `text` as the original line trimmed and blank lines skipped. `section` is the nearest heading above it if one is detected (a short line in caps or matching common headings), else null.
+- [x] T027 [US2] Implement the deterministic checks in `app/trace_check.py` (research.md §R6, checks 1–3): `extract_numbers(text)`, `posting_only_terms(posting, master)` (with a stopword list and a generic-job-word list in the same file), and `deterministic_check(bullet, lines, posting, master) -> (ok, reason)`
+- [x] T028 [US2] Implement `support_check(bullets, lines)` in `app/trace_check.py`. It makes one batched `llm.call` returning `{results: [{bullet_id, supported, unsupported_claim}]}`. Add `check_bullets(...)`, which sets `status: traced` only if the deterministic check and the support check both pass, and otherwise `flagged` with `flag_reason` set. It also sets `included = (status == "traced")` for generated bullets.
+- [x] T029 [US2] Implement `tailor_resume(posting, master_resume)` in `app/tailor.py`. The tailoring prompt sends numbered lines and the posting. It asks for JSON `{sections: [{heading, entries: [{header_line_ids, bullets: [{text, source_line_ids}]}]}]}`. Instructions: only reword/select/reorder, keep numbers exactly, cite line IDs for every bullet, aim for about one page, order Education, Experience, then others in master-resume order. The function then assigns bullet IDs `B1…` and runs `trace_check.check_bullets`.
+- [x] T030 [US2] Add `POST /api/tailor` to `app/main.py`. It takes `{posting, master_resume}`, validates lengths, and returns `{resume_lines, resume: {sections}}` per contracts/api.md. US3 adds `plain_text` and `gaps`.
+- [x] T031 [US2] Add `POST /api/verify-bullet` to `app/main.py`. It takes `{bullet_text, master_resume, posting, source_line_ids}`, runs `check_bullets` on the single bullet, and returns `{status, source_line_ids, flag_reason}`. Only existing line IDs count.
+- [x] T032 [US2] Build the master-resume UI in `app/static/index.html` and `app/static/app.js`:
   - textarea pre-filled from `truefit.v1.masterResume` (FR-020) with "Saved on this device on <savedAt>"
   - "Save on this device" and "Clear saved resume" buttons (FR-021). Clear removes the key and resets availability to the default.
   - a "Tailor resume" button that stays disabled until a start-date result is on screen (FR-008)
-- [ ] T033 [US2] Render tailored results in `app/static/app.js`: entries with header lines, and each bullet with its text, its source line(s) shown under it, and a Traced/Unverified badge with `flag_reason`. Flagged bullets start excluded.
-- [ ] T034 [US2] Add bullet controls in `app/static/app.js`:
+- [x] T033 [US2] Render tailored results in `app/static/app.js`: entries with header lines, and each bullet with its text, its source line(s) shown under it, and a Traced/Unverified badge with `flag_reason`. Flagged bullets start excluded.
+- [x] T034 [US2] Add bullet controls in `app/static/app.js`:
   - Remove/Put back toggles `included` (FR-012a)
   - inline Edit sets `edited = true`, calls `/api/verify-bullet`, and updates the status, reason, and sources, showing "Checking…" while waiting (FR-012b)
   - a put-back flagged bullet stays visibly marked Unverified (FR-012c)
-- [ ] T035 [US2] Create 10 anonymized posting + master-resume pairs in `tests/eval/cases/tailor/*.json` (5 normal, 3 messy, 2 adversarial: a posting that pushes for skills the student lacks, and a resume full of metrics). Each holds `{posting, master_resume, expected_gaps: {required: [], preferred: []}}`. Extend `tests/eval/run_eval.py --suite tailor` to report:
+- [x] T035 [US2] Create 10 anonymized posting + master-resume pairs in `tests/eval/cases/tailor/*.json` (5 normal, 3 messy, 2 adversarial: a posting that pushes for skills the student lacks, and a resume full of metrics). Each holds `{posting, master_resume, expected_gaps: {required: [], preferred: []}}`. Extend `tests/eval/run_eval.py --suite tailor` to report:
   - default-included bullets whose numbers aren't in their cited lines (must be 0)
   - default-included bullets with posting-only terms (must be 0)
   - the false flag rate (flagged bullets a reviewer would accept), as a manual count prompt
@@ -208,7 +208,7 @@ confirm they fail before implementing.
 
 ### Implementation for User Story 3
 
-- [ ] T038 [P] [US3] Implement `normalize_chars(text)` and `render_plain_text(resume, lines) -> str` in `app/plain_text.py` per research.md §R10
+- [x] T038 [P] [US3] Implement `normalize_chars(text)` and `render_plain_text(resume, lines) -> str` in `app/plain_text.py` per research.md §R10
 - [ ] T039 [US3] Implement `build_gap_list(posting, master_resume, lines)` in `app/tailor.py`:
   - the requirements prompt asks for JSON `{requirements: [{text, quote, group, supported, line_ids}]}` with `group` in `required | preferred | unlabeled`, reading the posting's wording ("required", "must have" vs "preferred", "nice to have", "a plus")
   - drop requirements whose quote fails `quote_in`
