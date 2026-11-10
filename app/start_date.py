@@ -67,6 +67,7 @@ class StartDateResult:
     availability: Availability
     mentions: list[Mention] = field(default_factory=list)
     note: str | None = None
+    undergrad_quote: str | None = None  # set when the posting is aimed at undergraduates
 
     def to_dict(self) -> dict:
         return {
@@ -75,6 +76,7 @@ class StartDateResult:
             "availability": self.availability.to_dict(),
             "mentions": [m.to_dict() for m in self.mentions],
             "note": self.note,
+            "undergrad_warning": {"quote": self.undergrad_quote} if self.undergrad_quote else None,
         }
 
 
@@ -216,6 +218,7 @@ EXTRACTION_PROMPT = """You read job postings and find when the job STARTS. Reply
 
 Shape:
 {"is_job_posting": true|false, "is_english": true|false,
+ "audience": {"level": "undergraduate"|"graduate"|"not_stated", "quote": "..."},
  "mentions": [{"quote": "...", "kind": "...", "start": "...", "end": "...", "season": "...", "year": 2027, "role_hint": "..."}]}
 
 Rules:
@@ -233,6 +236,7 @@ Rules:
   - "graduation": ONLY if the posting gives no start date at all, a window or deadline for when eligible candidates graduate, written with a month, e.g. "graduating between December 2026 and June 2027" or "expected graduation by May 2027". start and end = "YYYY-MM" (start null if only a "by" month). A class year alone ("Class of 2027") is not a graduation window.
   Use null for fields that don't apply.
 - If different roles, offices, or programs start at different times, return one mention for each and name it in "role_hint". Otherwise role_hint is null.
+- audience: who the role is aimed at. "undergraduate" ONLY if it targets people pursuing or just finishing a bachelor's degree, e.g. "pursuing a Bachelor's degree", "graduating with a Bachelor's degree between...", "undergraduate students", "graduating seniors", "BA/BS Class of 2027". A bachelor's degree listed only as a minimum requirement ("Bachelor's degree required") is NOT undergraduate. If MBA or graduate-degree candidates are also eligible, use "graduate". If unclear, "not_stated". "quote" is copied character for character, as for mentions, or null for "not_stated".
 - is_job_posting is false if the text is not a job or internship posting. is_english is false if the posting is not in English."""
 
 
@@ -256,4 +260,14 @@ async def check_start_date(posting: str, availability_text: str | None) -> Start
         if mention is not None:
             mentions.append(mention)
 
-    return compute_verdict(mentions, availability, today)
+    result = compute_verdict(mentions, availability, today)
+    result.undergrad_quote = _undergrad_quote(reply.get("audience"), posting)
+    return result
+
+
+def _undergrad_quote(audience, posting: str) -> str | None:
+    """The quoted line showing the posting targets undergraduates, if the model found one we can verify."""
+    if not isinstance(audience, dict) or audience.get("level") != "undergraduate":
+        return None
+    quote = audience.get("quote")
+    return quote.strip() if isinstance(quote, str) and quote_in(posting, quote) else None
