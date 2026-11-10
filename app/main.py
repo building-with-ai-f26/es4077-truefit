@@ -1,6 +1,7 @@
 """TrueFit web app: serves the page and the JSON API."""
 
 import atexit
+import html
 import logging
 import os
 import time
@@ -9,7 +10,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from pydantic import BaseModel
@@ -134,7 +135,11 @@ def check_length(text: str, field: str, minimum: int, maximum: int) -> None:
 
 @app.get("/", include_in_schema=False)
 async def index():
-    return FileResponse(STATIC_DIR / "index.html")
+    """Serve the page with the PostHog token and host filled in (empty if unset)."""
+    page = (STATIC_DIR / "index.html").read_text()
+    for name in ("POSTHOG_PROJECT_TOKEN", "POSTHOG_HOST"):
+        page = page.replace("{{" + name + "}}", html.escape(os.environ.get(name, ""), quote=True))
+    return HTMLResponse(page)
 
 
 class StartDateRequest(BaseModel):
