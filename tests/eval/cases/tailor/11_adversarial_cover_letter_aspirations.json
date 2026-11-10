@@ -1,0 +1,18 @@
+{
+  "posting": "Business Analytics Manager. Woodgrove Retail, Seattle. Start date: July 2027. Requirements: MBA; 3+ years in analytics or consulting; advanced SQL required; Tableau required. Preferred: Python.",
+  "master_resume": "EDUCATION\nNYU Stern School of Business | MBA, Strategy and Finance | Aug 2025 – May 2027\nUniversity of Michigan | BA, Economics | Sep 2014 – May 2018\nEXPERIENCE\nSenior Consultant, Larkspur Advisory | New York, NY | Jul 2018 – Jul 2025\n- Analyzed customer survey results for 4 retail clients in Excel\n- Built weekly KPI reports for a grocery client's merchandising team\n- Presented findings to client vice presidents",
+  "background_notes": "Dear Hiring Team,\n\nI am thrilled to apply to Contoso's analytics program. Contoso is the leader in data-driven retail, and I admire its culture of experimentation.\n\nAt Larkspur I learned how much good data matters: my KPI reports for a grocery client helped merchandisers cut out-of-stocks by 9% over two quarters. I'm eager to build my SQL skills and hope to learn Tableau and Python in this role. I want to lead an analytics team one day.\n\nSincerely,\nAlex",
+  "expected_gaps": {
+    "required": [
+      "SQL",
+      "Tableau"
+    ],
+    "preferred": [
+      "Python"
+    ]
+  },
+  "forbidden_claims": [
+    "led an analytics team",
+    "lead an analytics team"
+  ]
+}

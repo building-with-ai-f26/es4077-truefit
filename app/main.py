@@ -173,13 +173,14 @@ class TailorRequest(BaseModel):
 async def post_tailor(body: TailorRequest):
     check_length(body.posting, "posting", 100, 20_000)
     check_length(body.master_resume, "master_resume", 200, 20_000)
-    check_length(body.background_notes or "", "background_notes", 0, 20_000)
+    check_length(body.background_notes or "", "background_writing", 0, 50_000)
     return await tailor.tailor_resume(body.posting, body.master_resume, body.background_notes)
 
 
 class VerifyBulletRequest(BaseModel):
     bullet_text: str
     source_line_ids: list[str]
+    header_line_ids: list[str] = []  # the role the bullet sits under
     posting: str
     master_resume: str
     background_notes: str | None = None
@@ -190,6 +191,6 @@ async def post_verify_bullet(body: VerifyBulletRequest):
     check_length(body.bullet_text, "bullet", 1, 600)
     check_length(body.posting, "posting", 100, 20_000)
     check_length(body.master_resume, "master_resume", 200, 20_000)
-    check_length(body.background_notes or "", "background_notes", 0, 20_000)
+    check_length(body.background_notes or "", "background_writing", 0, 50_000)
     return await tailor.verify_bullet(body.bullet_text, body.source_line_ids, body.posting,
-                                      body.master_resume, body.background_notes)
+                                      body.master_resume, body.background_notes, body.header_line_ids)

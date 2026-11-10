@@ -1,0 +1,15 @@
+{
+  "posting": "Product Marketing Manager. Fabrikam Software, Austin. Start date: August 2027. Lead go-to-market for new features and partner with product and sales. Requirements: MBA; 2+ years in marketing, product, or consulting.",
+  "master_resume": "EDUCATION\nNYU Stern School of Business | MBA, Strategy and Finance | Aug 2025 – May 2027\nUniversity of Michigan | BA, Economics | Sep 2014 – May 2018\nEXPERIENCE\nMarketing Associate, Tailspin Software | Austin, TX | Jul 2019 – Jul 2025\n- Supported product launches with sales enablement materials\n- Ran email campaigns for 3 product lines",
+  "background_notes": "Situation: In 2023 Tailspin was launching its analytics add-on, and my manager, Priya, led the go-to-market plan.\nTask: I was asked to support the launch by preparing sales materials.\nAction: I interviewed 6 account executives, wrote the battlecard and FAQ, and ran 2 training sessions for the sales team.\nResult: The add-on reached 140 paying customers in its first quarter, and sales leadership adopted my battlecard format for later launches.",
+  "expected_gaps": {
+    "required": [],
+    "preferred": []
+  },
+  "forbidden_claims": [
+    "led the go-to-market",
+    "led go-to-market",
+    "led the launch",
+    "owned the go-to-market"
+  ]
+}

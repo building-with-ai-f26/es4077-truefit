@@ -57,7 +57,7 @@ student chooses to continue from the start-date result (FR-008).
 {
   "posting": "string, 100–20,000 chars",
   "master_resume": "string, 200–20,000 chars",
-  "background_notes": "optional string, up to 20,000 chars (bullets or paragraphs about past roles)"
+  "background_notes": "optional string, up to 50,000 chars: notes, past cover letters, behavioral stories, essays"
 }
 ```
 
@@ -100,7 +100,8 @@ Re-checks one bullet after the student edits it (FR-012b).
   "master_resume": "string, 200–20,000 chars",
   "background_notes": "optional, same as /api/tailor",
   "posting": "string, 100–20,000 chars",
-  "source_line_ids": ["L6"]
+  "source_line_ids": ["L6"],
+  "header_line_ids": ["L4"]
 }
 ```
 

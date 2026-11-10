@@ -1,6 +1,7 @@
 """Splits the student's material into numbered lines that tailored bullets must cite (Constitution I).
 
-Master resume lines are L1, L2, ...; background-note sentences are N1, N2, ...
+Master resume lines are L1, L2, ...; sentences from the student's other writing (notes, past cover
+letters, behavioral stories, essays) are N1, N2, ...
 """
 
 import re
@@ -54,5 +55,5 @@ def split_lines(master_resume: str, background_notes: str | None = None) -> list
         for sentence in _SENTENCE_END.split(text):
             if sentence.strip():
                 count += 1
-                lines.append(ResumeLine(f"N{count}", sentence.strip(), "Background notes", "notes"))
+                lines.append(ResumeLine(f"N{count}", sentence.strip(), "Your writing", "notes"))
     return lines

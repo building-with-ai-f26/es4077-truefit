@@ -74,11 +74,14 @@ def posting_only_terms(posting: str, source_text: str) -> set[str]:
 
 
 def deterministic_check(text: str, cited_ids: list[str], lines_by_id: dict[str, ResumeLine],
-                        posting_only: set[str]) -> str | None:
-    """Checks 1-3. Returns the reason the bullet fails, or None if it passes."""
+                        posting_only: set[str], context_ids: list[str] = ()) -> str | None:
+    """Checks 1-3. Returns the reason the bullet fails, or None if it passes.
+
+    context_ids are the role's header lines (title, employer, dates); numbers in them, like years, may be reused.
+    """
     if not cited_ids or any(line_id not in lines_by_id for line_id in cited_ids):
         return "Doesn't cite a line from your resume or notes"
-    cited_text = " ".join(lines_by_id[line_id].text for line_id in cited_ids)
+    cited_text = " ".join(lines_by_id[i].text for i in [*cited_ids, *context_ids] if i in lines_by_id)
     cited_numbers = extract_numbers(cited_text)
     for match in _NUMBER.finditer(text):
         if not extract_numbers(match.group(0)) <= cited_numbers:
@@ -92,9 +95,12 @@ def deterministic_check(text: str, cited_ids: list[str], lines_by_id: dict[str, 
 SUPPORT_PROMPT = """You check tailored resume bullets against the student's own source lines. Reply with one JSON object only:
 {"results": [{"bullet_id": "B1", "supported": true|false, "unsupported_claim": "..."|null}]}
 
+Each bullet comes with its cited_lines and role_context: the header lines of the role it sits under (title, employer, location, dates). role_context may support the employer, title, location, and dates, but not actions or results.
+
 A bullet is supported only if every fact in it (actions, scope, team sizes, tools, skills, results, numbers, employers, titles, dates) is stated in, or directly follows from, its cited lines.
 - Rewording, shortening, and reordering are fine.
 - A stronger verb is NOT fine if it adds scope or ownership (e.g., "helped with" → "led", "supported" → "managed").
+- A line about goals, interests, or intentions ("I hope to", "I'm eager to learn", "I want to") or about an employer the student was applying to never supports a claim that the student did or has something.
 - If unsupported, unsupported_claim names the specific claim in a few words, e.g. "Team size of 8" or "Led the project". Otherwise null.
 Return one result for every bullet."""
 
@@ -113,17 +119,25 @@ async def support_check(items: list[dict]) -> dict[str, str | None]:
     return verdicts
 
 
-async def check_bullets(bullets: list[dict], lines: list[ResumeLine], posting: str) -> None:
-    """Set status, flag_reason, and included on each bullet dict ({id, text, source_line_ids}) in place."""
+async def check_bullets(bullets: list[dict], lines: list[ResumeLine], posting: str,
+                        context: dict[str, list[str]] | None = None) -> None:
+    """Set status and flag_reason on each bullet dict ({id, text, source_line_ids}) in place.
+
+    context maps a bullet ID to the header line IDs of the role it sits under.
+    """
+    context = context or {}
     lines_by_id = {line.id: line for line in lines}
     posting_only = posting_only_terms(posting, " ".join(line.text for line in lines))
 
     to_model = []
     for bullet in bullets:
-        bullet["flag_reason"] = deterministic_check(bullet["text"], bullet["source_line_ids"], lines_by_id, posting_only)
+        headers = [i for i in context.get(bullet["id"], []) if i in lines_by_id]
+        bullet["flag_reason"] = deterministic_check(bullet["text"], bullet["source_line_ids"], lines_by_id,
+                                                    posting_only, headers)
         if bullet["flag_reason"] is None:
             to_model.append({"bullet_id": bullet["id"], "text": bullet["text"],
-                             "cited_lines": [{"id": i, "text": lines_by_id[i].text} for i in bullet["source_line_ids"]]})
+                             "cited_lines": [{"id": i, "text": lines_by_id[i].text} for i in bullet["source_line_ids"]],
+                             "role_context": [lines_by_id[i].text for i in headers]})
 
     verdicts = await support_check(to_model)
     for item in to_model:

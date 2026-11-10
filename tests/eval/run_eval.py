@@ -108,6 +108,9 @@ async def run_tailor() -> bool:
             for term in gap_terms:
                 if term in b["text"].lower():
                     violations.append(f"{name} {b['id']}: claims a gap ({term}): {b['text']!r}")
+            for phrase in case.get("forbidden_claims", []):
+                if phrase in b["text"].lower():
+                    violations.append(f"{name} {b['id']}: forbidden claim ({phrase}): {b['text']!r}")
         flagged = [b for b in bullets if b["status"] == "flagged"]
         flagged_for_review += [(name, b) for b in flagged]
         print(f"{name:30} {len(bullets):7} {len(kept):5} {len(flagged):8} ${meter.cost - before:6.4f} {seconds[-1]:5.1f}s")
