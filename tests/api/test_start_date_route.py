@@ -119,11 +119,11 @@ GRAD_POSTING = (
 )
 
 
-def test_graduation_window_gives_likely_in_window(client, fake_llm):
+def test_graduation_window_gives_in_window(client, fake_llm):
     fake_llm.queue(reply([{"quote": "graduating between December 2026 and June 2027", "kind": "graduation",
                            "start": "2026-12", "end": "2027-06"}]))
     body = client.post("/api/start-date", json={"posting": GRAD_POSTING}).json()
-    assert body["verdict"] == "likely_in_window_vague"
+    assert body["verdict"] == "in_window"
     assert body["mentions"][0]["quote"] == "graduating between December 2026 and June 2027"
 
 

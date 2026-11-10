@@ -62,7 +62,7 @@ The posting interval `P` is `[start, end]`. Availability `A` is open-ended: `[A.
 
 1. No valid mentions → `not_stated`.
 2. Posting `kind = flexible` → `flexible_to_discuss`.
-2a. Posting `kind = graduation` (only kept when no other mention exists) → `likely_in_window_vague`
+2a. Posting `kind = graduation` (only kept when no other mention exists) → `in_window`
    if `A.mode = flexible` or the month after the graduation window's end ≥ `A.start` (the role hires
    people graduating as late as that month, and they start after graduating); otherwise
    `outside_window`. A season end uses its last month ("Spring 2027" → May 2027). The note names the month.

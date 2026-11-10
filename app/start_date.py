@@ -27,7 +27,7 @@ VERDICT_LABELS = {
 NOTE_VAGUE = "Exact date not specified"
 NOTE_PASSED = "This date has already passed"
 NOTE_TOO_EARLY = "The role starts before you're available"
-NOTE_GRADUATION = "No start date is listed. This role is for people graduating through {month}, so it likely starts after graduation."
+NOTE_GRADUATION = "No start date is listed, but this role is for people graduating through {month}, so it starts after graduation."
 NOTE_GRADUATION_EARLY = "No start date is listed. This role is for people graduating by {month}, before you're available."
 NOTE_DIFFERENT = "Different start dates are listed (for example, for different roles or offices). See each one below."
 
@@ -182,7 +182,7 @@ def _mention_verdict(m: Mention, a: Availability, today: date) -> tuple[str, str
         # The role hires people graduating as late as m.end, so it can start the month after.
         month = f"{calendar.month_name[m.end.month]} {m.end.year}"
         if a.mode == "flexible" or m.end + timedelta(days=1) >= a.start:
-            return "likely_in_window_vague", NOTE_GRADUATION.format(month=month)
+            return "in_window", NOTE_GRADUATION.format(month=month)
         return "outside_window", NOTE_GRADUATION_EARLY.format(month=month)
     if m.end < today:
         return "outside_window", NOTE_PASSED
