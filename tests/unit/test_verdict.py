@@ -192,5 +192,23 @@ def test_graduation_window_ignored_when_start_date_stated():
     assert [m.kind for m in r.mentions] == ["month"]
 
 
-def test_graduation_needs_an_end_month():
-    assert normalize_mention({"quote": "x", "kind": "graduation", "start": "2026-12"}, TODAY) is None
+def test_graduation_needs_a_month_or_season():
+    assert normalize_mention({"quote": "x", "kind": "graduation"}, TODAY) is None
+
+
+def test_graduation_ending_in_a_season_uses_its_last_month():
+    # "Must be graduating in December 2026 or Spring 2027": Spring 2027 grads finish in May,
+    # so the role can start in June 2027 at the earliest.
+    r = verdict([mention("graduation", "2026-12", season="spring", year=2027)])
+    assert r.mentions[0].end == date(2027, 5, 31)
+    assert r.verdict == "likely_in_window_vague"
+
+
+def test_graduation_month_before_availability_month_still_fits():
+    # Graduating by May 2027 → can start June 2027.
+    assert verdict([mention("graduation", None, "2027-05")]).verdict == "likely_in_window_vague"
+
+
+def test_graduation_single_month():
+    m = mention("graduation", "2027-05")
+    assert m.end == date(2027, 5, 31)
