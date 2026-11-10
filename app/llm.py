@@ -3,7 +3,9 @@
 Prompts and responses are never logged: they contain resume and posting text.
 """
 
+import asyncio
 import json
+import logging
 
 import httpx
 
@@ -11,10 +13,12 @@ from app.config import get_settings
 from app.errors import ModelAccountProblem, ModelUnavailable
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-TIMEOUT_SECONDS = 60
-ATTEMPTS = 2  # first try + one retry, only for problems that might be temporary
+TIMEOUT_SECONDS = 30  # a normal reply takes 1-5 s
+RETRY_DELAYS = (1, 3)  # seconds to wait before the 2nd and 3rd tries, only for problems that might be temporary
 
+logger = logging.getLogger("truefit")
 _transport: httpx.AsyncBaseTransport | None = None  # tests swap in a fake transport
+_sleep = asyncio.sleep  # tests swap in a no-op
 
 
 async def call(system: str, user: str) -> dict:
@@ -32,22 +36,31 @@ async def call(system: str, user: str) -> dict:
     headers = {"Authorization": f"Bearer {settings.api_key}"}
 
     async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS, transport=_transport) as client:
-        for _ in range(ATTEMPTS):
-            try:
-                response = await client.post(OPENROUTER_URL, json=payload, headers=headers)
-            except httpx.HTTPError:
-                continue
-            _raise_if_account_problem(response)
-            if response.status_code != 200:
-                continue  # 429 rate limit, 5xx outage: worth one retry
-            try:
-                content = response.json()["choices"][0]["message"]["content"]
-                parsed = json.loads(_strip_code_fence(content))
-            except (KeyError, IndexError, TypeError, ValueError):
-                continue
-            if isinstance(parsed, dict):
-                return parsed
+        for attempt, delay in enumerate((0, *RETRY_DELAYS), start=1):
+            await _sleep(delay)
+            reason = await _try_once(client, payload, headers)
+            if isinstance(reason, dict):
+                return reason
+            # Log why (never the prompt or reply text) so outages can be diagnosed.
+            logger.warning("OpenRouter attempt %d failed: %s", attempt, reason)
     raise ModelUnavailable()
+
+
+async def _try_once(client: httpx.AsyncClient, payload: dict, headers: dict) -> dict | str:
+    """One request. Returns the parsed reply, or a short reason it failed (429 rate limit, 5xx outage, timeout...)."""
+    try:
+        response = await client.post(OPENROUTER_URL, json=payload, headers=headers)
+    except httpx.HTTPError as exc:
+        return type(exc).__name__
+    _raise_if_account_problem(response)
+    if response.status_code != 200:
+        return f"HTTP {response.status_code}"
+    try:
+        content = response.json()["choices"][0]["message"]["content"]
+        parsed = json.loads(_strip_code_fence(content))
+    except (KeyError, IndexError, TypeError, ValueError):
+        return "reply was not valid JSON"
+    return parsed if isinstance(parsed, dict) else "reply was not a JSON object"
 
 
 def _raise_if_account_problem(response: httpx.Response) -> None:

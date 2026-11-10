@@ -17,6 +17,13 @@ def fake_settings(monkeypatch):
     monkeypatch.setattr("app.config._load_env_file", lambda *a, **k: None)
 
 
+@pytest.fixture(autouse=True)
+def no_waiting(monkeypatch):
+    async def skip(_seconds):
+        return None
+    monkeypatch.setattr(llm, "_sleep", skip)
+
+
 def use_responses(monkeypatch, *responses):
     """Each request gets the next response; returns a list that records request count."""
     seen = []
@@ -64,24 +71,39 @@ def test_account_problems_fail_fast_with_reason(monkeypatch, status, body, code)
 
 
 @pytest.mark.parametrize("status", [429, 500, 503])
-def test_temporary_problems_retry_once_then_succeed(monkeypatch, status):
+def test_temporary_problems_retry_then_succeed(monkeypatch, status):
     seen = use_responses(monkeypatch, httpx.Response(status), ok('{"a": 1}'))
     assert run() == {"a": 1}
     assert len(seen) == 2
 
 
-def test_temporary_problem_twice_is_unavailable(monkeypatch):
+def test_temporary_problem_three_times_is_unavailable(monkeypatch, caplog):
     seen = use_responses(monkeypatch, httpx.Response(503))
     with pytest.raises(ModelUnavailable):
         run()
-    assert len(seen) == 2
+    assert len(seen) == 3
+    assert "OpenRouter attempt 3 failed: HTTP 503" in caplog.text
+
+
+def test_succeeds_on_third_try(monkeypatch):
+    seen = use_responses(monkeypatch, httpx.Response(429), httpx.Response(502), ok('{"a": 1}'))
+    assert run() == {"a": 1}
+    assert len(seen) == 3
+
+
+def test_failure_log_never_includes_reply_text(monkeypatch, caplog):
+    use_responses(monkeypatch, ok("SECRET RESUME TEXT, not json"))
+    with pytest.raises(ModelUnavailable):
+        run()
+    assert "SECRET" not in caplog.text
+    assert "reply was not valid JSON" in caplog.text
 
 
 def test_bad_json_retries_then_unavailable(monkeypatch):
     seen = use_responses(monkeypatch, ok("not json"))
     with pytest.raises(ModelUnavailable):
         run()
-    assert len(seen) == 2
+    assert len(seen) == 3
 
 
 def test_other_400_is_unavailable_without_retry(monkeypatch):
