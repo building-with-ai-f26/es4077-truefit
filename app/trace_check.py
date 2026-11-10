@@ -1,0 +1,137 @@
+"""Checks every tailored bullet against the lines it cites (research.md §R6, Constitution I).
+
+A bullet is traced only if all four checks pass:
+1. every cited line exists;
+2. every number in the bullet appears in the cited lines;
+3. no word that appears only in the posting (not in the student's material) is used;
+4. a model support check agrees the cited lines back every claim.
+Checks 1-3 are plain Python, so invented metrics and skills are caught without trusting the model.
+"""
+
+import json
+import re
+
+from app import llm
+from app.resume_lines import ResumeLine
+
+_NUMBER = re.compile(r"\$?\d+(?:[.,]\d+)*(?:%|\+|[xkmb]\b)?", re.IGNORECASE)
+_WORD = re.compile(r"[a-z][a-z0-9+#]*(?:[.\-/][a-z0-9+#]+)*")
+_SUFFIXES = ("ations", "ation", "ments", "ment", "ings", "ing", "ers", "er", "ies", "ed", "es", "s", "ly", "al")
+
+STOPWORDS = set("""
+a about above after again against all also am an and any are as at be because been before being below between both
+but by can could did do does doing down during each either etc few for from further had has have having he her here
+hers him his how i if in into is it its itself just me more most my no nor not now of off on once only or other our
+ours out over own per same she should so some such than that the their them then there these they this those through
+to too under until up upon us very via was we were what when where which while who whom why will with within without
+would you your yours
+""".split())
+
+# Words any job posting uses. They aren't claims of a specific skill, so reusing them is fine.
+GENERIC_JOB_WORDS = set("""
+ability able across analysis analytical analyze apply applicant applicants based benefits best build building business
+candidate candidates career client clients collaborate collaboration communicate communication company complex
+contribute core cross-functional culture customer customers data day decisions deliver demonstrated develop
+development drive driven effective environment excellent execute experience expertise fast-paced focus functional
+global goals great grow growth help high highly ideal impact including independently insights join key knowledge
+lead leader leaders leadership leading learn level looking manage management manager meet mission new office
+opportunities opportunity organization own ownership partner partners passion people plan plus position preferred
+problem problems process processes product products program programs project projects proven qualifications quality
+record related required requirements responsibilities responsible results role roles run senior skill skills solve
+solutions stakeholders strategic strategy strong success successful support team teams thinking time tools track
+understand understanding use using value various verbal well work working world written year years
+""".split())
+
+
+def _stem(word: str) -> str:
+    for suffix in _SUFFIXES:
+        if word.endswith(suffix) and len(word) - len(suffix) >= 4:
+            return word[: -len(suffix)]
+    return word
+
+
+def _words(text: str) -> list[str]:
+    return [w for w in _WORD.findall(text.lower()) if len(w) >= 3 and w not in STOPWORDS]
+
+
+def extract_numbers(text: str) -> set[tuple[str, str]]:
+    """Each number as (digits, unit): '$1.2M' → ('1.2', '$m'), '12%' → ('12', '%'), '1,200' → ('1200', '')."""
+    found = set()
+    for match in _NUMBER.finditer(text):
+        token = match.group(0).lower()
+        dollar = token.startswith("$")
+        token = token.lstrip("$").rstrip("+")
+        unit = token[-1] if token[-1] in "%xkmb" else ""
+        core = (token[:-1] if unit else token).replace(",", "")
+        found.add((core, ("$" if dollar else "") + unit))
+    return found
+
+
+def posting_only_terms(posting: str, source_text: str) -> set[str]:
+    """Stems of posting words that never appear in the student's material (after removing generic job words)."""
+    source = {_stem(w) for w in _words(source_text)}
+    return {_stem(w) for w in _words(posting) if w not in GENERIC_JOB_WORDS} - source
+
+
+def deterministic_check(text: str, cited_ids: list[str], lines_by_id: dict[str, ResumeLine],
+                        posting_only: set[str]) -> str | None:
+    """Checks 1-3. Returns the reason the bullet fails, or None if it passes."""
+    if not cited_ids or any(line_id not in lines_by_id for line_id in cited_ids):
+        return "Doesn't cite a line from your resume or notes"
+    cited_text = " ".join(lines_by_id[line_id].text for line_id in cited_ids)
+    cited_numbers = extract_numbers(cited_text)
+    for match in _NUMBER.finditer(text):
+        if not extract_numbers(match.group(0)) <= cited_numbers:
+            return f'"{match.group(0)}" isn\'t in the cited lines'
+    for word in _words(text):
+        if word not in GENERIC_JOB_WORDS and _stem(word) in posting_only:
+            return f'"{word}" is from the posting, not your resume or notes'
+    return None
+
+
+SUPPORT_PROMPT = """You check tailored resume bullets against the student's own source lines. Reply with one JSON object only:
+{"results": [{"bullet_id": "B1", "supported": true|false, "unsupported_claim": "..."|null}]}
+
+A bullet is supported only if every fact in it (actions, scope, team sizes, tools, skills, results, numbers, employers, titles, dates) is stated in, or directly follows from, its cited lines.
+- Rewording, shortening, and reordering are fine.
+- A stronger verb is NOT fine if it adds scope or ownership (e.g., "helped with" → "led", "supported" → "managed").
+- If unsupported, unsupported_claim names the specific claim in a few words, e.g. "Team size of 8" or "Led the project". Otherwise null.
+Return one result for every bullet."""
+
+
+async def support_check(items: list[dict]) -> dict[str, str | None]:
+    """Check 4 for many bullets in one model call. Returns bullet_id → None if supported, else the unsupported claim."""
+    if not items:
+        return {}
+    reply = await llm.call(SUPPORT_PROMPT, json.dumps({"bullets": items}, ensure_ascii=False))
+    verdicts = {}
+    for result in reply.get("results") or []:
+        if isinstance(result, dict) and isinstance(result.get("bullet_id"), str):
+            claim = result.get("unsupported_claim")
+            verdicts[result["bullet_id"]] = None if result.get("supported") is True else (
+                claim if isinstance(claim, str) and claim.strip() else "Not supported by the cited lines")
+    return verdicts
+
+
+async def check_bullets(bullets: list[dict], lines: list[ResumeLine], posting: str) -> None:
+    """Set status, flag_reason, and included on each bullet dict ({id, text, source_line_ids}) in place."""
+    lines_by_id = {line.id: line for line in lines}
+    posting_only = posting_only_terms(posting, " ".join(line.text for line in lines))
+
+    to_model = []
+    for bullet in bullets:
+        bullet["flag_reason"] = deterministic_check(bullet["text"], bullet["source_line_ids"], lines_by_id, posting_only)
+        if bullet["flag_reason"] is None:
+            to_model.append({"bullet_id": bullet["id"], "text": bullet["text"],
+                             "cited_lines": [{"id": i, "text": lines_by_id[i].text} for i in bullet["source_line_ids"]]})
+
+    verdicts = await support_check(to_model)
+    for item in to_model:
+        bullet = next(b for b in bullets if b["id"] == item["bullet_id"])
+        if item["bullet_id"] not in verdicts:
+            bullet["flag_reason"] = "Couldn't be checked; review it yourself"
+        else:
+            bullet["flag_reason"] = verdicts[item["bullet_id"]]
+
+    for bullet in bullets:
+        bullet["status"] = "traced" if bullet["flag_reason"] is None else "flagged"

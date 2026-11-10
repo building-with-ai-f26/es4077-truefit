@@ -48,21 +48,24 @@ Checks a posting's start date against the student's availability (User Story 1).
 
 ## POST /api/tailor
 
-Builds the tailored resume and gap list (User Stories 2 and 3). The UI calls it only after the
+Builds the tailored resume and gap list (User Stories 2 and 3). `gaps` is added in Build 3; until
+then the response has `resume_lines` and `resume` only. The UI calls it only after the
 student chooses to continue from the start-date result (FR-008).
 
 **Request**
 ```json
 {
   "posting": "string, 100–20,000 chars",
-  "master_resume": "string, 200–20,000 chars"
+  "master_resume": "string, 200–20,000 chars",
+  "background_notes": "optional string, up to 20,000 chars (bullets or paragraphs about past roles)"
 }
 ```
 
 **200 Response**
 ```json
 {
-  "resume_lines": [ { "id": "L1", "text": "...", "section": "Experience" } ],
+  "resume_lines": [ { "id": "L1", "text": "...", "section": "Experience", "source": "resume" },
+                    { "id": "N1", "text": "...", "section": "Background notes", "source": "notes" } ],
   "resume": {
     "sections": [
       { "heading": "Experience",
@@ -95,6 +98,7 @@ Re-checks one bullet after the student edits it (FR-012b).
 {
   "bullet_text": "string, 1–600 chars",
   "master_resume": "string, 200–20,000 chars",
+  "background_notes": "optional, same as /api/tailor",
   "posting": "string, 100–20,000 chars",
   "source_line_ids": ["L6"]
 }

@@ -17,7 +17,7 @@ from pydantic import BaseModel
 from posthog import Posthog
 from posthog.integrations.asgi import PosthogASGIMiddleware
 
-from app import config, start_date
+from app import config, start_date, tailor
 from app.errors import ApiError, ConfigError, ModelAccountProblem, ModelUnavailable
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -161,3 +161,35 @@ async def post_start_date(body: StartDateRequest):
     check_length(body.posting, "posting", 100, 20_000)
     result = await start_date.check_start_date(body.posting, body.availability_text)
     return result.to_dict()
+
+
+class TailorRequest(BaseModel):
+    posting: str
+    master_resume: str
+    background_notes: str | None = None
+
+
+@app.post("/api/tailor")
+async def post_tailor(body: TailorRequest):
+    check_length(body.posting, "posting", 100, 20_000)
+    check_length(body.master_resume, "master_resume", 200, 20_000)
+    check_length(body.background_notes or "", "background_notes", 0, 20_000)
+    return await tailor.tailor_resume(body.posting, body.master_resume, body.background_notes)
+
+
+class VerifyBulletRequest(BaseModel):
+    bullet_text: str
+    source_line_ids: list[str]
+    posting: str
+    master_resume: str
+    background_notes: str | None = None
+
+
+@app.post("/api/verify-bullet")
+async def post_verify_bullet(body: VerifyBulletRequest):
+    check_length(body.bullet_text, "bullet", 1, 600)
+    check_length(body.posting, "posting", 100, 20_000)
+    check_length(body.master_resume, "master_resume", 200, 20_000)
+    check_length(body.background_notes or "", "background_notes", 0, 20_000)
+    return await tailor.verify_bullet(body.bullet_text, body.source_line_ids, body.posting,
+                                      body.master_resume, body.background_notes)

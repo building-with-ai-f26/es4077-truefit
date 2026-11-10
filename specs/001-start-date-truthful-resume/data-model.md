@@ -84,9 +84,10 @@ The posting interval `P` is `[start, end]`. Availability `A` is open-ended: `[A.
 
 | Field | Type | Notes |
 |---|---|---|
-| `id` | string | `L1`, `L2`, … in order of appearance |
+| `id` | string | `L1`, `L2`, … for master-resume lines; `N1`, `N2`, … for background-note sentences |
 | `text` | string | Original line, trimmed; blank lines skipped |
-| `section` | string \| null | Nearest heading above it (e.g., "Experience"), if one is detected |
+| `section` | string \| null | Nearest heading above it (e.g., "Experience"), if one is detected; "Background notes" for N-lines |
+| `source` | `resume` \| `notes` | Which input the line came from |
 
 ## TailoredResume
 
