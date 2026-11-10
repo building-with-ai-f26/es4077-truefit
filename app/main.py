@@ -75,6 +75,15 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 @app.middleware("http")
+async def revalidate_static(request: Request, call_next):
+    """Make browsers check for a newer app.js/styles.css on every load instead of reusing a stale copy."""
+    response = await call_next(request)
+    if request.url.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
+@app.middleware("http")
 async def log_requests(request: Request, call_next):
     """Log route, status, and timing only. Request bodies hold resumes and are never logged."""
     started = time.perf_counter()
