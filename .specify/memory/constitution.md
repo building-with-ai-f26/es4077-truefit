@@ -5,7 +5,9 @@
 ### I. Truth Over Polish (NON-NEGOTIABLE)
 
 Every claim in a generated resume MUST trace to at least one line of the user's own material:
-their master resume and any background notes they write (bullets or paragraphs about past roles).
+their master resume and any other writing they provide about their experience (notes, past cover
+letters, behavioral stories, essays). Only statements of what the user did, achieved, or has count;
+goals, interests, and plans never support a claim.
 The product MUST NOT add employers, titles, dates, degrees, skills, tools, certifications, or
 metrics that this material does not contain. Numbers, percentages, dollar amounts, and dates
 MUST appear exactly as written in the source. Rewording, reordering, selecting, and shortening are
@@ -99,4 +101,4 @@ day-to-day operating instructions for coding agents and MUST stay consistent wit
   after design. Violations MUST be justified in Complexity Tracking or the design MUST change.
   Principle I can never be waived.
 
-**Version**: 1.2.0 | **Ratified**: 2026-11-04 | **Last Amended**: 2026-11-10
+**Version**: 1.3.0 | **Ratified**: 2026-11-04 | **Last Amended**: 2026-11-10

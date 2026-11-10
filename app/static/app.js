@@ -282,7 +282,7 @@ function renderTailored() {
       }
       if (entry.bullets.length) {
         const list = el("ul", { class: "bullets" });
-        for (const bullet of entry.bullets) list.append(renderBullet(bullet));
+        for (const bullet of entry.bullets) list.append(renderBullet(bullet, entry));
         block.append(list);
       }
       tailoredBox.append(block);
@@ -295,7 +295,7 @@ function renderTailored() {
   plainTextBox.value = renderPlainText(tailorState.sections, tailorState.linesById);
 }
 
-function renderBullet(bullet) {
+function renderBullet(bullet, entry) {
   const traced = bullet.status === "traced";
   const item = el("li", { class: `bullet ${bullet.status}${bullet.included ? "" : " excluded"}` });
   item.append(
@@ -308,7 +308,7 @@ function renderBullet(bullet) {
   const sources = el("div", { class: "sources" });
   for (const id of bullet.source_line_ids) {
     const line = tailorState.linesById.get(id);
-    if (line) sources.append(el("div", {}, `${line.source === "notes" ? "From your notes" : "From your resume"}: “${line.text}”`));
+    if (line) sources.append(el("div", {}, `${line.source === "notes" ? "From your writing" : "From your resume"}: “${line.text}”`));
   }
   item.append(sources);
 
@@ -319,13 +319,13 @@ function renderBullet(bullet) {
     renderTailored();
   });
   const edit = el("button", { class: "link-button", type: "button" }, "Edit");
-  edit.addEventListener("click", () => startEdit(item, bullet));
+  edit.addEventListener("click", () => startEdit(item, bullet, entry));
   controls.append(toggle, edit);
   item.append(controls);
   return item;
 }
 
-function startEdit(item, bullet) {
+function startEdit(item, bullet, entry) {
   const box = el("textarea", { class: "bullet-edit", rows: "3", "aria-label": "Edit bullet" });
   box.value = bullet.text;
   const save = el("button", { class: "link-button", type: "button" }, "Save and re-check");
@@ -343,6 +343,7 @@ function startEdit(item, bullet) {
       const check = await api("/api/verify-bullet", {
         bullet_text: text,
         source_line_ids: bullet.source_line_ids,
+        header_line_ids: entry.header_line_ids,
         posting: tailorState.request.posting,
         master_resume: tailorState.request.master_resume,
         background_notes: tailorState.request.background_notes,

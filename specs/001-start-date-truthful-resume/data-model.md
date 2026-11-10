@@ -84,9 +84,9 @@ The posting interval `P` is `[start, end]`. Availability `A` is open-ended: `[A.
 
 | Field | Type | Notes |
 |---|---|---|
-| `id` | string | `L1`, `L2`, … for master-resume lines; `N1`, `N2`, … for background-note sentences |
+| `id` | string | `L1`, `L2`, … for master-resume lines; `N1`, `N2`, … for sentences from the student's other writing (notes, past cover letters, behavioral stories, essays) |
 | `text` | string | Original line, trimmed; blank lines skipped |
-| `section` | string \| null | Nearest heading above it (e.g., "Experience"), if one is detected; "Background notes" for N-lines |
+| `section` | string \| null | Nearest heading above it (e.g., "Experience"), if one is detected; "Your writing" for N-lines |
 | `source` | `resume` \| `notes` | Which input the line came from |
 
 ## TailoredResume
@@ -139,7 +139,7 @@ The posting interval `P` is `[start, end]`. Availability `A` is open-ended: `[A.
 | Field | Type | Notes |
 |---|---|---|
 | `masterResume` | string | Pre-filled on load (FR-020); always shown and editable before tailoring |
-| `backgroundNotes` | string | Optional notes about past roles; saved and cleared with the resume |
+| `backgroundNotes` | string | Optional writing about their experience (notes, cover letters, stories, essays, up to 50,000 chars); saved and cleared with the resume |
 | `availabilityText` | string | What the student typed; empty means the default window |
 | `savedAt` | ISO datetime | Shown as "Saved on this device on …" |
 

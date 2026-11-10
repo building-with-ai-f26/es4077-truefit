@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TrueFit</title>
-  <link rel="stylesheet" href="/static/styles.css?v=5" />
+  <link rel="stylesheet" href="/static/styles.css?v=6" />
   <!-- Filled from .env by the "/" route in app/main.py -->
   <meta name="posthog-token" content="{{POSTHOG_PROJECT_TOKEN}}" />
   <meta name="posthog-host" content="{{POSTHOG_HOST}}" />
@@ -50,9 +50,9 @@
       <label for="master-resume">Master resume</label>
       <textarea id="master-resume" rows="14" placeholder="Paste your full resume: every role, school, and bullet you might use"></textarea>
 
-      <label for="background-notes">Background notes <span class="optional">(optional)</span></label>
-      <textarea id="background-notes" rows="6" placeholder="- At Acme I also trained 3 new analysts on our pricing model.&#10;- Led the summer intern recruiting event for my team."></textarea>
-      <p class="hint">Bullets or paragraphs about past jobs, projects, or details that aren't on your resume. TrueFit can use these, and nothing else, to write bullets.</p>
+      <label for="background-notes">More about your experience <span class="optional">(optional)</span></label>
+      <textarea id="background-notes" rows="8" placeholder="Paste anything that describes your past work: notes, past cover letters, behavioral (STAR) stories, application essays."></textarea>
+      <p class="hint">TrueFit uses what you say you <em>did</em> here (actions, results, skills you used) to write bullets, along with your resume and nothing else. Goals and things you hope to learn are never turned into claims.</p>
 
       <div class="save-row">
         <button id="save-profile" class="link-button" type="button">Save on this device</button>
@@ -80,6 +80,6 @@
     </section>
   </main>
 
-  <script src="/static/app.js?v=5"></script>
+  <script src="/static/app.js?v=6"></script>
 </body>
 </html>

@@ -107,3 +107,26 @@ def test_verify_bullet_traced_edit(client, fake_llm):
     r = client.post("/api/verify-bullet", json={"bullet_text": "Repriced 40 SKUs to grow regional revenue 12%",
                                                 "source_line_ids": ["L5"], "posting": POSTING, "master_resume": MASTER})
     assert r.json()["status"] == "traced"
+
+
+def test_long_writing_accepted_up_to_limit(client, fake_llm):
+    fake_llm.queue(tailored({"text": "Built an Excel pricing model", "source_line_ids": ["L6"]}), supported("B1"))
+    assert post(client, background_notes="I built things. " * 3000).status_code == 200  # ~48,000 chars
+    r = post(client, background_notes="x" * 50_001)
+    assert r.json()["error"]["code"] == "background_writing_too_long"
+
+
+def test_year_and_employer_from_role_header_are_allowed(client, fake_llm):
+    fake_llm.queue(tailored({"text": "At Acme Corp from 2022, built an Excel pricing model", "source_line_ids": ["L6"]}),
+                   supported("B1"))
+    body = post(client).json()
+    assert body["resume"]["sections"][1]["entries"][0]["bullets"][0]["status"] == "traced"
+    support_request = fake_llm.calls[1]["user"]
+    assert '"role_context": ["Associate, Acme Corp | New York, NY | Jun 2022 – Jul 2025"]' in support_request
+
+
+def test_verify_bullet_uses_header_context(client, fake_llm):
+    fake_llm.queue(supported("B1"))
+    r = client.post("/api/verify-bullet", json={"bullet_text": "In 2022, built an Excel pricing model", "source_line_ids": ["L6"],
+                                                "header_line_ids": ["L4"], "posting": POSTING, "master_resume": MASTER})
+    assert r.json()["status"] == "traced"
