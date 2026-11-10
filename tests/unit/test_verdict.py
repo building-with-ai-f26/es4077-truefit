@@ -174,9 +174,9 @@ def test_month_is_whole_month():
 
 # --- Graduation window used when no start date is given ----------------------
 
-def test_graduation_window_through_june_is_likely_in_window():
+def test_graduation_window_through_june_is_in_window():
     r = verdict([mention("graduation", "2026-12", "2027-06")])
-    assert r.verdict == "likely_in_window_vague"
+    assert r.verdict == "in_window"
     assert "graduating through June 2027" in r.note
 
 
@@ -201,12 +201,12 @@ def test_graduation_ending_in_a_season_uses_its_last_month():
     # so the role can start in June 2027 at the earliest.
     r = verdict([mention("graduation", "2026-12", season="spring", year=2027)])
     assert r.mentions[0].end == date(2027, 5, 31)
-    assert r.verdict == "likely_in_window_vague"
+    assert r.verdict == "in_window"
 
 
 def test_graduation_month_before_availability_month_still_fits():
     # Graduating by May 2027 → can start June 2027.
-    assert verdict([mention("graduation", None, "2027-05")]).verdict == "likely_in_window_vague"
+    assert verdict([mention("graduation", None, "2027-05")]).verdict == "in_window"
 
 
 def test_graduation_single_month():

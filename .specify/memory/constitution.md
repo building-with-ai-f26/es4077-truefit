@@ -20,8 +20,8 @@ Any fact TrueFit extracts or asserts (a start date, a requirement, a bullet's ba
 shown with the exact source text it came from. When the source does not state something, the
 product MUST say "Not stated" (or the equivalent) instead of guessing or inferring a specific value.
 Quoted evidence that bounds a value without stating it (for example, a graduation window when no
-start date is given) MAY inform a verdict only if it is shown with its quote, the verdict is marked
-as likely rather than certain, and no specific value is presented as stated.
+start date is given) MAY inform a verdict only if it is shown with its quote and a note saying what
+the verdict is based on, and no specific value is presented as stated.
 Verdicts MUST use the fixed, documented categories in the active spec.
 
 **Rationale**: Users can only trust output they can check in seconds. Quoting the source makes
