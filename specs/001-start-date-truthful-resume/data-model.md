@@ -47,7 +47,7 @@ One mention of a start date in a posting. The model extracts it and the server v
 | `verdict` | Verdict | Summary verdict (see below); with multiple mentions, each also carries its own verdict |
 | `availability` | Availability | What it was checked against (shown next to the verdict) |
 | `note` | string \| null | e.g. "Exact date not specified", "This date has already passed" |
-| `undergrad_warning` | `{quote}` \| null | Set when the posting targets people pursuing or finishing a bachelor's degree (not when a bachelor's is only a minimum requirement). The quote must be an exact substring of the posting or the warning is dropped. Shown above the verdict; does not change it. |
+| `undergrad_warning` | `{quote}` \| null | Set when the posting targets people pursuing or finishing a bachelor's degree, or is a new-grad / early-career program whose only named degree is a bachelor's. Not set when an MBA or other graduate degree is named, or when a bachelor's is the minimum for an experienced role. The quote must be an exact substring of the posting or the warning is dropped. Shown above the verdict; does not change it. |
 
 ### Verdict
 

@@ -242,7 +242,11 @@ Rules:
   - "graduation": ONLY if the posting gives no start date at all, a window or deadline for when eligible candidates graduate, written with a month, e.g. "graduating between December 2026 and June 2027" or "expected graduation by May 2027". start and end = "YYYY-MM" (start null if only a "by" month). If the latest graduation time is a season ("Spring 2027"), set end null and give it as season and year. A class year alone ("Class of 2027") is not a graduation window.
   Use null for fields that don't apply.
 - If different roles, offices, or programs start at different times, return one mention for each and name it in "role_hint". Otherwise role_hint is null.
-- audience: who the role is aimed at. "undergraduate" ONLY if it targets people pursuing or just finishing a bachelor's degree, e.g. "pursuing a Bachelor's degree", "graduating with a Bachelor's degree between...", "undergraduate students", "graduating seniors", "BA/BS Class of 2027". A bachelor's degree listed only as a minimum requirement ("Bachelor's degree required") is NOT undergraduate. If MBA or graduate-degree candidates are also eligible, use "graduate". If unclear, "not_stated". "quote" is copied character for character, as for mentions, or null for "not_stated".
+- audience: who the role is aimed at. Use "undergraduate" if EITHER:
+  (a) it targets people pursuing or just finishing a bachelor's degree, e.g. "pursuing a Bachelor's degree", "graduating with a Bachelor's degree between...", "undergraduate students", "graduating seniors", "BA/BS Class of 2027"; OR
+  (b) it is a new-grad, campus, or early-career program (e.g., "new grads", "recent graduates", "early career program", "analyst program") and a bachelor's degree is the only degree it names.
+  Use "graduate" if it names an MBA, master's, or other graduate degree (even as "preferred"). A bachelor's listed as the minimum for an experienced role (e.g., "Bachelor's degree required, 4+ years of experience") is "not_stated", not "undergraduate".
+  "quote" is copied character for character, as for mentions: the line naming the bachelor's degree or the undergraduate/new-grad audience. Null for "not_stated".
 - is_job_posting is false if the text is not a job or internship posting. is_english is false if the posting is not in English."""
 
 
