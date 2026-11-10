@@ -12,3 +12,9 @@ def test_index_leaves_posthog_empty_when_unset(client, monkeypatch):
     page = client.get("/").text
     assert '<meta name="posthog-token" content="" />' in page
     assert "{{" not in page
+
+
+def test_static_files_are_revalidated(client):
+    r = client.get("/static/app.js")
+    assert r.status_code == 200
+    assert r.headers["cache-control"] == "no-cache"
