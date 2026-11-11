@@ -1,0 +1,563 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-11T20:13:51+00:00",
+  "title": "Design System: TrueFit",
+  "extensions": {
+    "colorMeta": {
+      "violet": {
+        "role": "primary",
+        "displayName": "NYU Violet",
+        "canonical": "#57068c",
+        "oklch": "oklch(36.9% 0.187 304)",
+        "tonalRamp": [
+          "oklch(15% 0.022 304)",
+          "oklch(26% 0.068 304)",
+          "oklch(38% 0.116 304)",
+          "oklch(49% 0.163 304)",
+          "oklch(61% 0.163 304)",
+          "oklch(72% 0.116 304)",
+          "oklch(84% 0.068 304)",
+          "oklch(95% 0.022 304)"
+        ]
+      },
+      "violet-dark": {
+        "role": "primary",
+        "displayName": "Deep Violet",
+        "canonical": "#3f0566",
+        "oklch": "oklch(29.7% 0.148 305)",
+        "tonalRamp": [
+          "oklch(15% 0.018 305)",
+          "oklch(26% 0.054 305)",
+          "oklch(38% 0.091 305)",
+          "oklch(49% 0.129 305)",
+          "oklch(61% 0.129 305)",
+          "oklch(72% 0.091 305)",
+          "oklch(84% 0.054 305)",
+          "oklch(95% 0.018 305)"
+        ]
+      },
+      "violet-tint": {
+        "role": "primary",
+        "displayName": "Violet Mist",
+        "canonical": "#f4effa",
+        "oklch": "oklch(95.9% 0.016 306)",
+        "tonalRamp": [
+          "oklch(15% 0.002 306)",
+          "oklch(26% 0.006 306)",
+          "oklch(38% 0.010 306)",
+          "oklch(49% 0.014 306)",
+          "oklch(61% 0.014 306)",
+          "oklch(72% 0.010 306)",
+          "oklch(84% 0.006 306)",
+          "oklch(95% 0.002 306)"
+        ]
+      },
+      "grad-start": {
+        "role": "secondary",
+        "displayName": "Cayman Blue",
+        "canonical": "#155799",
+        "oklch": "oklch(45.4% 0.125 253)",
+        "tonalRamp": [
+          "oklch(15% 0.015 253)",
+          "oklch(26% 0.046 253)",
+          "oklch(38% 0.077 253)",
+          "oklch(49% 0.109 253)",
+          "oklch(61% 0.109 253)",
+          "oklch(72% 0.077 253)",
+          "oklch(84% 0.046 253)",
+          "oklch(95% 0.015 253)"
+        ]
+      },
+      "bg": {
+        "role": "neutral",
+        "displayName": "Blue-Grey Wash",
+        "canonical": "#f3f6fa",
+        "oklch": "oklch(97.2% 0.006 255)",
+        "tonalRamp": [
+          "oklch(15% 0.001 255)",
+          "oklch(26% 0.002 255)",
+          "oklch(38% 0.004 255)",
+          "oklch(49% 0.005 255)",
+          "oklch(61% 0.005 255)",
+          "oklch(72% 0.004 255)",
+          "oklch(84% 0.002 255)",
+          "oklch(95% 0.001 255)"
+        ]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 90)",
+        "tonalRamp": [
+          "oklch(15% 0.000 90)",
+          "oklch(26% 0.000 90)",
+          "oklch(38% 0.000 90)",
+          "oklch(49% 0.000 90)",
+          "oklch(61% 0.000 90)",
+          "oklch(72% 0.000 90)",
+          "oklch(84% 0.000 90)",
+          "oklch(95% 0.000 90)"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Slate Ink",
+        "canonical": "#3b454a",
+        "oklch": "oklch(38.3% 0.016 229)",
+        "tonalRamp": [
+          "oklch(15% 0.002 229)",
+          "oklch(26% 0.006 229)",
+          "oklch(38% 0.010 229)",
+          "oklch(49% 0.014 229)",
+          "oklch(61% 0.014 229)",
+          "oklch(72% 0.010 229)",
+          "oklch(84% 0.006 229)",
+          "oklch(95% 0.002 229)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Fog Grey",
+        "canonical": "#606c71",
+        "oklch": "oklch(52.3% 0.017 225)",
+        "tonalRamp": [
+          "oklch(15% 0.002 225)",
+          "oklch(26% 0.006 225)",
+          "oklch(38% 0.010 225)",
+          "oklch(49% 0.014 225)",
+          "oklch(61% 0.014 225)",
+          "oklch(72% 0.010 225)",
+          "oklch(84% 0.006 225)",
+          "oklch(95% 0.002 225)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#e3e8ee",
+        "oklch": "oklch(92.9% 0.010 253)",
+        "tonalRamp": [
+          "oklch(15% 0.001 253)",
+          "oklch(26% 0.004 253)",
+          "oklch(38% 0.006 253)",
+          "oklch(49% 0.009 253)",
+          "oklch(61% 0.009 253)",
+          "oklch(72% 0.006 253)",
+          "oklch(84% 0.004 253)",
+          "oklch(95% 0.001 253)"
+        ]
+      },
+      "good": {
+        "role": "status",
+        "displayName": "Proof Green",
+        "canonical": "#166534",
+        "oklch": "oklch(44.8% 0.108 151)",
+        "tonalRamp": [
+          "oklch(15% 0.013 151)",
+          "oklch(26% 0.040 151)",
+          "oklch(38% 0.067 151)",
+          "oklch(49% 0.095 151)",
+          "oklch(61% 0.095 151)",
+          "oklch(72% 0.067 151)",
+          "oklch(84% 0.040 151)",
+          "oklch(95% 0.013 151)"
+        ]
+      },
+      "good-bg": {
+        "role": "status",
+        "displayName": "Proof Green Wash",
+        "canonical": "#ecfdf3",
+        "oklch": "oklch(97.9% 0.022 160)",
+        "tonalRamp": [
+          "oklch(15% 0.003 160)",
+          "oklch(26% 0.008 160)",
+          "oklch(38% 0.014 160)",
+          "oklch(49% 0.019 160)",
+          "oklch(61% 0.019 160)",
+          "oklch(72% 0.014 160)",
+          "oklch(84% 0.008 160)",
+          "oklch(95% 0.003 160)"
+        ]
+      },
+      "warn": {
+        "role": "status",
+        "displayName": "Caution Amber Ink",
+        "canonical": "#92400e",
+        "oklch": "oklch(47.3% 0.125 46)",
+        "tonalRamp": [
+          "oklch(15% 0.015 46)",
+          "oklch(26% 0.046 46)",
+          "oklch(38% 0.077 46)",
+          "oklch(49% 0.109 46)",
+          "oklch(61% 0.109 46)",
+          "oklch(72% 0.077 46)",
+          "oklch(84% 0.046 46)",
+          "oklch(95% 0.015 46)"
+        ]
+      },
+      "warn-accent": {
+        "role": "status",
+        "displayName": "Caution Amber",
+        "canonical": "#d97706",
+        "oklch": "oklch(66.6% 0.157 58)",
+        "tonalRamp": [
+          "oklch(15% 0.019 58)",
+          "oklch(26% 0.057 58)",
+          "oklch(38% 0.097 58)",
+          "oklch(49% 0.137 58)",
+          "oklch(61% 0.137 58)",
+          "oklch(72% 0.097 58)",
+          "oklch(84% 0.057 58)",
+          "oklch(95% 0.019 58)"
+        ]
+      },
+      "warn-bg": {
+        "role": "status",
+        "displayName": "Caution Amber Wash",
+        "canonical": "#fffbeb",
+        "oklch": "oklch(98.7% 0.021 95)",
+        "tonalRamp": [
+          "oklch(15% 0.003 95)",
+          "oklch(26% 0.008 95)",
+          "oklch(38% 0.013 95)",
+          "oklch(49% 0.019 95)",
+          "oklch(61% 0.019 95)",
+          "oklch(72% 0.013 95)",
+          "oklch(84% 0.008 95)",
+          "oklch(95% 0.003 95)"
+        ]
+      },
+      "warn-badge-bg": {
+        "role": "status",
+        "displayName": "Caution Amber Badge",
+        "canonical": "#fef3c7",
+        "oklch": "oklch(96.2% 0.058 96)",
+        "tonalRamp": [
+          "oklch(15% 0.007 96)",
+          "oklch(26% 0.021 96)",
+          "oklch(38% 0.036 96)",
+          "oklch(49% 0.051 96)",
+          "oklch(61% 0.051 96)",
+          "oklch(72% 0.036 96)",
+          "oklch(84% 0.021 96)",
+          "oklch(95% 0.007 96)"
+        ]
+      },
+      "warn-border": {
+        "role": "status",
+        "displayName": "Caution Amber Edge",
+        "canonical": "#fde68a",
+        "oklch": "oklch(92.4% 0.115 96)",
+        "tonalRamp": [
+          "oklch(15% 0.014 96)",
+          "oklch(26% 0.042 96)",
+          "oklch(38% 0.071 96)",
+          "oklch(49% 0.101 96)",
+          "oklch(61% 0.101 96)",
+          "oklch(72% 0.071 96)",
+          "oklch(84% 0.042 96)",
+          "oklch(95% 0.014 96)"
+        ]
+      },
+      "bad": {
+        "role": "status",
+        "displayName": "Stop Red",
+        "canonical": "#991b1b",
+        "oklch": "oklch(44.4% 0.161 27)",
+        "tonalRamp": [
+          "oklch(15% 0.019 27)",
+          "oklch(26% 0.059 27)",
+          "oklch(38% 0.100 27)",
+          "oklch(49% 0.141 27)",
+          "oklch(61% 0.141 27)",
+          "oklch(72% 0.100 27)",
+          "oklch(84% 0.059 27)",
+          "oklch(95% 0.019 27)"
+        ]
+      },
+      "bad-bg": {
+        "role": "status",
+        "displayName": "Stop Red Wash",
+        "canonical": "#fef2f2",
+        "oklch": "oklch(97.1% 0.013 17)",
+        "tonalRamp": [
+          "oklch(15% 0.002 17)",
+          "oklch(26% 0.005 17)",
+          "oklch(38% 0.008 17)",
+          "oklch(49% 0.011 17)",
+          "oklch(61% 0.011 17)",
+          "oklch(72% 0.008 17)",
+          "oklch(84% 0.005 17)",
+          "oklch(95% 0.002 17)"
+        ]
+      },
+      "bad-border": {
+        "role": "status",
+        "displayName": "Stop Red Edge",
+        "canonical": "#fecaca",
+        "oklch": "oklch(88.5% 0.059 18)",
+        "tonalRamp": [
+          "oklch(15% 0.007 18)",
+          "oklch(26% 0.022 18)",
+          "oklch(38% 0.037 18)",
+          "oklch(49% 0.052 18)",
+          "oklch(61% 0.052 18)",
+          "oklch(72% 0.037 18)",
+          "oklch(84% 0.022 18)",
+          "oklch(95% 0.007 18)"
+        ]
+      },
+      "neutral": {
+        "role": "status",
+        "displayName": "Slate Neutral",
+        "canonical": "#475569",
+        "oklch": "oklch(44.6% 0.037 257)",
+        "tonalRamp": [
+          "oklch(15% 0.004 257)",
+          "oklch(26% 0.014 257)",
+          "oklch(38% 0.023 257)",
+          "oklch(49% 0.033 257)",
+          "oklch(61% 0.033 257)",
+          "oklch(72% 0.023 257)",
+          "oklch(84% 0.014 257)",
+          "oklch(95% 0.004 257)"
+        ]
+      },
+      "neutral-bg": {
+        "role": "status",
+        "displayName": "Slate Neutral Wash",
+        "canonical": "#f1f5f9",
+        "oklch": "oklch(96.8% 0.007 248)",
+        "tonalRamp": [
+          "oklch(15% 0.001 248)",
+          "oklch(26% 0.003 248)",
+          "oklch(38% 0.004 248)",
+          "oklch(49% 0.006 248)",
+          "oklch(61% 0.006 248)",
+          "oklch(72% 0.004 248)",
+          "oklch(84% 0.003 248)",
+          "oklch(95% 0.001 248)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "TrueFit wordmark in the masthead."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Product Page section headings."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "App step-card headings with step marker."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All running text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels and primary button text."
+      },
+      "small": {
+        "displayName": "Small",
+        "purpose": "Hints, captions, link buttons."
+      },
+      "eyebrow": {
+        "displayName": "Eyebrow",
+        "purpose": "Uppercase line above the wordmark."
+      },
+      "verdict": {
+        "displayName": "Verdict",
+        "purpose": "Uppercase start-date verdict label."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Copy-ready plain-text resume."
+      }
+    },
+    "gradients": [
+      {
+        "name": "masthead-band",
+        "value": "linear-gradient(120deg, #155799, #57068c)",
+        "purpose": "App header band."
+      },
+      {
+        "name": "masthead-sidebar",
+        "value": "linear-gradient(160deg, #155799, #57068c)",
+        "purpose": "Product Page sticky sidebar."
+      }
+    ],
+    "shadows": [
+      {
+        "name": "card-lift",
+        "value": "0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 16px rgba(16, 24, 40, 0.06)",
+        "purpose": "App step cards only."
+      },
+      {
+        "name": "focus-halo",
+        "value": "0 0 0 3px rgba(87, 6, 140, 0.15)",
+        "purpose": "Focused inputs and textareas, with a violet border."
+      },
+      {
+        "name": "focus-outline",
+        "value": "3px solid rgba(87, 6, 140, 0.35); outline-offset: 2px",
+        "purpose": "Focus-visible outline on buttons."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-fast",
+        "value": "0.15s ease",
+        "purpose": "Button background, input border and halo transitions."
+      },
+      {
+        "name": "spinner",
+        "value": "rotate 0.8s linear infinite",
+        "purpose": "Inline spinner in a working primary button."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "app-narrow",
+        "value": "600px"
+      },
+      {
+        "name": "page-narrow",
+        "value": "860px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one main action in a step, such as Check start date or Tailor resume.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Check start date</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; font: 600 16px/1.6 \"Open Sans\", -apple-system, BlinkMacSystemFont, \"Helvetica Neue\", Arial, sans-serif; padding: 10px 20px; border: none; border-radius: 10px; background: var(--violet, #57068c); color: #fff; cursor: pointer; transition: background 0.15s; } .ds-btn-primary:hover { background: var(--violet-dark, #3f0566); } .ds-btn-primary:focus-visible { outline: 3px solid rgba(87, 6, 140, 0.35); outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.75; cursor: wait; }"
+    },
+    {
+      "name": "Link Button",
+      "kind": "button",
+      "refersTo": "button-link",
+      "description": "Secondary actions: sample posting, save, clear, remove, put back.",
+      "html": "<button class=\"ds-btn-link\" type=\"button\">Try a sample posting</button>",
+      "css": ".ds-btn-link { margin: 0; padding: 0; background: none; border: none; color: var(--violet, #57068c); font: 600 14px/1.6 \"Open Sans\", -apple-system, BlinkMacSystemFont, \"Helvetica Neue\", Arial, sans-serif; cursor: pointer; } .ds-btn-link:hover { text-decoration: underline; } .ds-btn-link:focus-visible { outline: 3px solid rgba(87, 6, 140, 0.35); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Labelled text input or textarea with a violet focus halo.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-label\" for=\"ds-avail\">Available starting</label><input class=\"ds-input\" id=\"ds-avail\" type=\"text\" placeholder=\"June 2027 (or ASAP, Flexible)\" /><p class=\"ds-hint\">Leave blank for June 2027.</p></div>",
+      "css": ".ds-field { font: 16px/1.6 \"Open Sans\", -apple-system, BlinkMacSystemFont, \"Helvetica Neue\", Arial, sans-serif; color: #3b454a; } .ds-label { display: block; font-weight: 600; margin: 0 0 6px; } .ds-input { width: 100%; font: inherit; color: #3b454a; padding: 10px 12px; border: 1px solid #e3e8ee; border-radius: 10px; background: #fff; transition: border-color 0.15s, box-shadow 0.15s; } .ds-input:focus { outline: none; border-color: #57068c; box-shadow: 0 0 0 3px rgba(87, 6, 140, 0.15); } .ds-hint { margin: 6px 0 0; font-size: 14px; color: #606c71; }"
+    },
+    {
+      "name": "Step Card",
+      "kind": "card",
+      "refersTo": "step-card",
+      "description": "Top-level numbered step; the only lifted surface.",
+      "html": "<section class=\"ds-step-card\"><h2 class=\"ds-step-title\"><span class=\"ds-step-marker\" aria-hidden=\"true\">1</span>Check the start date</h2><p>Paste the full job posting text.</p></section>",
+      "css": ".ds-step-card { background: #fff; border: 1px solid #e3e8ee; border-radius: 14px; padding: 24px 28px; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 16px rgba(16, 24, 40, 0.06); font: 16px/1.6 \"Open Sans\", -apple-system, BlinkMacSystemFont, \"Helvetica Neue\", Arial, sans-serif; color: #3b454a; } .ds-step-card p { margin: 0; } .ds-step-title { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font-size: 20px; font-weight: 600; color: #57068c; } .ds-step-marker { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #57068c; color: #fff; font-size: 14px; font-weight: 700; flex: none; }"
+    },
+    {
+      "name": "Verdict Card: In window",
+      "kind": "custom",
+      "refersTo": "verdict-in-window",
+      "description": "Start-date result with glyph, label, explanation, and the quoted evidence.",
+      "html": "<div class=\"ds-verdict ds-verdict-good\"><div class=\"ds-verdict-head\"><span class=\"ds-verdict-icon\" aria-hidden=\"true\">✓</span><span class=\"ds-verdict-label\">In window</span></div><p class=\"ds-verdict-text\">This role starts on or after the month you're available, so the timing works.</p><blockquote class=\"ds-quote\">Start date: July 13, 2027</blockquote></div>",
+      "css": ".ds-verdict { padding: 18px 20px; border-radius: 12px; border: 1px solid #e3e8ee; border-left: 5px solid #475569; background: #f1f5f9; font: 16px/1.6 \"Open Sans\", -apple-system, BlinkMacSystemFont, \"Helvetica Neue\", Arial, sans-serif; color: #3b454a; } .ds-verdict-good { border-left-color: #166534; background: #ecfdf3; } .ds-verdict-head { display: flex; align-items: center; gap: 12px; } .ds-verdict-icon { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; font-size: 17px; font-weight: 700; color: #fff; background: #166534; } .ds-verdict-label { font-size: 15px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #166534; } .ds-verdict-text { margin: 10px 0 0; } .ds-quote { margin: 8px 0 0; padding: 8px 14px; border-left: 3px solid rgba(0, 0, 0, 0.15); border-radius: 0 8px 8px 0; background: rgba(255, 255, 255, 0.7); font-style: italic; }"
+    },
+    {
+      "name": "Verdict Card: Vague",
+      "kind": "custom",
+      "refersTo": "verdict-vague",
+      "description": "Amber variant for vague, partial, or flexible start dates.",
+      "html": "<div class=\"ds-verdict-warn\"><div class=\"ds-vw-head\"><span class=\"ds-vw-icon\" aria-hidden=\"true\">~</span><span class=\"ds-vw-label\">Likely in window</span></div><p class=\"ds-vw-text\">The posting only gives a rough time, but it looks like it fits. Confirm the exact date with the recruiter.</p></div>",
+      "css": ".ds-verdict-warn { padding: 18px 20px; border-radius: 12px; border: 1px solid #e3e8ee; border-left: 5px solid #d97706; background: #fffbeb; font: 16px/1.6 \"Open Sans\", -apple-system, BlinkMacSystemFont, \"Helvetica Neue\", Arial, sans-serif; color: #3b454a; } .ds-vw-head { display: flex; align-items: center; gap: 12px; } .ds-vw-icon { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; font-size: 17px; font-weight: 700; color: #fff; background: #d97706; } .ds-vw-label { font-size: 15px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #92400e; } .ds-vw-text { margin: 10px 0 0; }"
+    },
+    {
+      "name": "Traced Bullet",
+      "kind": "custom",
+      "refersTo": "bullet",
+      "description": "Resume bullet with Traced badge, source line, and controls.",
+      "html": "<div class=\"ds-bullet\"><div class=\"ds-bullet-row\"><span class=\"ds-badge-traced\">✓ Traced</span><span>Led pricing analysis that cut churn 12% across 40 accounts.</span></div><div class=\"ds-sources\">From your resume: “Led pricing analysis; churn down 12% (40 accounts)”</div><div class=\"ds-controls\"><button class=\"ds-ctl\" type=\"button\">Remove</button><button class=\"ds-ctl\" type=\"button\">Edit</button></div></div>",
+      "css": ".ds-bullet { padding: 10px 12px; border: 1px solid #e3e8ee; border-radius: 10px; background: #fff; font: 16px/1.6 \"Open Sans\", -apple-system, BlinkMacSystemFont, \"Helvetica Neue\", Arial, sans-serif; color: #3b454a; } .ds-bullet-row { display: flex; gap: 10px; align-items: baseline; } .ds-badge-traced { flex: none; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; color: #166534; background: #ecfdf3; } .ds-sources { margin-top: 6px; font-size: 13px; color: #606c71; font-style: italic; } .ds-controls { display: flex; gap: 16px; margin-top: 6px; } .ds-ctl { padding: 0; background: none; border: none; color: #57068c; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; } .ds-ctl:hover { text-decoration: underline; } .ds-ctl:focus-visible { outline: 3px solid rgba(87, 6, 140, 0.35); outline-offset: 2px; }"
+    },
+    {
+      "name": "Unverified Bullet",
+      "kind": "custom",
+      "refersTo": "bullet-unverified",
+      "description": "Bullet that couldn't be traced: amber tile, flag reason, left out by default.",
+      "html": "<div class=\"ds-bullet-flag\"><div class=\"ds-bf-row\"><span class=\"ds-badge-unverified\">Unverified</span><span class=\"ds-bf-text\">Built Tableau dashboards for the CFO.</span></div><p class=\"ds-bf-reason\">\"Tableau\" appears only in the posting, not in your material.</p><button class=\"ds-bf-ctl\" type=\"button\">Put back</button></div>",
+      "css": ".ds-bullet-flag { padding: 10px 12px; border: 1px solid #fde68a; border-radius: 10px; background: #fffbeb; font: 16px/1.6 \"Open Sans\", -apple-system, BlinkMacSystemFont, \"Helvetica Neue\", Arial, sans-serif; color: #3b454a; opacity: 0.6; } .ds-bf-row { display: flex; gap: 10px; align-items: baseline; } .ds-bf-text { text-decoration: line-through; } .ds-badge-unverified { flex: none; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; color: #92400e; background: #fef3c7; } .ds-bf-reason { margin: 6px 0 0; font-size: 14px; color: #92400e; } .ds-bf-ctl { margin-top: 6px; padding: 0; background: none; border: none; color: #57068c; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; } .ds-bf-ctl:hover { text-decoration: underline; }"
+    },
+    {
+      "name": "Masthead Sidebar Button",
+      "kind": "nav",
+      "refersTo": "product-page-sidebar",
+      "description": "Product Page ghost navigation button on the gradient sidebar.",
+      "html": "<nav class=\"ds-sidebar\"><a class=\"ds-side-btn\" href=\"#prd\">Read the Living PRD</a><a class=\"ds-side-btn\" href=\"#build-log\">Weekly Build Log</a></nav>",
+      "css": ".ds-sidebar { display: flex; flex-direction: column; gap: 10px; padding: 24px; background: linear-gradient(160deg, #155799, #57068c); font: 16px/1.6 \"Open Sans\", -apple-system, BlinkMacSystemFont, \"Helvetica Neue\", Arial, sans-serif; } .ds-side-btn { display: block; padding: 10px 14px; border-radius: 0.3rem; font-weight: 600; font-size: 15px; color: rgba(255, 255, 255, 0.9); background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.25); text-decoration: none; } .ds-side-btn:hover { background: rgba(255, 255, 255, 0.2); } .ds-side-btn:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.6); outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Receipts",
+    "overview": "**Creative North Star: \"The Receipts\"**\n\nEvery claim TrueFit makes arrives with its proof attached. The start-date verdict sits above the exact line it was quoted from; every resume bullet carries a Traced or Unverified badge and the source lines it came from. The visual system exists to make that evidence easy to see and quick to check. It is calm, not loud: trust comes from things being visible, never from emphasis.\n\nThe world is a quiet academic one. A blue-to-violet gradient (Cayman blue into NYU violet) marks the masthead, and everything below it is white cards on a pale blue-grey page, one column wide, with generous padding. Violet does two jobs only: headings and the primary action. Color beyond that is reserved for verdict status, and every status color is paired with a symbol and a word.\n\nThe system has two layouts that share one set of tokens. The app (`app/static/`) is an Operate surface: a gradient header band with three numbered step cards overlapping its lower edge. The Product Page (`docs/index.html`) is a Read surface: a sticky gradient sidebar beside one long text column for the PRD and build log. Both use the same text colors; the app's corner radii are the standard, and the page's tighter corners are noted in Shapes.",
+    "keyCharacteristics": [
+      "Proof sits next to the claim: italic quotes, source lines, Traced badges.",
+      "One column, max 760px in the app, max 820px of text on the Product Page.",
+      "Gradient only in the masthead; white cards and flat interiors everywhere else.",
+      "Four status families (good, warn, bad, neutral), each with a glyph and a label.",
+      "Plain, literal copy; the copy-ready resume is monospace plain text."
+    ],
+    "rules": [
+      {
+        "name": "The Proof Is Green Rule",
+        "body": "Green means \"checked and it holds\": an In window verdict or a Traced bullet. It is never used as decoration, branding, or a generic success toast.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Violet Rule",
+        "body": "Violet marks headings and the single primary action in a step. If two things on screen are both violet buttons, one of them should be a link button.",
+        "section": "colors"
+      },
+      {
+        "name": "The Quote Rule",
+        "body": "Italic means \"this is someone else's exact words\": posting quotes in blockquotes and source lines under bullets. Nothing else is set in italic, so a reader can trust that anything slanted is verbatim.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Lift Rule",
+        "body": "Only the step card is lifted. Verdict cards, bullets, badges, and inputs inside it stay flat; depth inside a card comes from tint and border, never from another shadow.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Never Color Alone Rule",
+        "body": "Every status color travels with a glyph and a word: ✓ In window, ✕ Outside window, \"Unverified\". If you remove the color, the meaning must survive.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do put the source next to every claim: an italic blockquote for posting quotes, an italic source line for resume bullets.",
+      "Do pair each status color with its glyph and label (✓ ~ ✕ ?, \"✓ Traced\", \"Unverified\").",
+      "Do use NYU Violet (#57068c) for h2 headings and the one primary button per step; use link buttons for everything secondary.",
+      "Do keep the copy-ready resume monospace and plain: standard headings, hyphen bullets, a single column.",
+      "Do keep focus visible: a violet border plus a 3px halo on fields, a 3px violet outline on buttons.",
+      "Do use Fog Grey (#606c71) as the lightest text color; it clears 4.5:1 on white and on the Blue-Grey Wash."
+    ],
+    "donts": [
+      "Don't use the gradient anywhere but the app header band and the Product Page sidebar.",
+      "Don't add new hues; the palette is violet, Cayman blue, cool neutrals, and the four status families.",
+      "Don't use green, amber, or red as decoration; they report results only.",
+      "Don't add shadows inside a step card; only the card itself is lifted.",
+      "Don't set anything in italic that isn't verbatim source text.",
+      "Don't introduce a grey lighter than Fog Grey for text; anything paler fails WCAG AA at the 14px captions use.",
+      "Don't add tables, columns, icons, or decorative formatting to the copy-ready resume output."
+    ]
+  }
+}
