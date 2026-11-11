@@ -1,0 +1,21 @@
+{
+  "hook": {
+    "enabled": true,
+    "limits": {
+      "maxFindings": 5,
+      "maxChars": 8000
+    }
+  },
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "sans\",-apple-system,blinkmacsystemfont,\"helvetica neue\",helvetica,arial,sans-serif",
+        "createdAt": "2026-11-11T20:13:58.931Z",
+        "reason": "Claude: detector truncates the quoted \"Open Sans\" family; the full stack is declared verbatim in DESIGN.md typography"
+      }
+    ]
+  }
+}
