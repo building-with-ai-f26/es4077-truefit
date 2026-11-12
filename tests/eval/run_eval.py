@@ -46,7 +46,7 @@ async def run_start_date() -> bool:
         warned = bool(result and result["undergrad_warning"])
         ok = got == case["expected_verdict"] and warned == case.get("expected_undergrad_warning", False)
         agreed += ok
-        if case["expected_verdict"] == "not_stated" and result and result["mentions"]:
+        if case["expected_verdict"] in ("not_stated", "likely_too_early") and result and result["mentions"]:
             invented.append(name)
         print(f"{name:32} {case['expected_verdict']:24} {got:24} {'✓' if ok else '✗'}{'  (undergrad warning)' if warned else ''}")
         if result and not ok:

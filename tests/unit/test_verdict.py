@@ -38,10 +38,11 @@ def test_us1_3_summer_is_likely_vague():
     assert r.note == "Exact date not specified"
 
 
-def test_us1_4_no_mentions_not_stated():
+def test_us1_4_no_mentions_assumes_asap_too_early():
     r = verdict([])
-    assert r.verdict == "not_stated"
+    assert r.verdict == "likely_too_early"
     assert r.mentions == []
+    assert "as soon as possible" in r.note and "June 2027" in r.note
 
 
 def test_us1_5_starting_august_vs_july_posting():
@@ -75,8 +76,14 @@ def test_us1_7_flexible_student_any_future_date(start):
     assert r.mentions[0].start.isoformat() == start
 
 
-def test_us1_8_flexible_student_no_date_still_not_stated():
-    assert verdict([], parse_availability("Flexible", TODAY)).verdict == "not_stated"
+def test_us1_8_flexible_student_no_date_likely_fits():
+    r = verdict([], parse_availability("Flexible", TODAY))
+    assert r.verdict == "likely_in_window_vague"
+    assert "as soon as possible" in r.note
+
+
+def test_asap_student_no_date_likely_fits():
+    assert verdict([], parse_availability("ASAP", TODAY)).verdict == "likely_in_window_vague"
 
 
 # --- Edge cases ------------------------------------------------------------

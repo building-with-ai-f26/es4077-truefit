@@ -35,7 +35,7 @@ def test_custom_availability_used(client, fake_llm):
 def test_quote_not_in_posting_is_dropped(client, fake_llm):
     fake_llm.queue(reply([{"quote": "The role starts in July 2027", "kind": "month", "start": "2027-07"}]))
     body = client.post("/api/start-date", json={"posting": POSTING}).json()
-    assert body["verdict"] == "not_stated"
+    assert body["verdict"] == "likely_too_early"
     assert body["mentions"] == []
 
 
@@ -89,7 +89,7 @@ def test_model_unavailable(client, fake_llm):
 def test_malformed_mentions_field(client, fake_llm):
     fake_llm.queue({"is_job_posting": True, "is_english": True, "mentions": "July"})
     body = client.post("/api/start-date", json={"posting": POSTING}).json()
-    assert body["verdict"] == "not_stated"
+    assert body["verdict"] == "likely_too_early"
 
 
 def test_missing_config_gives_plain_error(client, monkeypatch):
