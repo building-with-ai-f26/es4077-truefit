@@ -36,7 +36,7 @@ def test_traced_bullets_are_included_and_in_plain_text(client, fake_llm):
     body = post(client).json()
     bullets = body["resume"]["sections"][1]["entries"][0]["bullets"]
     assert [(b["id"], b["status"], b["included"]) for b in bullets] == [("B1", "traced", True), ("B2", "traced", True)]
-    assert body["resume_lines"][0] == {"id": "L1", "text": "EDUCATION", "section": "Education", "source": "resume"}
+    assert body["resume_lines"][0] == {"id": "L1", "text": "EDUCATION", "section": "Education", "source": "resume", "kind": "heading"}
     assert body["resume"]["plain_text"].startswith("Education\nNYU Stern School of Business | MBA | Aug 2025 – May 2027\n\nExperience\n")
     assert "- Built an Excel pricing model adopted by 3 regional teams" in body["resume"]["plain_text"]
 
@@ -130,3 +130,28 @@ def test_verify_bullet_uses_header_context(client, fake_llm):
     r = client.post("/api/verify-bullet", json={"bullet_text": "In 2022, built an Excel pricing model", "source_line_ids": ["L6"],
                                                 "header_line_ids": ["L4"], "posting": POSTING, "master_resume": MASTER})
     assert r.json()["status"] == "traced"
+
+
+def test_header_lines_returned_as_bullets_move_back_to_the_header(client, fake_llm):
+    # The model files the job line (L4) as a bullet and gives the entry no header.
+    fake_llm.queue(
+        {"sections": [{"heading": "Experience", "entries": [{"header_line_ids": [], "bullets": [
+            {"text": "Associate, Acme Corp | New York, NY | Jun 2022 – Jul 2025", "source_line_ids": ["L4"]},
+            {"text": "Built an Excel pricing model adopted by 3 regional teams", "source_line_ids": ["L6"]}]}]}]},
+        supported("B1"))
+    body = post(client).json()
+    entry = body["resume"]["sections"][0]["entries"][0]
+    assert entry["header_line_ids"] == ["L4"]
+    assert [b["text"] for b in entry["bullets"]] == ["Built an Excel pricing model adopted by 3 regional teams"]
+    assert body["resume"]["plain_text"] == (
+        "Experience\nAssociate, Acme Corp | New York, NY | Jun 2022 – Jul 2025\n"
+        "- Built an Excel pricing model adopted by 3 regional teams\n")
+
+
+def test_entry_without_header_gets_the_header_lines_above_its_bullets(client, fake_llm):
+    fake_llm.queue(
+        {"sections": [{"heading": "Experience", "entries": [{"header_line_ids": [], "bullets": [
+            {"text": "Presented quarterly pricing reviews to the VP of Sales", "source_line_ids": ["L7"]}]}]}]},
+        supported("B1"))
+    entry = post(client).json()["resume"]["sections"][0]["entries"][0]
+    assert entry["header_line_ids"] == ["L4"]

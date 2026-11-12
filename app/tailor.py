@@ -25,7 +25,7 @@ Rules:
 - Every bullet cites ALL the line IDs that back it in "source_line_ids". If a bullet combines facts from several sentences, cite each one. When a bullet credits the student with a result, also cite the line showing the student's own action that led to it. N-lines may be used to write or strengthen bullets for a role.
 - From N-lines, use only statements of what the student did, achieved, or has. Ignore goals, interests, things they hope, plan, or are eager to do or learn, opinions, and anything praising or describing a company they were applying to. "I'm eager to build my SQL skills" is NOT evidence of SQL.
 - Keep the student's role accurate: if a story says a manager or someone else led something and the student supported it, the bullet must say the student supported or contributed, not led.
-- header_line_ids are the lines that name the role, school, or organization (title, company, location, dates), copied by ID, not rewritten.
+- header_line_ids are the lines that name the role, school, or organization (title, company, location, dates), copied by ID, not rewritten. Lines marked (header) go in header_line_ids and NEVER become bullets; every entry lists its header lines.
 - Sections in this order: Education, Experience, then any others in the order they appear in the master resume. Use the student's own heading names.
 - Pick the experience most relevant to the posting and aim for about one page: 3-5 bullets for recent or relevant roles, fewer for others.
 - Bullets are one sentence, start with a strong verb that doesn't overstate the source, and contain no bullet symbol. No first-person words (I, my, me, we, our): write "the go-to-market plan led by the manager", not "led by my manager"."""
@@ -33,10 +33,10 @@ Rules:
 
 async def tailor_resume(posting: str, master_resume: str, background_notes: str | None = None) -> dict:
     lines = split_lines(master_resume, background_notes)
-    numbered = "\n".join(f"{line.id}: {line.text}" for line in lines)
+    numbered = "\n".join(f"{line.id}{' (header)' if line.kind == 'header' else ''}: {line.text}" for line in lines)
     reply = await llm.call(TAILOR_PROMPT, f"Job posting:\n<<<\n{posting}\n>>>\n\nStudent's numbered lines:\n<<<\n{numbered}\n>>>")
 
-    sections = _validate(reply, {line.id for line in lines})
+    sections = _validate(reply, lines)
     bullets, context = [], {}
     for entry in (e for s in sections for e in s["entries"]):
         for bullet in entry["bullets"]:
@@ -64,8 +64,9 @@ async def verify_bullet(text: str, source_line_ids: list[str], posting: str, mas
     return {"status": bullet["status"], "source_line_ids": bullet["source_line_ids"], "flag_reason": bullet["flag_reason"]}
 
 
-def _validate(reply: dict, line_ids: set[str]) -> list[dict]:
+def _validate(reply: dict, lines: list) -> list[dict]:
     """Keep only well-formed sections, entries, and bullets. Unknown header IDs are dropped; bullet IDs are checked later."""
+    line_ids = {line.id for line in lines}
     sections = []
     for raw_section in reply.get("sections") or []:
         if not isinstance(raw_section, dict) or not isinstance(raw_section.get("heading"), str):
@@ -80,6 +81,7 @@ def _validate(reply: dict, line_ids: set[str]) -> list[dict]:
                 for b in raw_entry.get("bullets") or []
                 if isinstance(b, dict) and isinstance(b.get("text"), str) and b["text"].strip()
             ]
+            headers, bullets = _repair_headers(headers, bullets, lines)
             if headers or bullets:
                 entries.append({"header_line_ids": headers, "bullets": bullets})
         if entries:
@@ -87,3 +89,34 @@ def _validate(reply: dict, line_ids: set[str]) -> list[dict]:
     if not sections:
         raise ModelUnavailable()  # never return an empty or unchecked resume (contract guarantee 6)
     return sections
+
+
+def _repair_headers(headers: list[str], bullets: list[dict], lines: list) -> tuple[list[str], list[dict]]:
+    """Keep job titles, companies, and dates as the entry's header, never as bullets.
+
+    A "bullet" that cites only header lines is moved back into the header. An entry with no header gets
+    the nearest block of header lines above the first resume line its bullets cite (within its section).
+    """
+    by_id = {line.id: line for line in lines}
+    order = {line.id: i for i, line in enumerate(lines)}
+    is_header = lambda i: i in by_id and by_id[i].kind == "header"
+    kept = []
+    for bullet in bullets:
+        ids = bullet["source_line_ids"]
+        if ids and all(is_header(i) for i in ids):
+            headers = headers + [i for i in ids if i not in headers]
+        else:
+            kept.append(bullet)
+
+    if not headers:
+        cited = min((order[i] for b in kept for i in b["source_line_ids"]
+                     if i in by_id and by_id[i].source == "resume"), default=None)
+        if cited is not None:
+            above = []
+            for line in reversed(lines[:cited]):
+                if line.kind == "heading" or (above and line.kind != "header"):
+                    break  # stop at the section heading, or at the top of the header block
+                if line.kind == "header":
+                    above.insert(0, line.id)
+            headers = above
+    return sorted(headers, key=lambda i: order.get(i, 0)), kept
