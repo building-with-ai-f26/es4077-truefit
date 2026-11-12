@@ -1,5 +1,5 @@
 from app.resume_lines import split_lines
-from app.trace_check import deterministic_check, extract_numbers, posting_only_terms
+from app.trace_check import deterministic_check, extract_numbers, posting_only_terms, posting_words_to_verify
 
 MASTER = """Experience
 Associate, Acme Corp | New York, NY | Jun 2022 – Jul 2025
@@ -57,3 +57,9 @@ def test_ordinary_posting_words_are_left_to_the_meaning_check():
     only = posting_only_terms(posting, MASTER)
     assert deterministic_check("Shaped the pricing plan that grew regional revenue 12%", ["L3"], LINES, only) is None
     assert deterministic_check("Built Looker reports on 40 SKUs", ["L3"], LINES, only) is not None
+
+
+def test_ordinary_posting_words_are_sent_to_the_meaning_check():
+    posting = "You will shape the plan and own financial forecasting. Tableau a plus."
+    assert posting_words_to_verify("Shaped quarterly financial forecasting for 3 teams", posting, MASTER) == ["shaped", "financial", "forecasting"]
+    assert posting_words_to_verify("Built Excel pricing model used by 3 regional teams", posting, MASTER) == []
