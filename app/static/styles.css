@@ -6,6 +6,8 @@
   --violet-dark: #3f0566;
   --violet-tint: #f4effa;
   --bg: #f3f6fa;
+  --page: #e2e8f0;
+  --field-border: #cbd5e1;
   --card: #ffffff;
   --text: #3b454a;
   --muted: #606c71;
@@ -25,9 +27,12 @@
 body {
   margin: 0;
   font: 16px/1.6 "Open Sans", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background: var(--bg);
+  background: var(--page);
   color: var(--text);
 }
+
+::selection { background: var(--violet-tint); color: var(--violet-dark); }
+input, textarea { caret-color: var(--violet); }
 
 /* Header band, same gradient as the Product Page sidebar */
 .hero {
@@ -62,27 +67,34 @@ section {
 
 h2 {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: baseline;
+  gap: 14px;
   margin: 0 0 14px;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 600;
   color: var(--violet);
 }
 .step {
-  display: inline-grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--violet);
-  color: #fff;
-  font-size: 14px;
+  font-size: 40px;
+  line-height: 1;
   font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--violet);
   flex: none;
 }
 
-label { display: block; font-weight: 600; color: var(--text); margin: 16px 0 6px; }
+/* Step 2 sits flat until the start date has been checked; its fields still work */
+section.is-waiting { box-shadow: none; }
+section.is-waiting .step { color: var(--muted); }
+
+/* Fields start short and grow with their text, where the browser supports it */
+textarea { field-sizing: content; min-height: 8.5em; max-height: 32em; }
+#background-notes { min-height: 5em; }
+#plain-text { field-sizing: fixed; max-height: none; }
+
+label { display: block; font-weight: 600; color: var(--text); margin: 24px 0 6px; }
+h2 + label, h2 + .label-row label { margin-top: 18px; }
 
 .label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .label-row label { margin-bottom: 6px; }
@@ -100,12 +112,22 @@ label { display: block; font-weight: 600; color: var(--text); margin: 16px 0 6px
 }
 .link-button:hover { text-decoration: underline; }
 
+/* A shortcut for demos, so it stays quieter than the field it fills */
+#sample-posting {
+  font-weight: 400;
+  color: var(--muted);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+}
+#sample-posting:hover { color: var(--violet); text-decoration-color: currentColor; }
+
 input[type="text"], textarea {
   width: 100%;
   font: inherit;
   color: var(--text);
   padding: 10px 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--field-border);
   border-radius: 10px;
   background: #fff;
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -262,4 +284,5 @@ blockquote {
 @media (max-width: 600px) {
   h1 { font-size: 30px; }
   section { padding: 20px; }
+  .step { font-size: 32px; }
 }

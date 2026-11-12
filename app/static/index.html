@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" />
-  <link rel="stylesheet" href="/static/styles.css?v=6" />
+  <link rel="stylesheet" href="/static/styles.css?v=7" />
   <!-- Filled from .env by the "/" route in app/main.py -->
   <meta name="posthog-token" content="{{POSTHOG_PROJECT_TOKEN}}" />
   <meta name="posthog-host" content="{{POSTHOG_HOST}}" />
@@ -39,7 +39,7 @@
         <label for="posting">Job posting</label>
         <button id="sample-posting" class="link-button" type="button">Try a sample posting</button>
       </div>
-      <textarea id="posting" rows="12" placeholder="Paste the full job posting text"></textarea>
+      <textarea id="posting" rows="8" placeholder="Paste the full job posting text"></textarea>
 
       <button id="check-start-date" class="primary" type="button">Check start date</button>
 
@@ -47,14 +47,14 @@
     </section>
 
     <!-- 2. Master resume + background notes -->
-    <section id="step-resume" aria-labelledby="resume-heading">
+    <section id="step-resume" class="is-waiting" aria-labelledby="resume-heading">
       <h2 id="resume-heading"><span class="step" aria-hidden="true">2</span>Your experience</h2>
 
       <label for="master-resume">Master resume</label>
-      <textarea id="master-resume" rows="14" placeholder="Paste your full resume: every role, school, and bullet you might use"></textarea>
+      <textarea id="master-resume" rows="8" placeholder="Paste your full resume: every role, school, and bullet you might use"></textarea>
 
       <label for="background-notes">More about your experience <span class="optional">(optional)</span></label>
-      <textarea id="background-notes" rows="8" placeholder="Paste anything that describes your past work: notes, past cover letters, behavioral (STAR) stories, application essays."></textarea>
+      <textarea id="background-notes" rows="4" placeholder="Paste anything that describes your past work: notes, past cover letters, behavioral (STAR) stories, application essays."></textarea>
       <p class="hint">TrueFit uses what you say you <em>did</em> here (actions, results, skills you used) to write bullets, along with your resume and nothing else. Goals and things you hope to learn are never turned into claims.</p>
 
       <div class="save-row">
@@ -83,6 +83,6 @@
     </section>
   </main>
 
-  <script src="/static/app.js?v=6"></script>
+  <script src="/static/app.js?v=7"></script>
 </body>
 </html>

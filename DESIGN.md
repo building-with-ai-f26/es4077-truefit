@@ -7,6 +7,8 @@ colors:
   violet-tint: "#f4effa"
   grad-start: "#155799"
   bg: "#f3f6fa"
+  page: "#e2e8f0"
+  field-border: "#cbd5e1"
   card: "#ffffff"
   text: "#3b454a"
   muted: "#606c71"
@@ -101,10 +103,9 @@ components:
     rounded: "{rounded.xl}"
     padding: "24px 28px"
   step-marker:
-    backgroundColor: "{colors.violet}"
-    textColor: "{colors.card}"
-    rounded: "{rounded.pill}"
-    size: "28px"
+    textColor: "{colors.violet}"
+    fontSize: "40px"
+    fontWeight: 700
   verdict-in-window:
     backgroundColor: "{colors.good-bg}"
     textColor: "{colors.good}"
@@ -183,7 +184,9 @@ A restrained palette: one brand violet, one gradient partner blue, cool neutrals
 - **Slate Ink** (text): body text, labels, entry headers. The standard text color for both surfaces.
 - **Fog Grey** (muted): hints, captions, `meta` lines, stat-box labels, source-line notes, optional-field labels.
 - **Paper White** (card): card, input, and bullet backgrounds.
-- **Blue-Grey Wash** (bg): the app page background behind the cards; also the Product Page table-header and stat-box tint.
+- **Blue-Grey Wash** (bg): the Product Page table-header and stat-box tint.
+- **Slate Page** (page): the app page background behind the cards, dark enough that white cards stand out.
+- **Field Edge** (field-border): the 1px border on app inputs and textareas.
 - **Hairline** (border): card, input, bullet, and section-divider borders.
 
 ### Status
@@ -207,7 +210,7 @@ A restrained palette: one brand violet, one gradient partner blue, cool neutrals
 ### Hierarchy
 - **Display** (700, 36px): the "TrueFit" wordmark in the app header band, in white. The Product Page sidebar sets it at 40px, weight 600, line height 1.1; 30px on phones in the app.
 - **Headline** (600, 26px, 1.25): Product Page section headings, in violet.
-- **Title** (600, 20px): app step-card headings, in violet with a numbered step marker; Product Page h3 subheads use 18px.
+- **Title** (600, 22px): app step-card headings, in violet, led by a 40px bold violet step numeral (32px on phones; Fog Grey on step 2 until a start date has been checked); Product Page h3 subheads use 18px.
 - **Body** (400, 16px, 1.6): everything else. Text measure is capped by the column (760px card, 820px page section), roughly 75–90 characters.
 - **Label** (600, 16px): form field labels and primary button text.
 - **Small** (400, 14px): hints, captions, "checked against" lines, link buttons (at 600).
@@ -249,15 +252,15 @@ Calm and checkable: soft cards, generous space, and evidence visible at a glance
 - **Shape:** gently rounded (10px).
 - **Primary:** NYU Violet fill, white 600-weight label, 10px × 20px padding, 16px above. Holds an inline 16px spinner while working; the disabled state drops to 75% opacity with a wait cursor (50% and not-allowed for "Tailor resume" before a start-date check).
 - **Hover / Focus:** hover darkens to Deep Violet over 0.15s. Focus-visible draws a 3px violet outline at 35% opacity, offset 2px.
-- **Link button:** unstyled text button in violet, 14px/600, underlined on hover. Used for secondary actions such as "Try a sample posting", "Save on this device", "Remove", and "Put back".
+- **Link button:** unstyled text button in violet, 14px/600, underlined on hover. Used for secondary actions such as "Save on this device", "Remove", and "Put back". "Try a sample posting" is quieter still: Fog Grey, weight 400, a hairline underline, turning violet on hover.
 - **Product Page sidebar button:** full-width ghost button on the gradient, translucent white fill (8%) and border (25%), brightening to 20% fill on hover.
 
 ### Cards / Containers
-- **Step card:** white, 14px radius, 1px hairline border, card-lift shadow, 24px × 28px padding. Its h2 leads with a 28px violet step-number disc.
+- **Step card:** white, 14px radius, 1px hairline border, card-lift shadow, 24px × 28px padding. Its h2 leads with a 40px violet step numeral. Step 2 drops its shadow and greys its numeral until a start date has been checked; its fields stay usable.
 - **Stat box (Product Page):** Blue-Grey Wash fill, pale blue border, small uppercase label over a 19px bold violet value.
 
 ### Inputs / Fields
-- **Style:** full width, white, 1px hairline border, 10px radius, 10px × 12px padding, inherits body type. Textareas resize vertically only.
+- **Style:** full width, white, Field Edge border (darker than the card's hairline, so fields stand out inside the card), 10px radius, 10px × 12px padding, inherits body type. Textareas resize vertically only. Field groups are 24px apart (18px below a step heading).
 - **Focus:** border turns violet plus the 3px focus halo; the native outline is removed only because this replaces it.
 - **Read-only output:** the copy-ready resume textarea uses the mono font at 13px on a Slate Neutral background, so it reads as "plain text, ready to paste."
 

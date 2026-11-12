@@ -132,6 +132,7 @@ async function checkStartDate() {
     renderStartDate(result);
     tailorButton.disabled = false; // tailoring waits for a start-date result (FR-008)
     tailorHint.hidden = true;
+    document.getElementById("step-resume").classList.remove("is-waiting");
     track("start_date_checked", { verdict: result.verdict, undergrad_warning: Boolean(result.undergrad_warning) });
   } catch (err) {
     // The error is already shown; the saved availability stays as it was.
