@@ -103,15 +103,44 @@ Qualifications
 Start date: July 13, 2027
 Applications close December 1, 2026.`;
 
-// Icon and one plain sentence per verdict. Server notes still show underneath.
+// Status tone and one plain sentence per verdict; the sentence is the exhibit's action title.
 const VERDICT_DISPLAY = {
-  in_window: { icon: "✓", text: "This role starts on or after the month you're available, so the timing works." },
-  likely_in_window_vague: { icon: "~", text: "The posting only gives a rough time, but it looks like it fits. Confirm the exact date with the recruiter." },
-  partly_in_window: { icon: "~", text: "Some start dates in this posting fit and some don't. See each one below." },
-  flexible_to_discuss: { icon: "~", text: "The start date is open, so you can likely agree on one that works for you." },
-  outside_window: { icon: "✕", text: "The start date doesn't fit when you can start." },
-  not_stated: { icon: "?", text: "No start date is listed. That often means as soon as possible; ask the recruiter before you apply." },
+  in_window: { tone: "good", text: "This role starts on or after the month you're available, so the timing works." },
+  likely_in_window_vague: { tone: "warn", text: "The posting only gives a rough time, but it looks like it fits. Confirm the exact date with the recruiter." },
+  partly_in_window: { tone: "warn", text: "Some start dates in this posting fit and some don't. See each one below." },
+  flexible_to_discuss: { tone: "warn", text: "The start date is open, so you can likely agree on one that works for you." },
+  outside_window: { tone: "bad", text: "The start date doesn't fit when you can start." },
+  not_stated: { tone: "none", text: "No start date is listed. That often means as soon as possible; ask the recruiter before you apply." },
 };
+
+// Status glyphs drawn as SVG, always shown next to a word (never color alone).
+const MARK_PATHS = {
+  good: '<circle cx="12" cy="12" r="11" fill="#1e7a46"/><path d="M6.5 12.5l3.5 3.5 7.5-8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>',
+  warn: '<circle cx="12" cy="12" r="10" fill="none" stroke="#b7791f" stroke-width="2.4"/><path d="M9.3 9.4a2.8 2.8 0 1 1 3.6 2.7c-.6.2-.9.7-.9 1.3v.6" fill="none" stroke="#b7791f" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1.3" fill="#b7791f"/>',
+  bad: '<circle cx="12" cy="12" r="11" fill="#b42318"/><path d="M8 8l8 8M16 8l-8 8" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>',
+  none: '<circle cx="12" cy="12" r="10" fill="none" stroke="#6b7484" stroke-width="2"/><path d="M8 12h8" stroke="#6b7484" stroke-width="2.4" stroke-linecap="round"/>',
+};
+
+function statusCell(tag, tone, label) {
+  const cell = el(tag, { class: `status ${tone}` });
+  cell.insertAdjacentHTML("afterbegin", `<svg class="mark" viewBox="0 0 24 24" aria-hidden="true">${MARK_PATHS[tone]}</svg>`);
+  cell.append(label);
+  return cell;
+}
+
+function quoted(text, source) {
+  const p = el("p", { class: "quote" }, el("mark", {}, `“${text}”`));
+  if (source) p.append(el("span", { class: "source" }, source));
+  return p;
+}
+
+// Underline the tab for the step the student is on.
+function setStep(id) {
+  for (const tab of document.querySelectorAll(".steps a")) {
+    if (tab.getAttribute("href") === `#${id}`) tab.setAttribute("aria-current", "step");
+    else tab.removeAttribute("aria-current");
+  }
+}
 
 function setChecking(checking) {
   checkButton.disabled = checking;
@@ -132,6 +161,7 @@ async function checkStartDate() {
     renderStartDate(result);
     tailorButton.disabled = false; // tailoring waits for a start-date result (FR-008)
     tailorHint.hidden = true;
+    setStep("step-resume");
     track("start_date_checked", { verdict: result.verdict, undergrad_warning: Boolean(result.undergrad_warning) });
   } catch (err) {
     // The error is already shown; the saved availability stays as it was.
@@ -142,40 +172,46 @@ async function checkStartDate() {
 }
 
 function renderStartDate(result) {
-  startDateResult.replaceChildren();
-  startDateResult.className = `result ${result.verdict}`;
-  if (result.undergrad_warning) {
-    startDateResult.append(
-      el("div", { class: "undergrad-warning", role: "note" },
-        el("strong", {}, "This role looks aimed at undergraduates."),
-        " TrueFit is built for MBA and graduate roles, so check the posting before applying.",
-        el("blockquote", {}, `“${result.undergrad_warning.quote}”`)),
-    );
-  }
-  const display = VERDICT_DISPLAY[result.verdict] || { icon: "?", text: null };
-  startDateResult.append(
-    el("div", { class: "verdict-head" },
-      el("span", { class: "verdict-icon", "aria-hidden": "true" }, display.icon),
-      el("span", { class: "verdict" }, result.verdict_label)),
-  );
-  if (display.text) startDateResult.append(el("p", { class: "explanation" }, display.text));
+  const display = VERDICT_DISPLAY[result.verdict] || { tone: "none", text: result.verdict_label };
+  const rows = el("tbody");
 
-  if (result.note) startDateResult.append(el("p", { class: "note" }, result.note));
-
+  // One row per quoted start date; several rows when roles or offices start at different times.
   const several = result.mentions.length > 1;
-  for (const mention of result.mentions) {
-    const item = el("div", { class: "mention" });
-    if (several || mention.role_hint) {
-      const heading = [mention.role_hint, several ? mention.verdict_label : null].filter(Boolean).join(": ");
-      item.append(el("div", { class: "mention-verdict" }, heading));
-    }
-    item.append(el("blockquote", {}, `“${mention.quote}”`));
-    if (several && mention.note) item.append(el("p", { class: "hint" }, mention.note));
-    startDateResult.append(item);
+  result.mentions.forEach((mention, i) => {
+    const tone = several ? (VERDICT_DISPLAY[mention.verdict]?.tone || "none") : display.tone;
+    const label = several ? (mention.verdict_label || result.verdict_label) : result.verdict_label;
+    const name = mention.role_hint || (several ? `Start date ${i + 1}` : "Start date");
+    rows.append(el("tr", {},
+      el("td", { class: "req" }, name),
+      statusCell("td", tone, label),
+      el("td", {}, quoted(mention.quote, several && mention.note ? mention.note : "Quoted word for word from the posting"))));
+  });
+  if (!result.mentions.length) {
+    rows.append(el("tr", {},
+      el("td", { class: "req" }, "Start date"),
+      statusCell("td", display.tone, result.verdict_label),
+      el("td", {}, el("p", { class: "plain" }, "The posting doesn't state a start date."))));
+  }
+  if (result.undergrad_warning) {
+    rows.append(el("tr", {},
+      el("td", { class: "req" }, "Who it's for"),
+      statusCell("td", "warn", "Check"),
+      el("td", {}, quoted(result.undergrad_warning.quote,
+        "This role looks aimed at undergraduates. TrueFit is built for MBA and graduate roles, so check the posting before applying."))));
   }
 
-  startDateResult.append(el("p", { class: "checked-against" }, `Checked against your availability: ${result.availability.label}`));
-  startDateResult.hidden = false;
+  const table = el("table", { class: "exhibit-table fresh" },
+    el("thead", {}, el("tr", {},
+      el("th", { scope: "col" }, "Requirement"),
+      el("th", { scope: "col" }, "Status"),
+      el("th", { scope: "col" }, "What the posting says"))),
+    rows);
+
+  startDateResult.replaceChildren(
+    el("h3", { id: "exhibit-1-title", class: "action-title" }, display.text),
+    el("p", { class: "exhibit-sub" }, `Checked against your availability: ${result.availability.label}.`),
+    table);
+  if (result.note) startDateResult.append(el("p", { class: "exhibit-foot" }, result.note));
 }
 
 checkButton.addEventListener("click", checkStartDate);
@@ -224,6 +260,8 @@ fillSavedProfile();
 // ---- Step 3: tailored resume ------------------------------------------------
 
 const resultsSection = document.getElementById("step-results");
+const resultsHeading = document.getElementById("results-heading");
+const copyBlock = document.getElementById("copy-block");
 const tailoredBox = document.getElementById("tailored-resume");
 const summaryBox = document.getElementById("tailor-summary");
 const plainTextBox = document.getElementById("plain-text");
@@ -252,8 +290,9 @@ async function tailorResume() {
       linesById: new Map(result.resume_lines.map((line) => [line.id, line])),
       sections: result.resume.sections,
     };
-    renderTailored();
-    resultsSection.hidden = false;
+    renderTailored(true);
+    copyBlock.hidden = false;
+    setStep("step-results");
     resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
     const bullets = allBullets();
     track("resume_tailored", { bullets: bullets.length, flagged: bullets.filter((b) => b.status === "flagged").length });
@@ -270,8 +309,9 @@ function allBullets() {
   return tailorState.sections.flatMap((s) => s.entries.flatMap((e) => e.bullets));
 }
 
-function renderTailored() {
+function renderTailored(fresh = false) {
   tailoredBox.replaceChildren();
+  tailoredBox.classList.toggle("fresh", fresh);
   for (const section of tailorState.sections) {
     tailoredBox.append(el("h3", { class: "resume-section" }, section.heading));
     for (const entry of section.entries) {
@@ -291,26 +331,28 @@ function renderTailored() {
   const bullets = allBullets();
   const kept = bullets.filter((b) => b.included).length;
   const flagged = bullets.filter((b) => b.status === "flagged").length;
-  summaryBox.textContent = `${kept} of ${bullets.length} bullets kept · ${flagged} unverified`;
+  const traced = bullets.length - flagged;
+  resultsHeading.classList.remove("empty");
+  resultsHeading.textContent = `${traced} of ${bullets.length} bullets trace back to your own writing.`;
+  summaryBox.textContent = flagged
+    ? `${kept} kept in the copy-ready resume. ${flagged} unverified ${flagged === 1 ? "bullet is" : "bullets are"} left out unless you put ${flagged === 1 ? "it" : "them"} back.`
+    : `${kept} kept in the copy-ready resume. Each bullet shows the lines it came from.`;
   plainTextBox.value = renderPlainText(tailorState.sections, tailorState.linesById);
 }
 
 function renderBullet(bullet, entry) {
   const traced = bullet.status === "traced";
   const item = el("li", { class: `bullet ${bullet.status}${bullet.included ? "" : " excluded"}` });
-  item.append(
-    el("div", { class: "bullet-row" },
-      el("span", { class: `badge ${bullet.status}` }, traced ? "✓ Traced" : "Unverified"),
-      el("span", { class: "bullet-text" }, bullet.text)),
-  );
-  if (!traced && bullet.flag_reason) item.append(el("p", { class: "flag-reason" }, bullet.flag_reason));
+  const body = el("div", { class: "bullet-body" }, el("span", { class: "bullet-text" }, bullet.text));
+  item.append(statusCell("span", traced ? "good" : "warn", traced ? "Traced" : "Unverified"), body);
+  if (!traced && bullet.flag_reason) body.append(el("p", { class: "flag-reason" }, bullet.flag_reason));
 
   const sources = el("div", { class: "sources" });
   for (const id of bullet.source_line_ids) {
     const line = tailorState.linesById.get(id);
-    if (line) sources.append(el("div", {}, `${line.source === "notes" ? "From your writing" : "From your resume"}: “${line.text}”`));
+    if (line) sources.append(el("p", { class: "quote" }, `${line.source === "notes" ? "From your writing" : "From your resume"}: “${line.text}”`));
   }
-  item.append(sources);
+  body.append(sources);
 
   const controls = el("div", { class: "bullet-controls" });
   const toggle = el("button", { class: "link-button", type: "button" }, bullet.included ? "Remove" : "Put back");
@@ -321,7 +363,7 @@ function renderBullet(bullet, entry) {
   const edit = el("button", { class: "link-button", type: "button" }, "Edit");
   edit.addEventListener("click", () => startEdit(item, bullet, entry));
   controls.append(toggle, edit);
-  item.append(controls);
+  body.append(controls);
   return item;
 }
 

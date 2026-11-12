@@ -6,83 +6,99 @@
   <title>TrueFit</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" />
-  <link rel="stylesheet" href="/static/styles.css?v=6" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap" />
+  <link rel="stylesheet" href="/static/styles.css?v=8" />
   <!-- Filled from .env by the "/" route in app/main.py -->
   <meta name="posthog-token" content="{{POSTHOG_PROJECT_TOKEN}}" />
   <meta name="posthog-host" content="{{POSTHOG_HOST}}" />
   <script src="/static/posthog.js"></script>
 </head>
 <body>
-  <header class="hero">
-    <div class="hero-inner">
-      <span class="eyebrow">For MBA students recruiting for 2027</span>
-      <h1>TrueFit</h1>
-      <p class="tagline">Paste a job posting. Know if the start date works, then get a resume for it that's ATS-ready and 100% true.</p>
-    </div>
+  <header class="topbar">
+    <span class="brand">TrueFit</span>
+    <nav class="steps" aria-label="Steps">
+      <a href="#step-posting" aria-current="step"><b>1</b> Start date</a>
+      <a href="#step-resume"><b>2</b> <span class="full">Your experience</span><span class="short">Experience</span></a>
+      <a href="#step-results"><b>3</b> <span class="full">Tailored resume</span><span class="short">Resume</span></a>
+    </nav>
   </header>
 
-  <main class="container">
-
+  <main>
     <div id="error" class="error" role="alert" hidden></div>
 
-    <!-- 1. Availability + posting -->
-    <section id="step-posting" aria-labelledby="posting-heading">
-      <h2 id="posting-heading"><span class="step" aria-hidden="true">1</span>Check the start date</h2>
+    <!-- 1. Availability + posting, with the start-date exhibit beside it -->
+    <div class="band">
+      <section id="step-posting" class="inputs" aria-labelledby="posting-heading">
+        <h2 id="posting-heading" class="panel-title">1 · The posting</h2>
 
-      <label for="availability">Available starting</label>
-      <input id="availability" type="text" autocomplete="off"
-             placeholder="June 2027 (or ASAP, Flexible)" />
-      <p class="hint">Leave blank for June 2027. Any start date in or after your month counts as in window. You can also type another month like "August 2027", or "ASAP" or "Flexible".</p>
+        <label for="availability">Available starting</label>
+        <input id="availability" type="text" autocomplete="off"
+               placeholder="June 2027 (or ASAP, Flexible)" />
+        <p class="hint">Leave blank for June 2027. Any start date in or after your month counts as in window. You can also type another month like "August 2027", or "ASAP" or "Flexible".</p>
 
-      <div class="label-row">
-        <label for="posting">Job posting</label>
-        <button id="sample-posting" class="link-button" type="button">Try a sample posting</button>
-      </div>
-      <textarea id="posting" rows="12" placeholder="Paste the full job posting text"></textarea>
+        <div class="label-row">
+          <label for="posting">Job posting</label>
+          <button id="sample-posting" class="link-button quiet" type="button">Try a sample posting</button>
+        </div>
+        <textarea id="posting" rows="10" placeholder="Paste the full job posting text"></textarea>
 
-      <button id="check-start-date" class="primary" type="button">Check start date</button>
+        <button id="check-start-date" class="primary" type="button">Check start date</button>
+      </section>
 
-      <div id="start-date-result" class="result" hidden aria-live="polite"></div>
-    </section>
+      <section class="exhibit" aria-labelledby="exhibit-1-title" aria-live="polite">
+        <p class="exhibit-no">Exhibit 1 · Start date</p>
+        <div id="start-date-result">
+          <h3 id="exhibit-1-title" class="action-title empty">Your start-date check appears here.</h3>
+          <p class="exhibit-sub">Paste a posting and choose Check start date. Every result shows the exact line it came from, so you can check it in seconds.</p>
+          <table class="exhibit-table ghost">
+            <thead><tr><th scope="col">Requirement</th><th scope="col">Status</th><th scope="col">What the posting says</th></tr></thead>
+            <tbody><tr><td class="req">Start date</td><td class="status none">Not checked yet</td><td><span class="ghost-bar"></span><span class="source">The quoted line from the posting goes here</span></td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
 
-    <!-- 2. Master resume + background notes -->
-    <section id="step-resume" aria-labelledby="resume-heading">
-      <h2 id="resume-heading"><span class="step" aria-hidden="true">2</span>Your experience</h2>
+    <!-- 2. Master resume + background notes, with the tailored resume beside it -->
+    <div class="band">
+      <section id="step-resume" class="inputs" aria-labelledby="resume-heading">
+        <h2 id="resume-heading" class="panel-title">2 · Your experience</h2>
 
-      <label for="master-resume">Master resume</label>
-      <textarea id="master-resume" rows="14" placeholder="Paste your full resume: every role, school, and bullet you might use"></textarea>
+        <label for="master-resume">Master resume</label>
+        <textarea id="master-resume" rows="10" placeholder="Paste your full resume: every role, school, and bullet you might use"></textarea>
 
-      <label for="background-notes">More about your experience <span class="optional">(optional)</span></label>
-      <textarea id="background-notes" rows="8" placeholder="Paste anything that describes your past work: notes, past cover letters, behavioral (STAR) stories, application essays."></textarea>
-      <p class="hint">TrueFit uses what you say you <em>did</em> here (actions, results, skills you used) to write bullets, along with your resume and nothing else. Goals and things you hope to learn are never turned into claims.</p>
+        <label for="background-notes">More about your experience <span class="optional">(optional)</span></label>
+        <textarea id="background-notes" rows="5" placeholder="Paste anything that describes your past work: notes, past cover letters, behavioral (STAR) stories, application essays."></textarea>
+        <p class="hint">TrueFit uses what you say you <em>did</em> here (actions, results, skills you used) to write bullets, along with your resume and nothing else. Goals and things you hope to learn are never turned into claims.</p>
 
-      <div class="save-row">
-        <button id="save-profile" class="link-button" type="button">Save on this device</button>
-        <button id="clear-profile" class="link-button" type="button">Clear saved</button>
-        <span id="saved-at" class="hint" aria-live="polite"></span>
-      </div>
+        <div class="save-row">
+          <button id="save-profile" class="link-button" type="button">Save on this device</button>
+          <button id="clear-profile" class="link-button" type="button">Clear saved</button>
+          <span id="saved-at" class="hint" aria-live="polite"></span>
+        </div>
 
-      <button id="tailor" class="primary" type="button" disabled>Tailor resume</button>
-      <p id="tailor-hint" class="hint">Check the start date first.</p>
-    </section>
+        <button id="tailor" class="primary" type="button" disabled>Tailor resume</button>
+        <p id="tailor-hint" class="hint">Check the start date first.</p>
+      </section>
 
-    <!-- 3. Results -->
-    <section id="step-results" aria-labelledby="results-heading" hidden>
-      <h2 id="results-heading"><span class="step" aria-hidden="true">3</span>Tailored resume</h2>
-      <p class="hint">Every bullet shows the lines it came from. <strong>Unverified</strong> bullets couldn't be traced and are left out unless you put them back.</p>
-      <div id="tailor-summary" class="tailor-summary" aria-live="polite"></div>
-      <div id="tailored-resume"></div>
+      <!-- 3. Results -->
+      <section id="step-results" class="exhibit" aria-labelledby="results-heading">
+        <p class="exhibit-no">Exhibit 2 · Tailored resume</p>
+        <h3 id="results-heading" class="action-title empty">Your tailored resume appears here.</h3>
+        <p id="tailor-summary" class="exhibit-sub" aria-live="polite">Every bullet shows the lines it came from. <strong>Unverified</strong> bullets couldn't be traced and are left out unless you put them back.</p>
+        <div id="tailored-resume"></div>
 
-      <div class="label-row copy-row">
-        <label for="plain-text">Copy-ready resume</label>
-        <button id="copy-resume" class="primary" type="button">Copy</button>
-      </div>
-      <textarea id="plain-text" rows="14" readonly></textarea>
-      <p id="copy-status" class="hint" aria-live="polite">Plain text for Workday or iCIMS: only the bullets you've kept.</p>
-    </section>
+        <div id="copy-block" hidden>
+          <div class="label-row copy-row">
+            <label for="plain-text">Copy-ready resume</label>
+            <button id="copy-resume" class="primary" type="button">Copy</button>
+          </div>
+          <textarea id="plain-text" rows="14" readonly></textarea>
+          <p id="copy-status" class="hint" aria-live="polite">Plain text for Workday or iCIMS: only the bullets you've kept.</p>
+        </div>
+      </section>
+    </div>
   </main>
 
-  <script src="/static/app.js?v=6"></script>
+  <script src="/static/app.js?v=8"></script>
 </body>
 </html>

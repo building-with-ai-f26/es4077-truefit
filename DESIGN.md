@@ -2,292 +2,228 @@
 name: TrueFit
 description: Paste a job posting. Know if the start date works, and get a resume for it that's ATS-ready and 100% true.
 colors:
-  violet: "#57068c"
-  violet-dark: "#3f0566"
-  violet-tint: "#f4effa"
-  grad-start: "#155799"
-  bg: "#f3f6fa"
-  card: "#ffffff"
-  text: "#3b454a"
-  muted: "#606c71"
-  border: "#e3e8ee"
-  good: "#166534"
-  good-bg: "#ecfdf3"
-  warn: "#92400e"
-  warn-accent: "#d97706"
-  warn-bg: "#fffbeb"
-  warn-badge-bg: "#fef3c7"
-  warn-border: "#fde68a"
-  bad: "#991b1b"
-  bad-bg: "#fef2f2"
-  bad-border: "#fecaca"
-  neutral: "#475569"
-  neutral-bg: "#f1f5f9"
+  navy: "#14213d"
+  ground: "#f6f7f9"
+  panel: "#ffffff"
+  ink: "#1b2333"
+  muted: "#5b6474"
+  rule: "#d9dde4"
+  field-border: "#aab2bf"
+  teal: "#0f7c7a"
+  teal-dark: "#0b5f5d"
+  highlight: "#f2c94c"
+  good: "#1e7a46"
+  warn: "#8a5a12"
+  warn-mark: "#b7791f"
+  warn-bg: "#fdf6e3"
+  bad: "#b42318"
+  bad-bg: "#fdf0ee"
+  none: "#6b7484"
 typography:
-  display:
-    fontFamily: '"Open Sans", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif'
+  action-title:
+    fontFamily: '"Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif'
     fontSize: "36px"
+    fontWeight: 800
+    lineHeight: 1.15
+    letterSpacing: "-0.015em"
+  action-title-narrow:
+    fontFamily: '"Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif'
+    fontSize: "28px"
+    fontWeight: 800
+    lineHeight: 1.15
+  wordmark:
+    fontFamily: '"Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif'
+    fontSize: "24px"
+    fontWeight: 800
+  tab:
+    fontFamily: '"Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif'
+    fontSize: "16px"
+    fontWeight: 500
+  row-label:
+    fontFamily: '"Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif'
+    fontSize: "16px"
     fontWeight: 700
-  headline:
-    fontFamily: '"Open Sans", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif'
-    fontSize: "26px"
-    fontWeight: 600
-    lineHeight: 1.25
-  title:
-    fontFamily: '"Open Sans", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif'
-    fontSize: "20px"
-    fontWeight: 600
-  body:
-    fontFamily: '"Open Sans", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif'
-    fontSize: "16px"
-    fontWeight: 400
-    lineHeight: 1.6
-  label:
-    fontFamily: '"Open Sans", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif'
-    fontSize: "16px"
-    fontWeight: 600
-    lineHeight: 1.6
-  small:
-    fontFamily: '"Open Sans", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif'
-    fontSize: "14px"
-    fontWeight: 400
-  eyebrow:
-    fontFamily: '"Open Sans", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif'
-    fontSize: "12px"
-    fontWeight: 600
+  caps-label:
+    fontFamily: '"Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif'
+    fontSize: "13px"
+    fontWeight: 700
     letterSpacing: "0.08em"
-  verdict:
-    fontFamily: '"Open Sans", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif'
-    fontSize: "15px"
-    fontWeight: 700
-    letterSpacing: "0.05em"
+  body:
+    fontFamily: '"Source Sans 3", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif'
+    fontSize: "16px"
+    fontWeight: 400
+    lineHeight: 1.55
+  footnote:
+    fontFamily: '"Source Sans 3", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif'
+    fontSize: "13px"
+    fontWeight: 400
   mono:
     fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace"
     fontSize: "13px"
 rounded:
-  sm: "8px"
-  md: "10px"
-  lg: "12px"
-  xl: "14px"
-  pill: "999px"
+  sm: "2px"
+  md: "4px"
 spacing:
-  2xs: "6px"
-  xs: "8px"
+  xs: "6px"
   sm: "12px"
   md: "16px"
-  lg: "20px"
-  xl: "28px"
+  lg: "22px"
+  xl: "40px"
+  xxl: "64px"
 components:
+  topbar:
+    backgroundColor: "{colors.navy}"
+    textColor: "{colors.panel}"
+    typography: "{typography.tab}"
+    height: "64px"
   button-primary:
-    backgroundColor: "{colors.violet}"
-    textColor: "{colors.card}"
-    typography: "{typography.label}"
+    backgroundColor: "{colors.teal}"
+    textColor: "{colors.panel}"
+    typography: "{typography.row-label}"
     rounded: "{rounded.md}"
-    padding: "10px 20px"
+    padding: "12px 22px"
   button-primary-hover:
-    backgroundColor: "{colors.violet-dark}"
+    backgroundColor: "{colors.teal-dark}"
   button-link:
-    textColor: "{colors.violet}"
-    typography: "{typography.small}"
+    textColor: "{colors.teal}"
+    typography: "{typography.footnote}"
+    padding: "0"
+  button-link-quiet:
+    textColor: "{colors.muted}"
+    typography: "{typography.footnote}"
     padding: "0"
   input:
-    backgroundColor: "{colors.card}"
-    textColor: "{colors.text}"
+    backgroundColor: "{colors.panel}"
+    textColor: "{colors.ink}"
     typography: "{typography.body}"
     rounded: "{rounded.md}"
     padding: "10px 12px"
-  step-card:
-    backgroundColor: "{colors.card}"
-    rounded: "{rounded.xl}"
-    padding: "24px 28px"
-  step-marker:
-    backgroundColor: "{colors.violet}"
-    textColor: "{colors.card}"
-    rounded: "{rounded.pill}"
-    size: "28px"
-  verdict-in-window:
-    backgroundColor: "{colors.good-bg}"
-    textColor: "{colors.good}"
-    typography: "{typography.verdict}"
-    rounded: "{rounded.lg}"
-    padding: "18px 20px"
-  verdict-vague:
-    backgroundColor: "{colors.warn-bg}"
-    textColor: "{colors.warn}"
-    typography: "{typography.verdict}"
-    rounded: "{rounded.lg}"
-    padding: "18px 20px"
-  verdict-outside:
-    backgroundColor: "{colors.bad-bg}"
-    textColor: "{colors.bad}"
-    typography: "{typography.verdict}"
-    rounded: "{rounded.lg}"
-    padding: "18px 20px"
-  verdict-not-stated:
-    backgroundColor: "{colors.neutral-bg}"
-    textColor: "{colors.neutral}"
-    typography: "{typography.verdict}"
-    rounded: "{rounded.lg}"
-    padding: "18px 20px"
-  badge-traced:
-    backgroundColor: "{colors.good-bg}"
-    textColor: "{colors.good}"
-    rounded: "{rounded.pill}"
-    padding: "2px 8px"
-  badge-unverified:
-    backgroundColor: "{colors.warn-badge-bg}"
-    textColor: "{colors.warn}"
-    rounded: "{rounded.pill}"
-    padding: "2px 8px"
-  bullet:
-    backgroundColor: "{colors.card}"
-    textColor: "{colors.text}"
+  input-panel:
+    backgroundColor: "{colors.panel}"
+    padding: "36px 40px"
+    width: "440px"
+  exhibit:
+    backgroundColor: "{colors.ground}"
+    padding: "40px 64px"
+  status-mark:
+    size: "24px"
     rounded: "{rounded.md}"
-    padding: "10px 12px"
-  bullet-unverified:
-    backgroundColor: "{colors.warn-bg}"
 ---
 
 # Design System: TrueFit
 
 ## Overview
 
-**Creative North Star: "The Receipts"**
+**Creative North Star: "The Exhibit"**
 
-Every claim TrueFit makes arrives with its proof attached. The start-date verdict sits above the exact line it was quoted from; every resume bullet carries a Traced or Unverified badge and the source lines it came from. The visual system exists to make that evidence easy to see and quick to check. It is calm, not loud: trust comes from things being visible, never from emphasis.
+Every result TrueFit gives is laid out like an exhibit in a consulting deck, the format Stern MBAs read every day. The exhibit's action title states the answer in one sentence. Each row underneath gives one requirement or bullet, a status mark with a word, and the proof: the quoted line, highlighted, with where it came from. Trust comes from the proof being visible, not from emphasis.
 
-The world is a quiet academic one. A blue-to-violet gradient (Cayman blue into NYU violet) marks the masthead, and everything below it is white cards on a pale blue-grey page, one column wide, with generous padding. Violet does two jobs only: headings and the primary action. Color beyond that is reserved for verdict status, and every status color is paired with a symbol and a word.
+The app (`app/static/`) is an Operate surface. A deck-navy top bar holds the wordmark and the three steps as tabs. Below it, each step is a band: a 440px white input panel on the left, and that step's exhibit on a cool grey ground on the right. On narrow screens each band stacks, with the exhibit under its inputs.
 
-The system has two layouts that share one set of tokens. The app (`app/static/`) is an Operate surface: a gradient header band with three numbered step cards overlapping its lower edge. The Product Page (`docs/index.html`) is a Read surface: a sticky gradient sidebar beside one long text column for the PRD and build log. Both use the same text colors; the app's corner radii are the standard, and the page's tighter corners are noted in Shapes.
+The Product Page (`docs/index.html`) has not moved to this system yet. It still uses the earlier violet gradient sidebar and Open Sans, and gets The Exhibit after Build 2.
 
 **Key Characteristics:**
-- Proof sits next to the claim: italic quotes, source lines, Traced badges.
-- One column, max 760px in the app, max 820px of text on the Product Page.
-- Gradient only in the masthead; white cards and flat interiors everywhere else.
-- Four status families (good, warn, bad, neutral), each with a glyph and a label.
-- Plain, literal copy; the copy-ready resume is monospace plain text.
+- An action title per exhibit: one plain sentence that answers the question.
+- A status mark and a word on every row, never color alone.
+- Proof is highlighted: posting quotes sit on a highlighter-yellow wash.
+- Hairline rules and a 2px navy rule under each action title; 4px corners; no shadows.
+- Three type sizes carry the hierarchy: 36px titles, 16px body, 13px caps labels and footnotes.
 
 ## Colors
 
-A restrained palette: one brand violet, one gradient partner blue, cool neutrals, and four status families that are used only to report a result.
+Restrained: deck navy owns the shell, teal owns the one action per step, highlighter yellow owns proof, and the four status families report results only.
 
-### Primary
-- **NYU Violet** (violet): h2 headings, step markers, primary buttons, link buttons, the focus ring, and the end of the masthead gradient. It is the one voice that says "act here" or "this is a section."
-- **Deep Violet** (violet-dark): primary button hover, and resume-section headings inside the tailored resume.
-- **Violet Mist** (violet-tint): a pale violet wash kept available for selected or highlighted rows; currently defined but used sparingly.
+### Shell and action
+- **Deck Navy** (navy): the top bar, action titles, row labels, and the 2px rule under each action title.
+- **Teal** (teal / teal-dark): the primary button in each step, link buttons, the focus ring, and exhibit numbers ("Exhibit 1 · Start date"). Hover darkens to teal-dark.
+- **Highlighter** (highlight): the wash behind quoted posting lines (at 50% opacity), the active tab's underline, and text selection.
 
-### Secondary
-- **Cayman Blue** (grad-start): the start of the masthead gradient only (120° in the app header, 160° in the Product Page sidebar). Never used as a flat fill or text color.
-
-### Neutral
-- **Slate Ink** (text): body text, labels, entry headers. The standard text color for both surfaces.
-- **Fog Grey** (muted): hints, captions, `meta` lines, stat-box labels, source-line notes, optional-field labels.
-- **Paper White** (card): card, input, and bullet backgrounds.
-- **Blue-Grey Wash** (bg): the app page background behind the cards; also the Product Page table-header and stat-box tint.
-- **Hairline** (border): card, input, bullet, and section-divider borders.
+### Neutrals
+- **Ground** (ground): the exhibit side of each band and the copy-ready resume box.
+- **Panel** (panel): the input panel and field fills.
+- **Ink** (ink): body text. **Muted** (muted): hints, footnotes, column headers, empty-state titles; 5.6:1 on Ground.
+- **Rule** (rule): 1px hairlines between rows and bands. **Field Edge** (field-border): input and textarea borders, darker than Rule so fields read as fields.
 
 ### Status
-- **Proof Green** (good / good-bg): In window verdicts and Traced badges.
-- **Caution Amber** (warn / warn-bg / warn-accent / warn-badge-bg / warn-border): vague, partial, and flexible verdicts; Unverified bullets and badges; the undergraduate warning. `warn-accent` colors the verdict glyph disc and left rule; `warn` colors text.
-- **Stop Red** (bad / bad-bg / bad-border): Outside window verdicts and request errors.
-- **Slate Neutral** (neutral / neutral-bg): Not stated verdicts, and the background of the copy-ready resume box.
+- **Good** (good): Meets / In window, Traced.
+- **Warn** (warn text, warn-mark glyph, warn-bg): vague, partial, or flexible verdicts; Unverified bullets; the "Who it's for" undergraduate check.
+- **Bad** (bad, bad-bg): Outside window and request errors.
+- **None** (none): Not stated, and rows not checked yet.
 
 ### Named Rules
-**The Proof Is Green Rule.** Green means "checked and it holds": an In window verdict or a Traced bullet. It is never used as decoration, branding, or a generic success toast.
+**The Highlighter Rule.** Yellow means "this is the proof." It sits behind quoted posting text and nothing else on the page, apart from the active-tab underline and selection.
 
-**The One Violet Rule.** Violet marks headings and the single primary action in a step. If two things on screen are both violet buttons, one of them should be a link button.
+**The One Teal Rule.** Each step has exactly one teal button. Everything secondary is a link button.
 
 ## Typography
 
-**Body Font:** Open Sans (with -apple-system, BlinkMacSystemFont, Helvetica Neue, Helvetica, Arial, sans-serif)
-**Mono Font:** ui-monospace (with SFMono-Regular, Menlo, monospace), for the copy-ready resume only
-
-**Character:** One humanist sans at a few weights, set at a comfortable 1.6 line height. Hierarchy comes from weight and violet color, not from size jumps. Both surfaces load Open Sans from Google Fonts (400, 600, 700, and 400 italic for quotes, with `display=swap`); any new weight or style must be added to that link on both pages.
+**Display:** Schibsted Grotesk (500, 700, 800) for the wordmark, tabs, action titles, row labels, and caps labels.
+**Body:** Source Sans 3 (400, 600, 400 italic) for everything else.
+**Mono:** ui-monospace, for the copy-ready plain-text resume only.
 
 ### Hierarchy
-- **Display** (700, 36px): the "TrueFit" wordmark in the app header band, in white. The Product Page sidebar sets it at 40px, weight 600, line height 1.1; 30px on phones in the app.
-- **Headline** (600, 26px, 1.25): Product Page section headings, in violet.
-- **Title** (600, 20px): app step-card headings, in violet with a numbered step marker; Product Page h3 subheads use 18px.
-- **Body** (400, 16px, 1.6): everything else. Text measure is capped by the column (760px card, 820px page section), roughly 75–90 characters.
-- **Label** (600, 16px): form field labels and primary button text.
-- **Small** (400, 14px): hints, captions, "checked against" lines, link buttons (at 600).
-- **Eyebrow** (600, 12px, 0.08em, uppercase): the line above the wordmark in the masthead, at 75–80% white opacity. Stat-box labels on the Product Page use the same caps treatment at 0.04em.
-- **Verdict** (700, 15px, 0.05em, uppercase): the verdict label in the start-date result, in the status text color.
-- **Mono** (13px): the read-only copy-ready resume textarea.
+- **Action title** (800, 36px, 1.15, -0.015em): one per exhibit, in Deck Navy; Muted in the empty state; 28px under 900px.
+- **Wordmark** (800, 24px): "TrueFit" in the top bar.
+- **Tab** (500, 16px; numbers at 700): step tabs in the top bar, 78% white, full white when hovered or current.
+- **Row label** (700, 16px): requirement names, resume entry headers, primary button text.
+- **Caps label** (700, 13px, 0.06–0.08em, uppercase): panel titles, exhibit numbers, table headers, resume section headings.
+- **Body** (400, 16px, 1.55): everything else.
+- **Footnote** (400, 13px): hints, sources, flag reasons, link buttons (at 600).
 
 ### Named Rules
-**The Quote Rule.** Italic means "this is someone else's exact words": posting quotes in blockquotes and source lines under bullets. Nothing else is set in italic, so a reader can trust that anything slanted is verbatim.
+**The Quote Rule.** Italic means verbatim: posting quotes and resume source lines. Nothing else is italic.
+
+**The Three Sizes Rule.** Hierarchy comes from weight, case, color, and rules, not from more sizes. New text uses 36, 16, or 13px.
 
 ## Layout
 
-**App.** A full-width gradient header band (40px top, 72px bottom padding) holds the eyebrow, wordmark, and tagline inside a 760px column. The content column (max 760px, 20px side gutters) is pulled up 44px so the first card overlaps the band. Three step cards stack vertically with 20px between them, padded 24px × 28px (20px on phones). Inside a card, label/field groups are separated by 16px above each label and 6px below; primary buttons sit 16px below their field. Rows that pair a label with a link button use a space-between flex row. Breakpoint at 600px: wordmark drops to 30px and card padding to 20px.
+A band per step: `grid-template-columns: 440px 1fr`. The input panel is white with a 1px right rule and 36px × 40px padding. The exhibit pads 40px × 64px and caps at 980px. Bands are separated by a 1px rule. Under 900px, bands stack, padding drops to 28px × 20px, tabs shorten to "Experience" and "Resume", and exhibit table rows become label + status on one line with the quote below.
 
-**Product Page.** A two-column grid: a 320px sticky sidebar (full viewport height, 48px × 32px padding, gradient) and one text column (max 820px, 44px × 56px padding). Sections are separated by a 1px hairline rule. Supporting content uses full-width bordered tables and an auto-fit stat grid (min 220px columns, 14px gap). Below 860px the sidebar becomes a centered banner on top, its buttons wrap into a row, and sections pad to 32px × 22px.
-
-**Shared rhythm.** Spacing steps cluster at 6, 8, 12, 16, 20, and 28px. Density is relaxed: whitespace between steps is part of what makes the evidence feel checkable.
+Field groups are 22px apart; hints sit 6px under their field; a primary button sits 22px under the last field.
 
 ## Elevation & Depth
 
-The system is mostly flat. There is exactly one shadow, a soft two-layer ambient lift on the app's top-level step cards, which makes them read as sheets of paper resting on the blue-grey page and over the header band. Everything inside a card is flat and separated by 1px hairlines and pale tinted fills. The Product Page uses no shadows at all; it separates content with rules, borders, and tints.
+Flat. No shadows anywhere. Depth comes from the white panel against the grey ground, 1px rules, and the 2px navy rule under each action title. Focus uses a 3px teal halo on fields and a 3px teal outline on buttons.
 
-### Shadow Vocabulary
-- **Card lift** (`box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 16px rgba(16, 24, 40, 0.06)`): app step cards only.
-- **Focus halo** (`box-shadow: 0 0 0 3px rgba(87, 6, 140, 0.15)`): focused inputs and textareas, together with a violet border.
+## Motion
 
-### Named Rules
-**The One Lift Rule.** Only the step card is lifted. Verdict cards, bullets, badges, and inputs inside it stay flat; depth inside a card comes from tint and border, never from another shadow.
-
-## Shapes
-
-Gently rounded, friendly but not bubbly. In the app: blockquotes 8px (square on the left, where the quote rule sits), inputs, buttons, and bullets 10px, verdict cards 12px, step cards 14px, and full pills for badges, step markers, and verdict glyph discs. Radius grows with container size. The Product Page uses tighter corners (about 5px on sidebar buttons and stat boxes, 8px on figures); treat the app scale as the standard for new work. Status is also carried by a left rule: 5px on verdict cards and 3px on blockquotes.
+One authored moment: when an exhibit fills, a highlighter swipe draws across each quoted line (0.7s, `cubic-bezier(0.16, 1, 0.3, 1)`, staggered 0.12s per row). Only the background animates, so the text is readable from the start. It is off under `prefers-reduced-motion`.
 
 ## Components
 
-Calm and checkable: soft cards, generous space, and evidence visible at a glance.
+### Top bar
+Deck Navy, 64px tall, wordmark then three tabs ("1 Start date", "2 Your experience", "3 Tailored resume"). The current step's tab has `aria-current="step"`, full white text, and a 3px highlighter underline.
+
+### Exhibit (signature)
+Exhibit number in teal caps, then the action title, then a Muted sub-line ("Checked against your availability: …") over a 2px navy rule. Below, a table: Requirement | Status | What the posting says. The empty state shows the same table with one "Not checked yet" row and a grey bar where the quote will go.
+
+### Status mark
+A 24px SVG glyph followed by the status word, in the status color: filled green check (Meets / In window / Traced), amber outlined question mark (vague, partial, flexible, Unverified, Check), filled red cross (Outside window), grey outlined dash (Not stated, not checked yet). 20px inside resume bullets.
+
+### Quoted proof
+Italic text on a highlighter wash, with a 13px Muted source line under it ("Quoted word for word from the posting").
+
+### Traced bullet
+A row in Exhibit 2: status mark and word in a 130px column, then the bullet text, an amber flag reason (Unverified only), italic source lines ("From your resume: …"), and Remove / Put back / Edit link buttons. Unverified rows get a warm wash fading right; removed bullets are struck through in Muted and stay visible.
 
 ### Buttons
-- **Shape:** gently rounded (10px).
-- **Primary:** NYU Violet fill, white 600-weight label, 10px × 20px padding, 16px above. Holds an inline 16px spinner while working; the disabled state drops to 75% opacity with a wait cursor (50% and not-allowed for "Tailor resume" before a start-date check).
-- **Hover / Focus:** hover darkens to Deep Violet over 0.15s. Focus-visible draws a 3px violet outline at 35% opacity, offset 2px.
-- **Link button:** unstyled text button in violet, 14px/600, underlined on hover. Used for secondary actions such as "Try a sample posting", "Save on this device", "Remove", and "Put back".
-- **Product Page sidebar button:** full-width ghost button on the gradient, translucent white fill (8%) and border (25%), brightening to 20% fill on hover.
+- **Primary:** Teal, white 700 16px label, 12px × 22px, 4px corners. Disabled at 75% with a wait cursor while working; "Tailor resume" sits at 45% and not-allowed until a start date is checked.
+- **Link:** Teal 600 13px, underline on hover. **Quiet link** ("Try a sample posting"): Muted 400 with a Rule-colored underline, turning teal on hover.
 
-### Cards / Containers
-- **Step card:** white, 14px radius, 1px hairline border, card-lift shadow, 24px × 28px padding. Its h2 leads with a 28px violet step-number disc.
-- **Stat box (Product Page):** Blue-Grey Wash fill, pale blue border, small uppercase label over a 19px bold violet value.
-
-### Inputs / Fields
-- **Style:** full width, white, 1px hairline border, 10px radius, 10px × 12px padding, inherits body type. Textareas resize vertically only.
-- **Focus:** border turns violet plus the 3px focus halo; the native outline is removed only because this replaces it.
-- **Read-only output:** the copy-ready resume textarea uses the mono font at 13px on a Slate Neutral background, so it reads as "plain text, ready to paste."
-
-### Verdict Card (signature)
-The start-date result. A 12px-radius panel with a 5px status-colored left rule and a pale status fill. The head pairs a 32px glyph disc (white ✓ for in window, ~ for vague, partial, or flexible, ✕ for outside, ? for not stated) with an uppercase verdict label. Below it: a one-sentence plain explanation, the quoted evidence in an italic blockquote on a 70% white wash, and a small "checked against" note. An undergraduate-posting warning, when present, sits above the verdict in a Caution Amber box.
-
-### Traced Bullet (signature)
-Each tailored-resume bullet is a 10px-radius bordered tile. A pill badge leads the row: "✓ Traced" in Proof Green, or "Unverified" in Caution Amber, which also tints the whole tile amber. Under the text: an amber flag reason (Unverified only), then italic 13px source lines ("From your resume: …"), then link-button controls. Excluded bullets fade to 60% with the text struck through, so a removed claim stays visible and can be restored.
-
-### Error Banner
-A Stop Red tinted box (10px radius, pale red border) above the steps with `role="alert"`, holding one plain sentence.
-
-### Named Rules
-**The Never Color Alone Rule.** Every status color travels with a glyph and a word: ✓ In window, ✕ Outside window, "Unverified". If you remove the color, the meaning must survive.
+### Fields
+White, 1px Field Edge border, 4px corners, 10px × 12px. Focus: teal border and a 3px teal halo. Textareas grow with their content (min 9em, max 32em) where the browser supports `field-sizing`.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** put the source next to every claim: an italic blockquote for posting quotes, an italic source line for resume bullets.
-- **Do** pair each status color with its glyph and label (✓ ~ ✕ ?, "✓ Traced", "Unverified").
-- **Do** use NYU Violet (#57068c) for h2 headings and the one primary button per step; use link buttons for everything secondary.
-- **Do** keep the copy-ready resume monospace and plain: standard headings, hyphen bullets, a single column.
-- **Do** keep focus visible: a violet border plus a 3px halo on fields, a 3px violet outline on buttons.
-- **Do** use Fog Grey (#606c71) as the lightest text color; it clears 4.5:1 on white and on the Blue-Grey Wash.
+- **Do** open every exhibit with a one-sentence action title that answers the question.
+- **Do** pair every status color with its glyph and word.
+- **Do** put the quoted proof, highlighted, next to every claim, with where it came from.
+- **Do** show only what the app actually checks. Eligibility rows beyond start date wait until they are built.
 
 ### Don't:
-- **Don't** use the gradient anywhere but the app header band and the Product Page sidebar.
-- **Don't** add new hues; the palette is violet, Cayman blue, cool neutrals, and the four status families.
-- **Don't** use green, amber, or red as decoration; they report results only.
-- **Don't** add shadows inside a step card; only the card itself is lifted.
-- **Don't** set anything in italic that isn't verbatim source text.
-- **Don't** introduce a grey lighter than Fog Grey for text; anything paler fails WCAG AA at the 14px captions use.
-- **Don't** add tables, columns, icons, or decorative formatting to the copy-ready resume output.
+- **Don't** add shadows, gradients, or rounded corners beyond 4px.
+- **Don't** use yellow for anything but proof, the current tab, and selection.
+- **Don't** use green, amber, or red as decoration.
+- **Don't** invent source details the app doesn't have, such as posting line numbers.
+- **Don't** add decorative formatting to the copy-ready resume.
