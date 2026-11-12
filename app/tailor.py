@@ -69,8 +69,8 @@ async def verify_bullet(text: str, source_line_ids: list[str], posting: str, mas
 
 def _validate(reply: dict, lines: list) -> list[dict]:
     """Keep only well-formed sections, entries, and bullets. Unknown header IDs are dropped; bullet IDs are checked later."""
-    # Contact lines and section headings never belong in an entry's header.
-    header_ok = {line.id for line in lines if line.kind not in ("contact", "heading")}
+    # Only header lines belong in an entry's header: never contact lines, headings, or bullet lines.
+    header_ok = {line.id for line in lines if line.kind == "header"}
     sections = []
     for raw_section in reply.get("sections") or []:
         if not isinstance(raw_section, dict) or not isinstance(raw_section.get("heading"), str):

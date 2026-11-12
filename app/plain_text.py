@@ -28,6 +28,15 @@ def normalize_chars(text: str) -> str:
     return re.sub(r" {2,}", " ", text.replace("\x00", "–")).strip()
 
 
+def contact_rows(lines_by_id: dict[str, ResumeLine]) -> list[str]:
+    """The name on its own line, then all other contact details together on one line."""
+    contact = [normalize_chars(line.text) for line in lines_by_id.values() if line.kind == "contact"]
+    if len(contact) <= 1:
+        return contact
+    details = " | ".join(part.strip(" |") for part in contact[1:])
+    return [contact[0], details]
+
+
 def header_rows(entry: dict, lines_by_id: dict[str, ResumeLine]) -> list[list[str]]:
     """An entry's header as [left, right] rows: organization | location, then title | dates for each role.
 
@@ -61,8 +70,7 @@ def header_rows(entry: dict, lines_by_id: dict[str, ResumeLine]) -> list[list[st
 
 def render_plain_text(sections: list[dict], lines_by_id: dict[str, ResumeLine]) -> str:
     """Render included bullets only. Entries with nothing to show are skipped."""
-    contact = [normalize_chars(line.text) for line in lines_by_id.values() if line.kind == "contact"]
-    blocks = ["\n".join(contact)] if contact else []
+    blocks = ["\n".join(contact_rows(lines_by_id))] if contact_rows(lines_by_id) else []
     for section in sections:
         rows = []
         for entry in section.get("entries", []):

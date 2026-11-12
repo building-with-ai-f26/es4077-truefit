@@ -65,7 +65,8 @@ def test_restores_line_breaks_from_pdf_paste():
     lines = split_lines(GLUED)
     got = [(line.kind, line.section, line.text) for line in lines]
     assert got == [
-        ("contact", None, "Pat Lee 1 Main St, New York, NY | 555-0100 | pat@example.com"),
+        ("contact", None, "Pat Lee"),
+        ("contact", None, "1 Main St, New York, NY | 555-0100 | pat@example.com"),
         ("heading", "Education", "EDUCATION"),
         ("header", "Education", "STATE UNIVERSITY, School of Business New York, NY Master of Business Administration Aug. 2025 - Present"),
         ("header", "Education", "Concentrations: Strategy, Finance"),
@@ -84,4 +85,16 @@ def test_restores_line_breaks_from_pdf_paste():
         ("bullet", "Experience", "● Coordinated 18 press screening events"),
         ("heading", "Additional", "ADDITIONAL"),
         ("bullet", "Additional", "● Tools: Airtable, GitHub Copilot CLI, SQL"),
+    ]
+
+
+def test_header_joined_to_a_bullet_by_a_space_is_split():
+    resume = """EXPERIENCE
+NORTHWIND Seattle, WA Product Intern June 2026 - Aug. 2026
+● Prototyped an AI prompt tool with five interns, leading to better outputs AMERICAN EXPRESS New York, NY Marketing Manager June 2022 - Aug. 2025
+● Drove 20% growth through 30 campaigns"""
+    texts = [(line.kind, line.text) for line in split_lines(resume)][2:4]
+    assert texts == [
+        ("bullet", "● Prototyped an AI prompt tool with five interns, leading to better outputs"),
+        ("header", "AMERICAN EXPRESS New York, NY Marketing Manager June 2022 - Aug. 2025"),
     ]

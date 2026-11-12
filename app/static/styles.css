@@ -243,7 +243,8 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
   text-transform: uppercase;
   color: var(--navy);
 }
-.resume-contact { margin-top: 24px; font-weight: 600; color: var(--ink); }
+.resume-contact { margin-top: 24px; color: var(--ink); }
+.resume-name { font: 800 24px var(--display); color: var(--navy); }
 .entry { margin: 10px 0 18px; }
 .entry-header { display: flex; justify-content: space-between; gap: 16px; font: 600 16px var(--body); color: var(--ink); }
 .entry-header.org { font: 700 16px var(--display); color: var(--navy); }
@@ -259,8 +260,8 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
 .bullet .status { font-size: 13px; font-weight: 600; white-space: nowrap; }
 .bullet .mark { width: 20px; height: 20px; margin-right: 8px; vertical-align: -5px; }
 .bullet.flagged { background: linear-gradient(90deg, var(--warn-bg), transparent 70%); }
-.bullet.excluded .bullet-text { text-decoration: line-through; color: var(--muted); }
-.bullet.excluded .status { opacity: 0.6; }
+.bullet.removed .bullet-text { text-decoration: line-through; color: var(--muted); }
+.bullet.removed .status { opacity: 0.6; }
 .flag-reason { margin: 4px 0 0; font-size: 13px; color: var(--warn); }
 .sources .quote { font-size: 13px; color: var(--muted); }
 .sources .quote + .quote { margin-top: 2px; }

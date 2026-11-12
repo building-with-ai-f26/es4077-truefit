@@ -295,7 +295,6 @@ async function tailorResume() {
   setTailoring(true);
   try {
     const result = await api("/api/tailor", request);
-    lastRemoved = null;
     tailorState = {
       request,
       linesById: new Map(result.resume_lines.map((line) => [line.id, line])),
@@ -316,11 +315,15 @@ async function tailorResume() {
 
 tailorButton.addEventListener("click", tailorResume);
 
-// Removed bullets are gone from the list and the resume; the last one can be brought back with Undo.
-let lastRemoved = null;
-
 function allBullets() {
-  return tailorState.sections.flatMap((s) => s.entries.flatMap((e) => e.bullets)).filter((b) => !b.removed);
+  return tailorState.sections.flatMap((s) => s.entries.flatMap((e) => e.bullets));
+}
+
+// Mirrors contact_rows in app/plain_text.py: the name, then all other contact details on one line.
+function contactRows(linesById) {
+  const contact = [...linesById.values()].filter((line) => line.kind === "contact").map((line) => line.text);
+  if (contact.length <= 1) return contact;
+  return [contact[0], contact.slice(1).map((part) => part.replace(/^[\s|]+|[\s|]+$/g, "")).join(" | ")];
 }
 
 // Mirrors header_rows in app/plain_text.py: [left, right] rows, organization | location then title | dates.
@@ -350,8 +353,9 @@ function headerRows(entry, linesById) {
 function renderTailored(fresh = false) {
   tailoredBox.replaceChildren();
   tailoredBox.classList.toggle("fresh", fresh);
-  const contact = [...tailorState.linesById.values()].filter((line) => line.kind === "contact");
-  if (contact.length) tailoredBox.append(el("div", { class: "resume-contact" }, ...contact.map((line) => el("div", {}, line.text))));
+  const [name, details] = contactRows(tailorState.linesById);
+  if (name) tailoredBox.append(el("div", { class: "resume-contact" },
+    el("div", { class: "resume-name" }, name), details ? el("div", {}, details) : null));
   for (const section of tailorState.sections) {
     tailoredBox.append(el("h3", { class: "resume-section" }, section.heading));
     for (const entry of section.entries) {
@@ -360,10 +364,9 @@ function renderTailored(fresh = false) {
         block.append(el("div", { class: `entry-header${row.org ? " org" : ""}` },
           el("span", {}, row[0]), row[1] ? el("span", { class: "entry-header-right" }, row[1]) : null));
       }
-      const shown = entry.bullets.filter((b) => !b.removed);
-      if (shown.length) {
+      if (entry.bullets.length) {
         const list = el("ul", { class: "bullets" });
-        for (const bullet of shown) list.append(renderBullet(bullet, entry));
+        for (const bullet of entry.bullets) list.append(renderBullet(bullet, entry));
         block.append(list);
       }
       tailoredBox.append(block);
@@ -378,25 +381,17 @@ function renderTailored(fresh = false) {
   summaryBox.replaceChildren(flagged
     ? `${kept} kept in the copy-ready resume. ${flagged} unverified ${flagged === 1 ? "bullet is" : "bullets are"} left out unless you put ${flagged === 1 ? "it" : "them"} back.`
     : `${kept} kept in the copy-ready resume. Each bullet shows the lines it came from.`);
-  if (lastRemoved) {
-    const undo = el("button", { class: "link-button", type: "button" }, "Undo");
-    undo.addEventListener("click", () => {
-      Object.assign(lastRemoved.bullet, { removed: false, included: lastRemoved.included });
-      lastRemoved = null;
-      renderTailored();
-    });
-    summaryBox.append(" Bullet removed. ", undo);
-  }
   plainTextBox.value = renderPlainText(tailorState.sections, tailorState.linesById);
 }
 
 function renderBullet(bullet, entry) {
   const traced = bullet.status === "traced";
-  const item = el("li", { class: `bullet ${bullet.status}${bullet.included ? "" : " excluded"}` });
+  // Only bullets the student removed are crossed out; unverified ones stay readable while left out.
+  const item = el("li", { class: `bullet ${bullet.status}${bullet.removed ? " removed" : ""}` });
   const body = el("div", { class: "bullet-body" }, el("span", { class: "bullet-text" }, bullet.text));
   item.append(statusCell("span", traced ? "good" : "warn", traced ? "Traced" : "Unverified"), body);
   if (!traced && bullet.flag_reason) {
-    body.append(el("p", { class: "flag-reason" }, bullet.included ? bullet.flag_reason : `Left out of your resume. ${bullet.flag_reason.replace(/\.$/, "")}.`));
+    body.append(el("p", { class: "flag-reason" }, bullet.included || bullet.removed ? bullet.flag_reason : `Left out of your resume. ${bullet.flag_reason.replace(/\.$/, "")}.`));
   }
 
   const sources = el("div", { class: "sources" });
@@ -406,26 +401,19 @@ function renderBullet(bullet, entry) {
   }
   body.append(sources);
 
+  // Remove crosses a bullet out and leaves it out; Put back restores it. Unverified bullets start left out
+  // without being crossed out, and a put-back unverified bullet stays marked Unverified (FR-012c).
   const controls = el("div", { class: "bullet-controls" });
-  if (!traced) {
-    // Unverified bullets start left out; they can be put back (still marked Unverified, FR-012c) or left out again.
-    const toggle = el("button", { class: "link-button", type: "button" }, bullet.included ? "Leave out" : "Put back");
-    toggle.addEventListener("click", () => {
-      bullet.included = !bullet.included;
-      renderTailored();
-    });
-    controls.append(toggle);
-  }
-  const edit = el("button", { class: "link-button", type: "button" }, "Edit");
-  edit.addEventListener("click", () => startEdit(item, bullet, entry));
-  const remove = el("button", { class: "link-button", type: "button" }, "Remove");
-  remove.addEventListener("click", () => {
-    lastRemoved = { bullet, included: bullet.included };
-    Object.assign(bullet, { removed: true, included: false });
-    track("bullet_removed", { status: bullet.status });
+  const toggle = el("button", { class: "link-button", type: "button" }, bullet.included ? "Remove" : "Put back");
+  toggle.addEventListener("click", () => {
+    bullet.included = !bullet.included;
+    bullet.removed = !bullet.included; // pressing Remove crosses it out; Put back clears that
+    track(bullet.included ? "bullet_put_back" : "bullet_removed", { status: bullet.status });
     renderTailored();
   });
-  controls.append(edit, remove);
+  const edit = el("button", { class: "link-button", type: "button" }, "Edit");
+  edit.addEventListener("click", () => startEdit(item, bullet, entry));
+  controls.append(toggle, edit);
   body.append(controls);
   return item;
 }
@@ -519,7 +507,7 @@ function titleCase(text) {
 }
 
 function renderPlainText(sections, linesById) {
-  const contact = [...linesById.values()].filter((line) => line.kind === "contact").map((line) => normalizeChars(line.text));
+  const contact = contactRows(linesById).map(normalizeChars);
   const blocks = contact.length ? [contact.join("\n")] : [];
   for (const section of sections) {
     const rows = [];

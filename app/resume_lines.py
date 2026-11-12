@@ -85,6 +85,44 @@ def _split_glued(line: str) -> list[str]:
     return [line]
 
 
+_CAPS_WORD = re.compile(r"(?<!\S)[A-Z][A-Z&.'-]{2,}(?=[\s,(]|$)")
+
+
+def _split_spaced_header(line: str) -> list[str]:
+    """A bullet that ends in a job header joined by a space ("...better outputs PARAMOUNT New York, NY
+    Marketing Manager June 2022 - Aug. 2025"): split before the all-caps company name nearest the dates."""
+    if not _BULLET_PREFIX.match(line):
+        return [line]
+    dates = _DATE_RANGE.search(line)
+    if not dates or line[dates.end():].strip():
+        return [line]  # only a bullet that ends with a date range can hide a header
+    caps = [m for m in _CAPS_WORD.finditer(line, 0, dates.start())]
+    if not caps:
+        return [line]
+    start = caps[-1].start()
+    for m in reversed(caps[:-1]):  # take the whole company name: "AMERICAN EXPRESS", "TREMOR INTERNATIONAL LTD"
+        if line[m.end():start].strip():
+            break
+        start = m.start()
+    before, after = line[:start].strip(), line[start:].strip()
+    if len(before.split()) >= 4 and len(after.split()) <= 25:
+        return [before, after]
+    return [line]
+
+
+def _split_contact(lines: list[str], first_section: int) -> list[str]:
+    """Put the name on its own line: "Emma Doe 1 Main St, New York | 555-0100" → "Emma Doe", "1 Main St, ..."."""
+    if not first_section:
+        return lines
+    words = lines[0].split()
+    cut = next((i for i, w in enumerate(words) if any(c.isdigit() for c in w) or "@" in w or "|" in w
+                or w.lower().startswith(("www.", "http", "linkedin"))), len(words))
+    name = words[:cut]
+    if 2 <= len(name) <= 4 and cut < len(words) and all(w[:1].isupper() for w in name):
+        return [" ".join(name), " ".join(words[cut:]).lstrip("| "), *lines[1:]]
+    return lines
+
+
 def _split_after_dates(line: str) -> list[str]:
     """A header line followed by more text ("...Aug. 2025 - Present Specializations: ...") ends at its dates."""
     if _BULLET_PREFIX.match(line):
@@ -102,7 +140,8 @@ def restore_line_breaks(master_resume: str) -> list[str]:
     lines = []
     for raw in text.splitlines():
         for part in _split_glued(raw.strip()):
-            lines.extend(_split_after_dates(part))
+            for piece in _split_spaced_header(part):
+                lines.extend(_split_after_dates(piece))
     return [line.strip() for line in lines if line.strip()]
 
 
@@ -113,7 +152,9 @@ def split_lines(master_resume: str, background_notes: str | None = None) -> list
     raw_lines = restore_line_breaks(master_resume)
     uses_symbols = any(_BULLET_PREFIX.match(text) for text in raw_lines)
     # Lines above the first standard heading (name, email, phone, links) are the contact block.
-    first_section = next((i for i, t in enumerate(raw_lines) if t.rstrip(":").strip().lower() in COMMON_HEADINGS), None)
+    find_section = lambda: next((i for i, t in enumerate(raw_lines) if t.rstrip(":").strip().lower() in COMMON_HEADINGS), None)
+    raw_lines = _split_contact(raw_lines, find_section())
+    first_section = find_section()
     for i, text in enumerate(raw_lines):
         if first_section is not None and i < first_section:
             kind = "contact"

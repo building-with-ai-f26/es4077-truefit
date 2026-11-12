@@ -175,7 +175,7 @@ CONTOSO New York, NY Marketing Manager June 2022 - Aug. 2025
     body = client.post("/api/tailor", json={"posting": POSTING, "master_resume": master}).json()
     assert [s["heading"] for s in body["resume"]["sections"]] == ["Education", "Experience"]
     assert body["resume"]["plain_text"].startswith(
-        "Pat Lee | pat@example.com | 555-0100\n\nEducation\nSTATE UNIVERSITY New York, NY MBA Aug. 2025 – Present\n")
+        "Pat Lee\npat@example.com | 555-0100\n\nEducation\nSTATE UNIVERSITY New York, NY MBA Aug. 2025 – Present\n")
 
 
 def test_two_entries_for_the_same_job_merge(client, fake_llm):
