@@ -277,7 +277,7 @@
         <div class="stat-box">
           <div class="stat-label">Cumulative Build Spend</div>
           <div class="stat-value">$22.00</div>
-          <p class="meta">$5.00 OpenRouter credits ($0.08 used) + $17 Claude Pro (annual plan, one month prorated). As of Nov 6, 2026.</p>
+          <p class="meta">$5.00 OpenRouter credits ($2.30 used) + $17 Claude Pro (annual plan, one month prorated). As of Nov 12, 2026.</p>
         </div>
         <div class="stat-box">
           <div class="stat-label">Est. Cost Per User Run</div>
@@ -286,14 +286,19 @@
         </div>
         <div class="stat-box">
           <div class="stat-label">User Evidence (Analytics from Build 2)</div>
-          <div class="stat-value">1 tester · 3 checks</div>
-          <p class="meta">PostHog, Nov 10–12, 2026, all from my own testing. Local app: 7 page views, 21 clicks, 3 start-date checks, no failed checks, 1 session replay. Product Page: 1 page view. Real-user numbers start with pod testing on Nov 17.</p>
+          <div class="stat-value">7 checks · 7 resumes</div>
+          <p class="meta">PostHog, Nov 10–12, 2026, from my own testing (page views also include automated screenshot runs). Local app: 7 start-date checks, 7 tailored resumes, 2 copies, 21 page views, 92 clicks, 2 session replays. Product Page: 3 page views. Real-user numbers start with pod testing on Nov 17.</p>
         </div>
         <div class="stat-box">
           <div class="stat-label">Sponsor Call (Week 6)</div>
           <div class="stat-value">TBD</div>
         </div>
       </div>
+      <figure>
+        <img src="images/posthog-dashboard-build2.png" width="2426" height="1354" loading="lazy"
+             alt="PostHog dashboard 'TrueFit usage': 7 start-date checks, 7 resumes tailored, page views for the local app (about 21) and the Product Page (3), a visit-to-check-to-tailor funnel, and start-date verdicts broken down by type." />
+        <figcaption class="meta">PostHog dashboard on Nov 12, 2026. All activity so far is my own testing; events carry the verdict and bullet counts only, never posting or resume text.</figcaption>
+      </figure>
 
       <h3>5. Success Metrics</h3>
       <table>
@@ -377,7 +382,7 @@
         <ul>
           <li><strong>What shipped (so far):</strong> Redesigned the app to match this Product Page: violet header, numbered steps, and a verdict card with an icon and one plain-language sentence for each verdict. Added a "Try a sample posting" button for quick demos and a loading spinner while the check runs. When a posting lists no start date, TrueFit still says "Not stated" rather than guessing, and now adds that this often means as soon as possible and to ask the recruiter. Added PostHog to this page and the local app: page views, clicks, and three funnel events (sample posting used, start date checked, check failed), sending only the verdict or error code, never posting text. Updated the PRD to v2 (how this build tests the riskiest assumption, how the app works now) and added a project structure section to <code>AGENTS.md</code>. Start-date fixes from real postings: a graduation window ("Must be graduating in December 2026 or Spring 2027") now counts as In window, and postings aimed at undergraduates or new-grad bachelor's programs get a warning. Pulled tailoring forward from Build 3: students paste a master resume plus anything else they've written about their experience (notes, past cover letters, behavioral/STAR stories, application essays), and TrueFit uses only what they say they did, never goals or things they hope to learn; TrueFit writes a tailored resume where every bullet shows the lines it came from, flags anything it can't trace, and lets them remove, put back, or edit bullets (edits are re-checked) and copy plain text for Workday or iCIMS. Verified in PostHog on Nov 10: page views, clicks, start-date checks, and a session replay from the local app; Product Page page views confirmed Nov 12.</li>
           <li><strong>What broke / changed in PRD:</strong> Nothing broke. I considered two changes and kept the PRD as written. (1) Pasting a job posting link instead of the text: many job sites (Workday, iCIMS, LinkedIn) block automated reading or need a login, so links would often fail; TrueFit stays paste-only, and fetching from a URL stays out of scope. (2) Treating a posting with no start date as ASAP: because ASAP counts as "starts now," students available from June 2027 would see "Outside window" on roles they could actually take. TrueFit keeps "Not stated" (it never guesses a date) and now adds a hint that a missing date often means as soon as possible. <em>Update, Nov 12:</em> after testing real postings with no start date, I reversed this. TrueFit now assumes as soon as possible and flags it as "Likely too early" for students available later, rather than showing a plain "Not stated". I also added a one-page Word download to Build 3.</li>
-          <li><strong>Cost & time this week:</strong> $[0.00] · [0] hours</li>
+          <li><strong>Cost & time this week:</strong> $2.22 OpenRouter (credits used went from $0.08 to $2.30, including about $0.20 of tailoring evals) · [0] hours</li>
         </ul>
       </div>
 
