@@ -110,7 +110,14 @@ const VERDICT_DISPLAY = {
   partly_in_window: { tone: "warn", text: "Some start dates in this posting fit and some don't. See each one below." },
   flexible_to_discuss: { tone: "warn", text: "The start date is open, so you can likely agree on one that works for you." },
   outside_window: { tone: "bad", text: "The start date doesn't fit when you can start." },
+  likely_too_early: { tone: "warn", text: "No start date is listed, which usually means as soon as possible, before you're available." },
   not_stated: { tone: "none", text: "No start date is listed. That often means as soon as possible; ask the recruiter before you apply." },
+};
+
+// Action titles when the posting gives no start date and TrueFit assumes as soon as possible.
+const NO_DATE_TITLE = {
+  likely_too_early: "This role likely starts before you're available.",
+  likely_in_window_vague: "This role likely starts as soon as possible, which fits.",
 };
 
 // Status glyphs drawn as SVG, always shown next to a word (never color alone).
@@ -173,6 +180,9 @@ async function checkStartDate() {
 
 function renderStartDate(result) {
   const display = VERDICT_DISPLAY[result.verdict] || { tone: "none", text: result.verdict_label };
+  // With no quoted date TrueFit assumes ASAP; the server's note explains that in the row.
+  const noDate = !result.mentions.length;
+  const title = (noDate && NO_DATE_TITLE[result.verdict]) || display.text;
   const rows = el("tbody");
 
   // One row per quoted start date; several rows when roles or offices start at different times.
@@ -190,7 +200,7 @@ function renderStartDate(result) {
     rows.append(el("tr", {},
       el("td", { class: "req" }, "Start date"),
       statusCell("td", display.tone, result.verdict_label),
-      el("td", {}, el("p", { class: "plain" }, "The posting doesn't state a start date."))));
+      el("td", {}, el("p", { class: "plain" }, result.note || "The posting doesn't state a start date."))));
   }
   if (result.undergrad_warning) {
     rows.append(el("tr", {},
@@ -208,10 +218,10 @@ function renderStartDate(result) {
     rows);
 
   startDateResult.replaceChildren(
-    el("h3", { id: "exhibit-1-title", class: "action-title" }, display.text),
+    el("h3", { id: "exhibit-1-title", class: "action-title" }, title),
     el("p", { class: "exhibit-sub" }, `Checked against your availability: ${result.availability.label}.`),
     table);
-  if (result.note) startDateResult.append(el("p", { class: "exhibit-foot" }, result.note));
+  if (result.note && !noDate) startDateResult.append(el("p", { class: "exhibit-foot" }, result.note));
 }
 
 checkButton.addEventListener("click", checkStartDate);

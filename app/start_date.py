@@ -21,7 +21,8 @@ VERDICT_LABELS = {
     "partly_in_window": "Partly in window",
     "likely_in_window_vague": "Likely in window (vague)",
     "flexible_to_discuss": "Flexible / to discuss",
-    "not_stated": "Not stated",
+    "likely_too_early": "Likely too early",
+    "not_stated": "Not stated",  # kept so older results and analytics still have a label
 }
 
 NOTE_VAGUE = "Exact date not specified"
@@ -29,6 +30,10 @@ NOTE_PASSED = "This date has already passed"
 NOTE_TOO_EARLY = "The role starts before you're available"
 NOTE_GRADUATION = "No start date is listed, but this role is for people graduating through {month}, so it starts after graduation."
 NOTE_GRADUATION_EARLY = "No start date is listed. This role is for people graduating by {month}, before you're available."
+NOTE_NO_DATE_LATER = ("No start date is listed, which usually means they want someone as soon as possible, "
+                      "before you're available in {month}. Ask the recruiter whether the role could start later.")
+NOTE_NO_DATE_NOW = ("No start date is listed, which usually means as soon as possible. You can start now, "
+                    "so it likely fits; confirm with the recruiter.")
 NOTE_DIFFERENT = "Different start dates are listed (for example, for different roles or offices). See each one below."
 
 # Season → (first month, last month). Winter runs Dec of the year before through Feb.
@@ -205,7 +210,11 @@ def compute_verdict(mentions: list[Mention], availability: Availability, today: 
     if any(m.kind != "graduation" for m in mentions):
         mentions = [m for m in mentions if m.kind != "graduation"]
     if not mentions:
-        return StartDateResult("not_stated", availability, [], None)
+        # No start date usually means the role starts as soon as possible (decided Nov 12, 2026).
+        if availability.mode == "flexible" or availability.start <= today:
+            return StartDateResult("likely_in_window_vague", availability, [], NOTE_NO_DATE_NOW)
+        month = f"{calendar.month_name[availability.start.month]} {availability.start.year}"
+        return StartDateResult("likely_too_early", availability, [], NOTE_NO_DATE_LATER.format(month=month))
 
     for m in mentions:
         m.verdict, m.note = _mention_verdict(m, availability, today)
