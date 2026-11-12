@@ -26,6 +26,8 @@ Rules:
 - From N-lines, use only statements of what the student did, achieved, or has. Ignore goals, interests, things they hope, plan, or are eager to do or learn, opinions, and anything praising or describing a company they were applying to. "I'm eager to build my SQL skills" is NOT evidence of SQL.
 - Keep the student's role accurate: if a story says a manager or someone else led something and the student supported it, the bullet must say the student supported or contributed, not led.
 - header_line_ids are the lines that name the role, school, or organization (title, company, location, dates), copied by ID, not rewritten. Lines marked (header) go in header_line_ids and NEVER become bullets; every entry lists its header lines.
+- Bullet text never repeats a title, company, location, or dates; those show in the header.
+- Put each entry in the section it sits under in the master resume (shown in [brackets]). Skip (contact) lines; TrueFit adds them at the top.
 - Sections in this order: Education, Experience, then any others in the order they appear in the master resume. Use the student's own heading names.
 - Pick the experience most relevant to the posting and aim for about one page: 3-5 bullets for recent or relevant roles, fewer for others.
 - Bullets are one sentence, start with a strong verb that doesn't overstate the source, and contain no bullet symbol. No first-person words (I, my, me, we, our): write "the go-to-market plan led by the manager", not "led by my manager"."""
@@ -33,7 +35,7 @@ Rules:
 
 async def tailor_resume(posting: str, master_resume: str, background_notes: str | None = None) -> dict:
     lines = split_lines(master_resume, background_notes)
-    numbered = "\n".join(f"{line.id}{' (header)' if line.kind == 'header' else ''}: {line.text}" for line in lines)
+    numbered = "\n".join(_numbered(line) for line in lines)
     reply = await llm.call(TAILOR_PROMPT, f"Job posting:\n<<<\n{posting}\n>>>\n\nStudent's numbered lines:\n<<<\n{numbered}\n>>>")
 
     sections = _validate(reply, lines)
@@ -66,7 +68,8 @@ async def verify_bullet(text: str, source_line_ids: list[str], posting: str, mas
 
 def _validate(reply: dict, lines: list) -> list[dict]:
     """Keep only well-formed sections, entries, and bullets. Unknown header IDs are dropped; bullet IDs are checked later."""
-    line_ids = {line.id for line in lines}
+    # Contact lines and section headings never belong in an entry's header.
+    header_ok = {line.id for line in lines if line.kind not in ("contact", "heading")}
     sections = []
     for raw_section in reply.get("sections") or []:
         if not isinstance(raw_section, dict) or not isinstance(raw_section.get("heading"), str):
@@ -75,7 +78,7 @@ def _validate(reply: dict, lines: list) -> list[dict]:
         for raw_entry in raw_section.get("entries") or []:
             if not isinstance(raw_entry, dict):
                 continue
-            headers = [i for i in raw_entry.get("header_line_ids") or [] if i in line_ids]
+            headers = [i for i in raw_entry.get("header_line_ids") or [] if i in header_ok]
             bullets = [
                 {"text": b["text"].strip(), "source_line_ids": [i for i in b.get("source_line_ids") or [] if isinstance(i, str)]}
                 for b in raw_entry.get("bullets") or []
@@ -88,7 +91,7 @@ def _validate(reply: dict, lines: list) -> list[dict]:
             sections.append({"heading": raw_section["heading"].strip(), "entries": entries})
     if not sections:
         raise ModelUnavailable()  # never return an empty or unchecked resume (contract guarantee 6)
-    return sections
+    return _regroup_by_master_section(sections, lines)
 
 
 def _repair_headers(headers: list[str], bullets: list[dict], lines: list) -> tuple[list[str], list[dict]]:
@@ -106,6 +109,9 @@ def _repair_headers(headers: list[str], bullets: list[dict], lines: list) -> tup
         if ids and all(is_header(i) for i in ids):
             headers = headers + [i for i in ids if i not in headers]
         else:
+            for i in headers:
+                if is_header(i) and by_id[i].text in bullet["text"]:  # header text pasted into the bullet
+                    bullet["text"] = bullet["text"].replace(by_id[i].text, "").strip(" ;,.-–—|")
             kept.append(bullet)
 
     if not headers:
@@ -120,3 +126,51 @@ def _repair_headers(headers: list[str], bullets: list[dict], lines: list) -> tup
                     above.insert(0, line.id)
             headers = above
     return sorted(headers, key=lambda i: order.get(i, 0)), kept
+
+
+def _numbered(line) -> str:
+    tag = f" ({line.kind})" if line.kind in ("header", "contact") else ""
+    where = f" [{line.section}]" if line.source == "resume" and line.section and line.kind != "heading" else ""
+    return f"{line.id}{tag}{where}: {line.text}"
+
+
+def _regroup_by_master_section(sections: list[dict], lines: list) -> list[dict]:
+    """Each entry goes in the section its header sits under in the master resume, not wherever the model put it.
+
+    Order: Education, Experience, then other sections in master-resume order; entries keep the model's order.
+    """
+    by_id = {line.id: line for line in lines}
+    master_order = []
+    for line in lines:
+        if line.source == "resume" and line.section and line.section not in master_order:
+            master_order.append(line.section)
+
+    def home(entry, fallback):
+        for i in entry["header_line_ids"] + [i for b in entry["bullets"] for i in b["source_line_ids"]]:
+            line = by_id.get(i)
+            if line and line.source == "resume" and line.section:
+                return line.section
+        return fallback
+
+    grouped: dict[str, list[dict]] = {}
+    for section in sections:
+        for entry in section["entries"]:
+            entries = grouped.setdefault(home(entry, section["heading"]), [])
+            # Two entries for the same job (sharing a header line) become one, so its header prints once.
+            same = next((e for e in entries if set(e["header_line_ids"]) & set(entry["header_line_ids"])), None)
+            if same:
+                order = {line.id: n for n, line in enumerate(lines)}
+                same["header_line_ids"] = sorted(set(same["header_line_ids"]) | set(entry["header_line_ids"]), key=order.get)
+                same["bullets"].extend(entry["bullets"])
+            else:
+                entries.append(entry)
+
+    def rank(name):
+        key = name.lower()
+        if key == "education":
+            return (0, 0)
+        if key in ("experience", "work experience", "professional experience", "employment"):
+            return (1, 0)
+        return (2, master_order.index(name) if name in master_order else len(master_order))
+
+    return [{"heading": name, "entries": grouped[name]} for name in sorted(grouped, key=rank)]

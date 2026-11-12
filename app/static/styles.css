@@ -243,6 +243,7 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
   text-transform: uppercase;
   color: var(--navy);
 }
+.resume-contact { margin-top: 24px; font-size: 13px; color: var(--muted); }
 .entry { margin: 10px 0 18px; }
 .entry-header { font: 700 16px var(--display); color: var(--navy); }
 .bullets { list-style: none; margin: 6px 0 0; padding: 0; }

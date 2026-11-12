@@ -30,7 +30,8 @@ def normalize_chars(text: str) -> str:
 
 def render_plain_text(sections: list[dict], lines_by_id: dict[str, ResumeLine]) -> str:
     """Render included bullets only. Entries with nothing to show are skipped."""
-    blocks = []
+    contact = [normalize_chars(line.text) for line in lines_by_id.values() if line.kind == "contact"]
+    blocks = ["\n".join(contact)] if contact else []
     for section in sections:
         rows = []
         for entry in section.get("entries", []):

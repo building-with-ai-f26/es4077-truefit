@@ -322,6 +322,8 @@ function allBullets() {
 function renderTailored(fresh = false) {
   tailoredBox.replaceChildren();
   tailoredBox.classList.toggle("fresh", fresh);
+  const contact = [...tailorState.linesById.values()].filter((line) => line.kind === "contact");
+  if (contact.length) tailoredBox.append(el("div", { class: "resume-contact" }, ...contact.map((line) => el("div", {}, line.text))));
   for (const section of tailorState.sections) {
     tailoredBox.append(el("h3", { class: "resume-section" }, section.heading));
     for (const entry of section.entries) {
@@ -466,7 +468,8 @@ function titleCase(text) {
 }
 
 function renderPlainText(sections, linesById) {
-  const blocks = [];
+  const contact = [...linesById.values()].filter((line) => line.kind === "contact").map((line) => normalizeChars(line.text));
+  const blocks = contact.length ? [contact.join("\n")] : [];
   for (const section of sections) {
     const rows = [];
     for (const entry of section.entries) {
