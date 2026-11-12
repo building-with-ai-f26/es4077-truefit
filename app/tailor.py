@@ -16,7 +16,7 @@ TAILOR_PROMPT = """You tailor a student's resume to a job posting. Reply with on
 You get the student's material as numbered lines: L-lines are their master resume; N-lines are other things they wrote about their experience, such as notes, past cover letters, behavioral (STAR) stories, or application essays.
 
 Shape:
-{"sections": [{"heading": "Experience", "entries": [{"header_line_ids": ["L4", "L5"], "bullets": [{"text": "...", "source_line_ids": ["L6"]}]}]}]}
+{"sections": [{"heading": "Experience", "entries": [{"header_line_ids": ["L4", "L5"], "header_fields": {"L4": {"organization": "...", "location": "...", "title": "...", "dates": "..."}}, "bullets": [{"text": "...", "source_line_ids": ["L6"]}]}]}]}
 
 Rules:
 - Use ONLY facts in the numbered lines. Never add employers, titles, dates, schools, degrees, skills, tools, certifications, team sizes, or results that aren't there.
@@ -27,6 +27,7 @@ Rules:
 - Keep the student's role accurate: if a story says a manager or someone else led something and the student supported it, the bullet must say the student supported or contributed, not led.
 - header_line_ids are the lines that name the role, school, or organization (title, company, location, dates), copied by ID, not rewritten. Lines marked (header) go in header_line_ids and NEVER become bullets; every entry lists its header lines.
 - Bullet text never repeats a title, company, location, or dates; those show in the header.
+- header_fields splits each header line into the parts it contains: organization (company or school), location, title (job title or degree), and dates. Copy each part character for character from that line, and leave out parts the line doesn't have.
 - Put each entry in the section it sits under in the master resume (shown in [brackets]). Skip (contact) lines; TrueFit adds them at the top.
 - Sections in this order: Education, Experience, then any others in the order they appear in the master resume. Use the student's own heading names.
 - Pick the experience most relevant to the posting and aim for about one page: 3-5 bullets for recent or relevant roles, fewer for others.
@@ -86,7 +87,8 @@ def _validate(reply: dict, lines: list) -> list[dict]:
             ]
             headers, bullets = _repair_headers(headers, bullets, lines)
             if headers or bullets:
-                entries.append({"header_line_ids": headers, "bullets": bullets})
+                fields = _verified_fields(raw_entry.get("header_fields"), headers, lines)
+                entries.append({"header_line_ids": headers, "header_fields": fields, "bullets": bullets})
         if entries:
             sections.append({"heading": raw_section["heading"].strip(), "entries": entries})
     if not sections:
@@ -162,6 +164,7 @@ def _regroup_by_master_section(sections: list[dict], lines: list) -> list[dict]:
                 order = {line.id: n for n, line in enumerate(lines)}
                 same["header_line_ids"] = sorted(set(same["header_line_ids"]) | set(entry["header_line_ids"]), key=order.get)
                 same["bullets"].extend(entry["bullets"])
+                same["header_fields"] = {**entry.get("header_fields", {}), **same.get("header_fields", {})}
             else:
                 entries.append(entry)
 
@@ -174,3 +177,29 @@ def _regroup_by_master_section(sections: list[dict], lines: list) -> list[dict]:
         return (2, master_order.index(name) if name in master_order else len(master_order))
 
     return [{"heading": name, "entries": grouped[name]} for name in sorted(grouped, key=rank)]
+
+
+FIELD_NAMES = ("organization", "location", "title", "dates")
+
+
+def _verified_fields(raw, header_ids: list[str], lines: list) -> dict:
+    """Keep a header line's parts only if each is copied word for word from that line and together they
+    cover the whole line, so nothing is invented or dropped. Otherwise the line shows as written."""
+    if not isinstance(raw, dict):
+        return {}
+    by_id = {line.id: line for line in lines}
+    collapse = lambda t: " ".join(t.split())
+    verified = {}
+    for line_id in header_ids:
+        parts = raw.get(line_id)
+        if not isinstance(parts, dict):
+            continue
+        parts = {k: collapse(v) for k, v in parts.items() if k in FIELD_NAMES and isinstance(v, str) and v.strip()}
+        rest = collapse(by_id[line_id].text)
+        if not parts or not all(v in rest for v in parts.values()):
+            continue
+        for value in sorted(parts.values(), key=len, reverse=True):
+            rest = rest.replace(value, " ", 1)
+        if sum(c.isalnum() for c in rest) <= 2:  # only separators and punctuation are left over
+            verified[line_id] = parts
+    return verified

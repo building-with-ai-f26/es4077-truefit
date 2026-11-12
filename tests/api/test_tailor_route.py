@@ -187,3 +187,28 @@ def test_two_entries_for_the_same_job_merge(client, fake_llm):
         supported("B1", "B2"))
     entries = post(client).json()["resume"]["sections"][0]["entries"]
     assert len(entries) == 1 and len(entries[0]["bullets"]) == 2
+
+
+def _with_fields(fields):
+    return {"sections": [{"heading": "Experience", "entries": [{"header_line_ids": ["L4"], "header_fields": {"L4": fields},
+        "bullets": [{"text": "Built an Excel pricing model adopted by 3 regional teams", "source_line_ids": ["L6"]}]}]}]}
+
+
+def test_header_parts_render_as_two_lines(client, fake_llm):
+    fake_llm.queue(_with_fields({"organization": "Acme Corp", "location": "New York, NY",
+                                 "title": "Associate", "dates": "Jun 2022 – Jul 2025"}), supported("B1"))
+    body = post(client).json()
+    assert body["resume"]["plain_text"].startswith(
+        "Experience\nAcme Corp | New York, NY\nAssociate | Jun 2022 – Jul 2025\n- Built")
+
+
+def test_invented_or_incomplete_header_parts_fall_back_to_the_line(client, fake_llm):
+    # "Director" isn't in the line, so the parts are dropped and the line shows as written.
+    fake_llm.queue(_with_fields({"organization": "Acme Corp", "location": "New York, NY",
+                                 "title": "Director", "dates": "Jun 2022 – Jul 2025"}), supported("B1"))
+    assert post(client).json()["resume"]["plain_text"].startswith(
+        "Experience\nAssociate, Acme Corp | New York, NY | Jun 2022 – Jul 2025\n")
+    # Parts that leave out words from the line ("Associate") also fall back.
+    fake_llm.queue(_with_fields({"organization": "Acme Corp", "dates": "Jun 2022 – Jul 2025"}), supported("B1"))
+    assert post(client).json()["resume"]["plain_text"].startswith(
+        "Experience\nAssociate, Acme Corp | New York, NY | Jun 2022 – Jul 2025\n")

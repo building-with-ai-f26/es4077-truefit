@@ -3,7 +3,7 @@
 A bullet is traced only if all four checks pass:
 1. every cited line exists;
 2. every number in the bullet appears in the cited lines;
-3. no word that appears only in the posting (not in the student's material) is used;
+3. no skill or tool term that appears only in the posting (not in the student's material) is used;
 4. a model support check agrees the cited lines back every claim.
 Checks 1-3 are plain Python, so invented metrics and skills are caught without trusting the model.
 """
@@ -67,10 +67,40 @@ def extract_numbers(text: str) -> set[tuple[str, str]]:
     return found
 
 
+_TERM = re.compile(r"[A-Za-z][A-Za-z0-9+#]*(?:[.\-/][A-Za-z0-9+#]+)*")
+_STARTS_SENTENCE = set(".!?:;•●*-–—(\n")
+
+
+def _starts_sentence(text: str, index: int) -> bool:
+    i = index - 1
+    while i >= 0 and text[i] in " \t":
+        i -= 1
+    return i < 0 or text[i] in _STARTS_SENTENCE
+
+
+def skill_terms(posting: str) -> set[str]:
+    """Words in the posting that name a skill, tool, or credential: acronyms (SQL, CFA), names with
+    symbols or digits (C++, S3), and capitalized words mid-sentence (Tableau, Salesforce).
+
+    Ordinary words ("shape", "drive") aren't treated as skills; the model support check judges those by meaning.
+    """
+    terms = set()
+    for match in _TERM.finditer(posting):
+        token = match.group(0)
+        letters = [c for c in token if c.isalpha()]
+        acronym = len(letters) >= 2 and all(c.isupper() for c in letters)
+        technical = any(c in "+#" for c in token) or any(c.isdigit() for c in token)
+        named = token[0].isupper() and not _starts_sentence(posting, match.start())
+        if acronym or technical or named:
+            terms.add(token.lower())
+    return terms
+
+
 def posting_only_terms(posting: str, source_text: str) -> set[str]:
-    """Stems of posting words that never appear in the student's material (after removing generic job words)."""
+    """Stems of the posting's skill and tool terms that never appear in the student's material."""
     source = {_stem(w) for w in _words(source_text)}
-    return {_stem(w) for w in _words(posting) if w not in GENERIC_JOB_WORDS} - source
+    terms = {w for w in _words(" ".join(skill_terms(posting))) if w not in GENERIC_JOB_WORDS}
+    return {_stem(w) for w in terms} - source
 
 
 def deterministic_check(text: str, cited_ids: list[str], lines_by_id: dict[str, ResumeLine],
@@ -88,7 +118,7 @@ def deterministic_check(text: str, cited_ids: list[str], lines_by_id: dict[str, 
             return f'"{match.group(0)}" isn\'t in the cited lines'
     for word in _words(text):
         if word not in GENERIC_JOB_WORDS and _stem(word) in posting_only:
-            return f'"{word}" is from the posting, not your resume or notes'
+            return f'"{word}" is a skill or tool from the posting that isn\'t in your resume or notes'
     return None
 
 

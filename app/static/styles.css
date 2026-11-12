@@ -243,9 +243,11 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
   text-transform: uppercase;
   color: var(--navy);
 }
-.resume-contact { margin-top: 24px; font-size: 13px; color: var(--muted); }
+.resume-contact { margin-top: 24px; font-weight: 600; color: var(--ink); }
 .entry { margin: 10px 0 18px; }
-.entry-header { font: 700 16px var(--display); color: var(--navy); }
+.entry-header { display: flex; justify-content: space-between; gap: 16px; font: 600 16px var(--body); color: var(--ink); }
+.entry-header.org { font: 700 16px var(--display); color: var(--navy); }
+.entry-header-right { flex: none; text-align: right; color: var(--muted); font-weight: 400; }
 .bullets { list-style: none; margin: 6px 0 0; padding: 0; }
 .bullet {
   display: grid;

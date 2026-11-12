@@ -28,6 +28,37 @@ def normalize_chars(text: str) -> str:
     return re.sub(r" {2,}", " ", text.replace("\x00", "–")).strip()
 
 
+def header_rows(entry: dict, lines_by_id: dict[str, ResumeLine]) -> list[list[str]]:
+    """An entry's header as [left, right] rows: organization | location, then title | dates for each role.
+
+    Lines without verified parts show as written. app.js builds the same rows for the page.
+    """
+    fields = entry.get("header_fields") or {}
+    rows, org_row = [], None
+    for line_id in entry.get("header_line_ids", []):
+        if line_id not in lines_by_id:
+            continue
+        parts = fields.get(line_id)
+        if not parts:
+            rows.append([lines_by_id[line_id].text, ""])
+            continue
+        if parts.get("organization") or parts.get("location"):
+            if org_row is None:
+                org_row = [parts.get("organization", ""), parts.get("location", "")]
+                rows.append(org_row)
+            else:
+                org_row[0] = org_row[0] or parts.get("organization", "")
+                org_row[1] = org_row[1] or parts.get("location", "")
+        if parts.get("title"):
+            rows.append([parts["title"], parts.get("dates", "")])
+        elif parts.get("dates"):
+            if rows and rows[-1] is not org_row and not rows[-1][1]:
+                rows[-1][1] = parts["dates"]
+            else:
+                rows.append(["", parts["dates"]])
+    return rows
+
+
 def render_plain_text(sections: list[dict], lines_by_id: dict[str, ResumeLine]) -> str:
     """Render included bullets only. Entries with nothing to show are skipped."""
     contact = [normalize_chars(line.text) for line in lines_by_id.values() if line.kind == "contact"]
@@ -35,7 +66,7 @@ def render_plain_text(sections: list[dict], lines_by_id: dict[str, ResumeLine]) 
     for section in sections:
         rows = []
         for entry in section.get("entries", []):
-            headers = [normalize_chars(lines_by_id[i].text) for i in entry.get("header_line_ids", []) if i in lines_by_id]
+            headers = [" | ".join(normalize_chars(part) for part in row if part) for row in header_rows(entry, lines_by_id)]
             bullets = [f"- {normalize_chars(b['text'])}" for b in entry.get("bullets", []) if b.get("included")]
             rows.extend(headers + bullets)
         if rows:
