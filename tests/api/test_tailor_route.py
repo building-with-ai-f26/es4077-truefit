@@ -155,3 +155,60 @@ def test_entry_without_header_gets_the_header_lines_above_its_bullets(client, fa
         supported("B1"))
     entry = post(client).json()["resume"]["sections"][0]["entries"][0]
     assert entry["header_line_ids"] == ["L4"]
+
+
+def test_sections_follow_the_master_resume_and_contact_goes_on_top(client, fake_llm):
+    master = """Pat Lee | pat@example.com | 555-0100
+EDUCATION
+STATE UNIVERSITY New York, NY MBA Aug. 2025 - Present
+● Leadership: VP, Tech Club
+EXPERIENCE
+CONTOSO New York, NY Marketing Manager June 2022 - Aug. 2025
+● Drove 20% subscriber growth through 30 paid campaigns"""
+    # The model files the school's leadership entry under Experience and treats the contact line as a header.
+    fake_llm.queue(
+        {"sections": [{"heading": "Experience", "entries": [
+            {"header_line_ids": ["L1", "L3"], "bullets": [{"text": "Served as VP of the Tech Club", "source_line_ids": ["L4"]}]},
+            {"header_line_ids": ["L6"], "bullets": [{"text": "Drove 20% subscriber growth through 30 paid campaigns", "source_line_ids": ["L7"]}]},
+        ]}]},
+        supported("B1", "B2"))
+    body = client.post("/api/tailor", json={"posting": POSTING, "master_resume": master}).json()
+    assert [s["heading"] for s in body["resume"]["sections"]] == ["Education", "Experience"]
+    assert body["resume"]["plain_text"].startswith(
+        "Pat Lee\npat@example.com | 555-0100\n\nEducation\nSTATE UNIVERSITY New York, NY MBA Aug. 2025 – Present\n")
+
+
+def test_two_entries_for_the_same_job_merge(client, fake_llm):
+    fake_llm.queue(
+        {"sections": [{"heading": "Experience", "entries": [
+            {"header_line_ids": ["L4"], "bullets": [{"text": "Built an Excel pricing model adopted by 3 regional teams", "source_line_ids": ["L6"]}]},
+            {"header_line_ids": ["L4"], "bullets": [{"text": "Presented quarterly pricing reviews to the VP of Sales", "source_line_ids": ["L7"]}]},
+        ]}]},
+        supported("B1", "B2"))
+    entries = post(client).json()["resume"]["sections"][0]["entries"]
+    assert len(entries) == 1 and len(entries[0]["bullets"]) == 2
+
+
+def _with_fields(fields):
+    return {"sections": [{"heading": "Experience", "entries": [{"header_line_ids": ["L4"], "header_fields": {"L4": fields},
+        "bullets": [{"text": "Built an Excel pricing model adopted by 3 regional teams", "source_line_ids": ["L6"]}]}]}]}
+
+
+def test_header_parts_render_as_two_lines(client, fake_llm):
+    fake_llm.queue(_with_fields({"organization": "Acme Corp", "location": "New York, NY",
+                                 "title": "Associate", "dates": "Jun 2022 – Jul 2025"}), supported("B1"))
+    body = post(client).json()
+    assert body["resume"]["plain_text"].startswith(
+        "Experience\nAcme Corp | New York, NY\nAssociate | Jun 2022 – Jul 2025\n- Built")
+
+
+def test_invented_or_incomplete_header_parts_fall_back_to_the_line(client, fake_llm):
+    # "Director" isn't in the line, so the parts are dropped and the line shows as written.
+    fake_llm.queue(_with_fields({"organization": "Acme Corp", "location": "New York, NY",
+                                 "title": "Director", "dates": "Jun 2022 – Jul 2025"}), supported("B1"))
+    assert post(client).json()["resume"]["plain_text"].startswith(
+        "Experience\nAssociate, Acme Corp | New York, NY | Jun 2022 – Jul 2025\n")
+    # Parts that leave out words from the line ("Associate") also fall back.
+    fake_llm.queue(_with_fields({"organization": "Acme Corp", "dates": "Jun 2022 – Jul 2025"}), supported("B1"))
+    assert post(client).json()["resume"]["plain_text"].startswith(
+        "Experience\nAssociate, Acme Corp | New York, NY | Jun 2022 – Jul 2025\n")

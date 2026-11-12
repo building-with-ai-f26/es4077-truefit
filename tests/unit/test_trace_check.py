@@ -32,7 +32,8 @@ def test_number_from_another_line_is_flagged():
 
 
 def test_posting_only_skill_is_flagged():
-    assert check("Used SQL to reprice 40 SKUs") == '"sql" is from the posting, not your resume or notes'
+    assert check("Used SQL to reprice 40 SKUs") == '"sql" is a skill or tool from the posting that isn\'t in your resume or notes'
+    assert check("Built Tableau dashboards to track 40 SKUs") is not None
 
 
 def test_generic_posting_words_are_fine():
@@ -49,3 +50,10 @@ def test_notes_count_as_student_material():
     only = posting_only_terms(POSTING, " ".join(line.text for line in lines))
     by_id = {line.id: line for line in lines}
     assert deterministic_check("Reported weekly results with Tableau dashboards", ["N1"], by_id, only) is None
+
+
+def test_ordinary_posting_words_are_left_to_the_meaning_check():
+    posting = "You will shape our go-to-market plan and synthesize research. Experience with Looker and SQL required."
+    only = posting_only_terms(posting, MASTER)
+    assert deterministic_check("Shaped the pricing plan that grew regional revenue 12%", ["L3"], LINES, only) is None
+    assert deterministic_check("Built Looker reports on 40 SKUs", ["L3"], LINES, only) is not None

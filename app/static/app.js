@@ -319,16 +319,50 @@ function allBullets() {
   return tailorState.sections.flatMap((s) => s.entries.flatMap((e) => e.bullets));
 }
 
+// Mirrors contact_rows in app/plain_text.py: the name, then all other contact details on one line.
+function contactRows(linesById) {
+  const contact = [...linesById.values()].filter((line) => line.kind === "contact").map((line) => line.text);
+  if (contact.length <= 1) return contact;
+  return [contact[0], contact.slice(1).map((part) => part.replace(/^[\s|]+|[\s|]+$/g, "")).join(" | ")];
+}
+
+// Mirrors header_rows in app/plain_text.py: [left, right] rows, organization | location then title | dates.
+function headerRows(entry, linesById) {
+  const fields = entry.header_fields || {};
+  const rows = [];
+  let orgRow = null;
+  for (const id of entry.header_line_ids) {
+    const line = linesById.get(id);
+    if (!line) continue;
+    const parts = fields[id];
+    if (!parts) { rows.push([line.text, ""]); continue; }
+    if (parts.organization || parts.location) {
+      if (!orgRow) { orgRow = [parts.organization || "", parts.location || ""]; orgRow.org = true; rows.push(orgRow); }
+      else { orgRow[0] = orgRow[0] || parts.organization || ""; orgRow[1] = orgRow[1] || parts.location || ""; }
+    }
+    if (parts.title) rows.push([parts.title, parts.dates || ""]);
+    else if (parts.dates) {
+      const last = rows[rows.length - 1];
+      if (last && last !== orgRow && !last[1]) last[1] = parts.dates;
+      else rows.push(["", parts.dates]);
+    }
+  }
+  return rows;
+}
+
 function renderTailored(fresh = false) {
   tailoredBox.replaceChildren();
   tailoredBox.classList.toggle("fresh", fresh);
+  const [name, details] = contactRows(tailorState.linesById);
+  if (name) tailoredBox.append(el("div", { class: "resume-contact" },
+    el("div", { class: "resume-name" }, name), details ? el("div", { class: "resume-contact-details" }, details) : null));
   for (const section of tailorState.sections) {
     tailoredBox.append(el("h3", { class: "resume-section" }, section.heading));
     for (const entry of section.entries) {
       const block = el("div", { class: "entry" });
-      for (const id of entry.header_line_ids) {
-        const line = tailorState.linesById.get(id);
-        if (line) block.append(el("div", { class: "entry-header" }, line.text));
+      for (const row of headerRows(entry, tailorState.linesById)) {
+        block.append(el("div", { class: `entry-header${row.org ? " org" : ""}` },
+          el("span", {}, row[0]), row[1] ? el("span", { class: "entry-header-right" }, row[1]) : null));
       }
       if (entry.bullets.length) {
         const list = el("ul", { class: "bullets" });
@@ -344,30 +378,37 @@ function renderTailored(fresh = false) {
   const traced = bullets.length - flagged;
   resultsHeading.classList.remove("empty");
   resultsHeading.textContent = `${traced} of ${bullets.length} bullets trace back to your own writing.`;
-  summaryBox.textContent = flagged
+  summaryBox.replaceChildren(flagged
     ? `${kept} kept in the copy-ready resume. ${flagged} unverified ${flagged === 1 ? "bullet is" : "bullets are"} left out unless you put ${flagged === 1 ? "it" : "them"} back.`
-    : `${kept} kept in the copy-ready resume. Each bullet shows the lines it came from.`;
+    : `${kept} kept in the copy-ready resume. Each bullet shows the lines it came from.`);
   plainTextBox.value = renderPlainText(tailorState.sections, tailorState.linesById);
 }
 
 function renderBullet(bullet, entry) {
   const traced = bullet.status === "traced";
-  const item = el("li", { class: `bullet ${bullet.status}${bullet.included ? "" : " excluded"}` });
+  // Only bullets the student removed are crossed out; unverified ones stay readable while left out.
+  const item = el("li", { class: `bullet ${bullet.status}${bullet.removed ? " removed" : ""}` });
   const body = el("div", { class: "bullet-body" }, el("span", { class: "bullet-text" }, bullet.text));
   item.append(statusCell("span", traced ? "good" : "warn", traced ? "Traced" : "Unverified"), body);
-  if (!traced && bullet.flag_reason) body.append(el("p", { class: "flag-reason" }, bullet.flag_reason));
+  if (!traced && bullet.flag_reason) {
+    body.append(el("p", { class: "flag-reason" }, bullet.included || bullet.removed ? bullet.flag_reason : `Left out of your resume. ${bullet.flag_reason.replace(/\.$/, "")}.`));
+  }
 
   const sources = el("div", { class: "sources" });
   for (const id of bullet.source_line_ids) {
     const line = tailorState.linesById.get(id);
-    if (line) sources.append(el("p", { class: "quote" }, `${line.source === "notes" ? "From your writing" : "From your resume"}: “${line.text}”`));
+    if (line) sources.append(el("p", { class: "quote" }, `${line.source === "notes" ? "From your writing" : "From your resume"}: “${line.text.replace(/^[-*•●▪◦·–—]\s*/, "")}”`));
   }
   body.append(sources);
 
+  // Remove crosses a bullet out and leaves it out; Put back restores it. Unverified bullets start left out
+  // without being crossed out, and a put-back unverified bullet stays marked Unverified (FR-012c).
   const controls = el("div", { class: "bullet-controls" });
   const toggle = el("button", { class: "link-button", type: "button" }, bullet.included ? "Remove" : "Put back");
   toggle.addEventListener("click", () => {
-    bullet.included = !bullet.included; // a flagged bullet put back stays marked Unverified (FR-012c)
+    bullet.included = !bullet.included;
+    bullet.removed = !bullet.included; // pressing Remove crosses it out; Put back clears that
+    track(bullet.included ? "bullet_put_back" : "bullet_removed", { status: bullet.status });
     renderTailored();
   });
   const edit = el("button", { class: "link-button", type: "button" }, "Edit");
@@ -466,11 +507,12 @@ function titleCase(text) {
 }
 
 function renderPlainText(sections, linesById) {
-  const blocks = [];
+  const contact = contactRows(linesById).map(normalizeChars);
+  const blocks = contact.length ? [contact.join("\n")] : [];
   for (const section of sections) {
     const rows = [];
     for (const entry of section.entries) {
-      for (const id of entry.header_line_ids) if (linesById.has(id)) rows.push(normalizeChars(linesById.get(id).text));
+      for (const row of headerRows(entry, linesById)) rows.push(row.filter(Boolean).map(normalizeChars).join(" | "));
       for (const bullet of entry.bullets) if (bullet.included) rows.push(`- ${normalizeChars(bullet.text)}`);
     }
     if (rows.length) blocks.push([titleCase(normalizeChars(section.heading)), ...rows].join("\n"));
