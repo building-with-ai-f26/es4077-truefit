@@ -30,3 +30,19 @@ def test_notes_become_n_lines_split_into_sentences():
         ("N2", "I built the pricing model in Excel."),
         ("N3", "Volunteer tutor."),
     ]
+
+
+def test_line_kinds_with_bullet_symbols():
+    kinds = [line.kind for line in split_lines(RESUME)]
+    assert kinds == ["heading", "heading", "header", "heading", "header", "bullet"]
+
+
+def test_line_kinds_without_bullet_symbols():
+    resume = """EXPERIENCE
+Acme Corp
+Senior Analyst
+New York, NY | Jun 2022 – Jul 2025
+Grew regional revenue 12% in 2024 by repricing 40 SKUs
+Built Excel pricing model used by 3 regional teams"""
+    kinds = [line.kind for line in split_lines(resume)]
+    assert kinds == ["heading", "header", "header", "header", "bullet", "bullet"]

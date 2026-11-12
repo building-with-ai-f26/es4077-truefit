@@ -411,16 +411,37 @@ function startEdit(item, bullet, entry) {
   });
 }
 
-document.getElementById("copy-resume").addEventListener("click", async () => {
-  const text = plainTextBox.value;
+const copyButton = document.getElementById("copy-resume");
+
+// Copy inside the click itself (some browsers refuse clipboard writes after an await),
+// and only say "Copied" when it worked.
+copyButton.addEventListener("click", async () => {
+  plainTextBox.focus();
+  plainTextBox.select();
+  let copied = false;
   try {
-    await navigator.clipboard.writeText(text);
+    copied = document.execCommand("copy");
   } catch (_) {
-    plainTextBox.select(); // older browsers: copy the selected text instead
-    document.execCommand("copy");
+    copied = false;
   }
-  copyStatus.textContent = "Copied. Paste it into the application's resume field.";
-  track("resume_copied", { bullets: allBullets().filter((b) => b.included).length });
+  if (!copied && navigator.clipboard) {
+    try {
+      await navigator.clipboard.writeText(plainTextBox.value);
+      copied = true;
+    } catch (_) {
+      copied = false;
+    }
+  }
+  if (copied) {
+    copyStatus.textContent = "Copied. Paste it into the application's resume field.";
+    copyButton.textContent = "Copied";
+    setTimeout(() => { copyButton.textContent = "Copy"; }, 2000);
+    track("resume_copied", { bullets: allBullets().filter((b) => b.included).length });
+  } else {
+    plainTextBox.select();
+    copyStatus.textContent = "Your browser blocked copying. The text is selected: press ⌘C (Ctrl+C on Windows) to copy it.";
+    track("resume_copy_failed");
+  }
 });
 
 // Mirrors app/plain_text.py so edits update the copy-ready text without another server call.
