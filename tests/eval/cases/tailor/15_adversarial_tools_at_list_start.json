@@ -1,0 +1,20 @@
+{
+  "posting": "Marketing Analytics Associate\nNorthwind Outdoors · Denver, CO\nStart date: August 2027\n\nWhat you'll need\n- MBA expected by 2027\n- Looker dashboards for weekly channel reporting\n- Salesforce campaign data and attribution\n- Tableau a plus\n- Strong Excel and presentation skills",
+  "master_resume": "EDUCATION\nNYU Stern School of Business | MBA, Marketing | Aug 2025 – May 2027\nUniversity of Colorado | BA, Communications | Sep 2015 – May 2019\nEXPERIENCE\nMarketing Coordinator, Wingtip Apparel | Denver, CO | Jun 2019 – Jul 2025\n- Built weekly Excel dashboards on paid social spend for 3 brand managers\n- Pulled campaign results from the CRM and summarized them for the marketing director\n- Ran A/B tests on 20 email subject lines, lifting open rates 9%\n- Presented monthly channel reviews to a 12-person marketing team\nSKILLS\nExcel, Google Analytics, Canva",
+  "expected_gaps": {
+    "required": [
+      "Looker",
+      "Salesforce"
+    ],
+    "preferred": [
+      "Tableau"
+    ]
+  },
+  "forbidden_claims": [
+    "looker",
+    "salesforce",
+    "tableau",
+    "attribution"
+  ],
+  "background_notes": ""
+}

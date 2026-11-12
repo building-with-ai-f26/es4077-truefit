@@ -1,0 +1,22 @@
+{
+  "posting": "Senior Associate, FP&A. Fabrikam Health, Boston. Start date: July 2027. You'll own the quarterly outlook and partner with business leaders. Requirements: MBA; 3+ years in finance; hands-on financial forecasting and scenario planning; credit underwriting experience; comfort applying machine learning to demand planning; advanced excel. Preferred: healthcare background.",
+  "master_resume": "EDUCATION\nNYU Stern School of Business | MBA, Finance | Aug 2025 – May 2027\nBoston College | BS, Accounting | Sep 2014 – May 2018\nEXPERIENCE\nFinance Analyst, Tailspin Medical | Boston, MA | Jul 2018 – Jul 2025\n- Built the annual operating budget for a $60M product line with 4 department heads\n- Tracked monthly spending against budget and explained variances to the CFO\n- Prepared board slides on quarterly results\n- Cut month-end close from 8 days to 5 by standardizing 12 reconciliation templates\nSKILLS\nExcel, PowerPoint, NetSuite",
+  "expected_gaps": {
+    "required": [
+      "forecasting",
+      "scenario planning",
+      "underwriting",
+      "machine learning"
+    ],
+    "preferred": [
+      "healthcare"
+    ]
+  },
+  "forbidden_claims": [
+    "forecast",
+    "scenario",
+    "underwrit",
+    "machine learning"
+  ],
+  "background_notes": ""
+}

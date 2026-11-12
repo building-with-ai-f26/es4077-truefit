@@ -4,7 +4,8 @@ A bullet is traced only if all four checks pass:
 1. every cited line exists;
 2. every number in the bullet appears in the cited lines;
 3. no skill or tool term that appears only in the posting (not in the student's material) is used;
-4. a model support check agrees the cited lines back every claim.
+4. a model support check agrees the cited lines back every claim. Any other posting word the bullet uses
+   that isn't in the student's material is sent along as a word to verify, so the model checks it by meaning.
 Checks 1-3 are plain Python, so invented metrics and skills are caught without trusting the model.
 """
 
@@ -103,6 +104,21 @@ def posting_only_terms(posting: str, source_text: str) -> set[str]:
     return {_stem(w) for w in terms} - source
 
 
+def posting_words_to_verify(text: str, posting: str, source_text: str) -> list[str]:
+    """Ordinary posting words in a bullet that never appear in the student's material ("shape", "forecasting").
+
+    They aren't flagged outright, since they're often fair synonyms; the model support check verifies each one.
+    """
+    root = lambda w: _stem(w).rstrip("e")  # "shaped" and "shape" share a root
+    source = {root(w) for w in _words(source_text)}
+    posting_roots = {root(w) for w in _words(posting) if w not in GENERIC_JOB_WORDS}
+    found = []
+    for word in _words(text):
+        if word not in GENERIC_JOB_WORDS and root(word) in posting_roots and root(word) not in source and word not in found:
+            found.append(word)
+    return found
+
+
 def deterministic_check(text: str, cited_ids: list[str], lines_by_id: dict[str, ResumeLine],
                         posting_only: set[str], context_ids: list[str] = ()) -> str | None:
     """Checks 1-3. Returns the reason the bullet fails, or None if it passes.
@@ -126,6 +142,8 @@ SUPPORT_PROMPT = """You check tailored resume bullets against the student's own 
 {"results": [{"bullet_id": "B1", "supported": true|false, "unsupported_claim": "..."|null}]}
 
 Each bullet comes with its cited_lines and role_context: the header lines of the role it sits under (title, employer, location, dates). role_context may support the employer, title, location, and dates, but not actions or results.
+
+Some bullets also list words_to_verify: words the bullet shares with the job posting that never appear in the student's material. Check each one closely. It's fine only if the cited lines say the same thing in other words ("shaped" for "designed and synthesized"). If it claims a skill, tool, method, credential, or experience the cited lines don't show ("forecasting", "underwriting", "machine learning"), the bullet is NOT supported and unsupported_claim names it.
 
 A bullet is supported only if every fact in it (actions, scope, team sizes, tools, skills, results, numbers, employers, titles, dates) is stated in, or directly follows from, its cited lines.
 - Rewording, shortening, and reordering are fine.
@@ -157,7 +175,8 @@ async def check_bullets(bullets: list[dict], lines: list[ResumeLine], posting: s
     """
     context = context or {}
     lines_by_id = {line.id: line for line in lines}
-    posting_only = posting_only_terms(posting, " ".join(line.text for line in lines))
+    source_text = " ".join(line.text for line in lines)
+    posting_only = posting_only_terms(posting, source_text)
 
     to_model = []
     for bullet in bullets:
@@ -165,9 +184,13 @@ async def check_bullets(bullets: list[dict], lines: list[ResumeLine], posting: s
         bullet["flag_reason"] = deterministic_check(bullet["text"], bullet["source_line_ids"], lines_by_id,
                                                     posting_only, headers)
         if bullet["flag_reason"] is None:
-            to_model.append({"bullet_id": bullet["id"], "text": bullet["text"],
-                             "cited_lines": [{"id": i, "text": lines_by_id[i].text} for i in bullet["source_line_ids"]],
-                             "role_context": [lines_by_id[i].text for i in headers]})
+            item = {"bullet_id": bullet["id"], "text": bullet["text"],
+                    "cited_lines": [{"id": i, "text": lines_by_id[i].text} for i in bullet["source_line_ids"]],
+                    "role_context": [lines_by_id[i].text for i in headers]}
+            watch = posting_words_to_verify(bullet["text"], posting, source_text)
+            if watch:
+                item["words_to_verify"] = watch
+            to_model.append(item)
 
     verdicts = await support_check(to_model)
     for item in to_model:

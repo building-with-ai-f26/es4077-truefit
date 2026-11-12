@@ -212,3 +212,16 @@ def test_invented_or_incomplete_header_parts_fall_back_to_the_line(client, fake_
     fake_llm.queue(_with_fields({"organization": "Acme Corp", "dates": "Jun 2022 – Jul 2025"}), supported("B1"))
     assert post(client).json()["resume"]["plain_text"].startswith(
         "Experience\nAssociate, Acme Corp | New York, NY | Jun 2022 – Jul 2025\n")
+
+
+def test_ordinary_posting_words_go_to_the_meaning_check_and_can_flag(client, fake_llm):
+    import json
+    posting = POSTING + " Hands-on financial forecasting required."
+    fake_llm.queue(
+        tailored({"text": "Built an Excel forecasting model adopted by 3 regional teams", "source_line_ids": ["L6"]}),
+        supported("B1", claims={"B1": "Forecasting"}))
+    body = client.post("/api/tailor", json={"posting": posting, "master_resume": MASTER}).json()
+    sent = json.loads(fake_llm.calls[1]["user"])["bullets"][0]
+    assert sent["words_to_verify"] == ["forecasting"]
+    bullet = body["resume"]["sections"][1]["entries"][0]["bullets"][0]
+    assert (bullet["status"], bullet["included"], bullet["flag_reason"]) == ("flagged", False, "Forecasting")
