@@ -245,6 +245,8 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
 }
 .resume-contact { margin-top: 24px; color: var(--ink); }
 .resume-name { font: 800 24px var(--display); color: var(--navy); }
+.resume-contact-details { font-size: 13px; }
+@media (min-width: 1200px) { .resume-contact-details { white-space: nowrap; } }
 .entry { margin: 10px 0 18px; }
 .entry-header { display: flex; justify-content: space-between; gap: 16px; font: 600 16px var(--body); color: var(--ink); }
 .entry-header.org { font: 700 16px var(--display); color: var(--navy); }

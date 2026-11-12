@@ -355,7 +355,7 @@ function renderTailored(fresh = false) {
   tailoredBox.classList.toggle("fresh", fresh);
   const [name, details] = contactRows(tailorState.linesById);
   if (name) tailoredBox.append(el("div", { class: "resume-contact" },
-    el("div", { class: "resume-name" }, name), details ? el("div", {}, details) : null));
+    el("div", { class: "resume-name" }, name), details ? el("div", { class: "resume-contact-details" }, details) : null));
   for (const section of tailorState.sections) {
     tailoredBox.append(el("h3", { class: "resume-section" }, section.heading));
     for (const entry of section.entries) {
