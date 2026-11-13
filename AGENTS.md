@@ -20,11 +20,15 @@
   (real model calls — costs money; ask before running)
 
 ## 3. Project Structure
-- `app/main.py` — FastAPI app: serves the page, the `/api/start-date` route, error handlers, and the PostHog server client.
+- `app/main.py` — FastAPI app: serves the page, the `/api/start-date`, `/api/tailor`, and `/api/verify-bullet` routes, error handlers, and the PostHog server client.
 - `app/start_date.py` — Start-date check. The model only finds and quotes start-date text; Python checks the quote and decides the verdict.
 - `app/llm.py` — The one place TrueFit calls the model (OpenRouter). Prompts and responses are never logged.
 - `app/quotes.py` — Confirms each quote really appears in the posting.
 - `app/availability.py` — Parses the student's "available starting" text (month, ASAP, Flexible).
+- `app/tailor.py` — Tailored resume. The model only selects, reorders, and rewords the student's numbered lines, citing them for every bullet.
+- `app/resume_lines.py` — Splits the master resume (L1, L2, ...) and the student's other writing (N1, N2, ...) into numbered lines; restores line breaks lost in PDF paste.
+- `app/trace_check.py` — Checks each bullet against the lines it cites: Python checks numbers and posting-only skills, then a model support check.
+- `app/plain_text.py` — Copy-ready, ATS-safe plain text (`app.js` mirrors these rules after edits).
 - `app/config.py`, `app/errors.py` — Reads `.env`; shared error types.
 - `app/static/` — Plain HTML/CSS/JS frontend (`index.html`, `styles.css`, `app.js`, `posthog.js`).
 - `docs/index.html` — Public Product Page, living PRD, and weekly build log (GitHub Pages from `main` → `/docs`).
