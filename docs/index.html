@@ -319,7 +319,7 @@
         <div class="ledger-row">
           <div class="stat-label">Cumulative Build Spend</div>
           <div class="stat-value">$22.00</div>
-          <p class="meta">$5.00 OpenRouter credits ($2.30 used) + $17 Claude Pro (annual plan, one month prorated). As of Nov 12, 2026.</p>
+          <p class="meta">$5.00 OpenRouter credits ($2.56 used) + $17 Claude Pro (annual plan, one month prorated). As of Nov 13, 2026.</p>
         </div>
         <div class="ledger-row">
           <div class="stat-label">Est. Cost Per User Run</div>
@@ -427,7 +427,7 @@
           <li><strong>What broke and how I fixed it:</strong> Testing tailoring with a resume pasted from a PDF showed the line breaks were lost: job headers were glued onto the end of the previous bullet, and the contact line, EDUCATION, and the first school ran together on one line. TrueFit now restores the breaks before numbering lines and takes each entry's section from the master resume. The model also sometimes filed a job's title, company, or dates as a bullet; lines now carry a kind (heading, header, bullet) worked out from the student's own formatting, and Python moves header-only bullets back into the header. The Copy button sometimes said "Copied" when nothing was copied; it now copies inside the click and only says "Copied" when it worked.</li>
           <li><strong>Lessons:</strong> My own clean test resumes hid the biggest problems; a real resume pasted from a PDF broke the structure in a way no eval case did, so I'll add messy pasted input to the eval set. And keeping the model's job small (draft and cite) while plain Python does the checking made each of these bugs easy to find and fix without touching the prompt's honesty rules.</li>
           <li><strong>What changed in PRD:</strong> I considered two changes and kept the PRD as written. (1) Pasting a job posting link instead of the text: many job sites (Workday, iCIMS, LinkedIn) block automated reading or need a login, so links would often fail; TrueFit stays paste-only, and fetching from a URL stays out of scope. (2) Treating a posting with no start date as ASAP: because ASAP counts as "starts now," students available from June 2027 would see "Outside window" on roles they could actually take. TrueFit keeps "Not stated" (it never guesses a date) and now adds a hint that a missing date often means as soon as possible. <em>Update, Nov 12:</em> after testing real postings with no start date, I reversed this. TrueFit now assumes as soon as possible and flags it as "Likely too early" for students available later, rather than showing a plain "Not stated". I also added a one-page Word download to Build 3. <em>Update, Nov 13:</em> pulled the eligibility check forward from Build 3 and made work authorization and years of experience information only, with no profile questions, so TrueFit never asks students about visas or their work history. Decided one verdict per requirement instead of an overall one, and updated the pitch to "Know if you're eligible, starting with the start date."</li>
-          <li><strong>Cost & time this week:</strong> $2.22 OpenRouter (credits used went from $0.08 to $2.30, including about $0.20 of tailoring evals; about $0.25 more on Nov 13 for the eligibility eval and cost measurement) · 7 hours</li>
+          <li><strong>Cost & time this week:</strong> $2.48 OpenRouter (credits used went from $0.08 to $2.56, including about $0.20 of tailoring evals and about $0.26 on Nov 13 for the eligibility eval and cost measurement) · 7 hours</li>
         </ul>
       </div>
 
