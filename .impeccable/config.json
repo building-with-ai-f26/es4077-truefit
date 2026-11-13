@@ -15,6 +15,15 @@
         "value": "sans\",-apple-system,blinkmacsystemfont,\"helvetica neue\",helvetica,arial,sans-serif",
         "createdAt": "2026-11-11T20:13:58.931Z",
         "reason": "Claude: detector truncates the quoted \"Open Sans\" family; the full stack is declared verbatim in DESIGN.md typography"
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "files": [
+          ".impeccable/mocks/decision/canon.html"
+        ],
+        "createdAt": "2026-11-12T17:57:17.519Z",
+        "reason": "Claude: the decision round's 'category standard' card deliberately shows the generic default; it is a throwaway sketch, not shipped UI"
       }
     ]
   }
