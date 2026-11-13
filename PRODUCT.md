@@ -18,7 +18,7 @@ Secondary audience: the course teaching team and the end-of-course sponsor. They
 
 The user pastes one job posting and their master resume. TrueFit then:
 
-1. Finds the start date, quotes the line it came from, and gives a verdict against when the student can start.
+1. Checks eligibility: finds the start date and the posting's degree, work-authorization, and years-of-experience requirements, quotes the line each came from, and gives a verdict for the start date (against when the student can start) and the degree (against an MBA). Work authorization and years of experience are shown for information.
 2. Writes a tailored, ATS-safe resume in which every bullet traces back to the student's own material.
 3. Lists the gaps between the posting and the student's experience, grouped as Required and Preferred.
 
@@ -48,10 +48,17 @@ Success means classmates use TrueFit instead of that mix, and say it is faster a
 
 **Start-date check**
 
-- Verdicts use fixed categories: In window, Likely in window (vague dates), Outside window, Not stated.
-- TrueFit never guesses a date. When a posting gives no date, it says "Not stated" and adds a hint that a missing date often means ASAP and that the student should ask the recruiter.
+- Verdicts use fixed categories: In window, Likely in window (vague), Partly in window, Flexible / to discuss, Outside window, Likely too early.
+- TrueFit never guesses a date. When a posting gives no date, it assumes the role starts as soon as possible and says so: "Likely too early" for a student available later, with a prompt to ask the recruiter.
 - A graduation window counts as quoted evidence, with a note saying the verdict is based on it.
 - Postings aimed at undergraduates or bachelor's-only new-grad programs trigger a warning above the verdict.
+
+**Eligibility**
+
+- Runs in the same model call as the start-date check. Python confirms every quote appears word for word in the posting.
+- Degree gets a verdict (Meets, Doesn't meet, Unclear, Not stated) for a student finishing an MBA; a posting aimed at undergraduates is Unclear, with the quoted line.
+- Work authorization and years of experience are information only: the row names what the posting says ("No sponsorship", "4+ years required") with the quote. TrueFit never asks students about visas or their work history.
+- One verdict per requirement, no overall pass/fail. The action title counts only start date and degree.
 
 **Tailored resume**
 
@@ -101,14 +108,15 @@ Success means classmates use TrueFit instead of that mix, and say it is faster a
 
 ## Evidence on Hand
 
-- A start-date eval run against the real model: 22 of 22 correct, with no invented dates.
-- A 13-case tailoring eval (6 normal, 3 messy, 4 adversarial): 0 kept bullets with an untraceable claim.
-- 90 automated tests passing.
-- Measured costs: about $0.013 per user run, $22.00 cumulative build spend as of Nov 6, 2026.
-- Build 1 prototype screenshot at `docs/images/prototype-build1.png`, and a newer screenshot at `docs/Screenshot 2026-11-04 at 3.57.34 PM.png`.
+- A 31-case start-date and eligibility eval against the real model (Nov 13, 2026): 31 of 31 start dates and 27 of 27 requirement rows correct, with no invented dates or requirements.
+- A 15-case tailoring eval (6 normal, 3 messy, 6 adversarial): 0 kept bullets with an untraceable claim; 1 fair bullet of 63 flagged for review.
+- 169 automated tests passing.
+- Measured costs: about $0.019 per user run ($0.0064 for the eligibility check, $0.013 for tailoring); $2.56 of OpenRouter credit used and $22.00 cumulative build spend as of Nov 13, 2026.
+- PostHog from the builder's own testing (Nov 10–12, 2026): 7 start-date checks, 7 tailored resumes, page views, clicks, and session replays. Dashboard screenshot at `docs/images/posthog-dashboard-build2.png`.
+- Screenshots: `docs/images/prototype-build1.png` (Build 1), `docs/images/app-build2.png` (Build 2 app), and `docs/images/app-build2-eligibility.png` (eligibility check).
 - The detailed spec is in `specs/001-start-date-truthful-resume/`.
 
-Not yet available: outside-user usage, testimonials, PostHog analytics, a live cloud URL, and a 2-minute video. Future work must not invent any of these. Placeholders on the Product Page stay as placeholders until there is real data.
+Not yet available: outside-user usage (pod testing starts Nov 17, 2026), testimonials, a live cloud URL, and a 2-minute video. Future work must not invent any of these. Placeholders on the Product Page stay as placeholders until there is real data.
 
 ## Product Principles
 
