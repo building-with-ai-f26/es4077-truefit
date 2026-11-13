@@ -1,6 +1,6 @@
 ---
 name: TrueFit
-description: Paste a job posting. Know if the start date works, and get a resume for it that's ATS-ready and 100% true.
+description: Paste a job posting. Know if you're eligible, starting with the start date, and get a resume for it that's ATS-ready and 100% true.
 colors:
   navy: "#14213d"
   ground: "#f6f7f9"
