@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-12T17:56:32+00:00",
+  "generatedAt": "2026-11-13T21:11:08+00:00",
   "title": "Design System: TrueFit",
   "extensions": {
     "colorMeta": {
@@ -293,6 +293,26 @@
       "footnote": {
         "displayName": "Footnote",
         "purpose": "Hints, sources, link buttons."
+      },
+      "action-title-narrow": {
+        "displayName": "Action Title (narrow)",
+        "purpose": "Action titles and Product Page section titles under 900px."
+      },
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "\"TrueFit\" in the top bar."
+      },
+      "tab": {
+        "displayName": "Tab",
+        "purpose": "Step tabs in the app's top bar and section links on the Product Page; 78% white, full white when hovered or current."
+      },
+      "row-label": {
+        "displayName": "Row Label",
+        "purpose": "Requirement names, resume entry headers, primary button text, and Product Page subsection titles."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "The copy-ready plain-text resume only (and inline code on the Product Page)."
       }
     },
     "shadows": [],
@@ -367,7 +387,7 @@
   ],
   "narrative": {
     "northStar": "The Exhibit",
-    "overview": "Every result TrueFit gives is laid out like an exhibit in a consulting deck: an action title that states the answer, a row per requirement or bullet with a status mark and word, and the quoted proof highlighted under it.",
+    "overview": "Every result TrueFit gives is laid out like an exhibit in a consulting deck, the format Stern MBAs read every day. The exhibit's action title states the answer in one sentence. Each row underneath gives one requirement or bullet, a status mark with a word, and the proof: the quoted line, highlighted, with where it came from. Trust comes from the proof being visible, not from emphasis.\n\nThe app (`app/static/`) is an Operate surface. A deck-navy top bar holds the wordmark and the three steps as tabs. Below it, each step is a band: a 440px white input panel on the left, and that step's exhibit on a cool grey ground on the right. On narrow screens each band stacks, with the exhibit under its inputs.\n\nThe Product Page (`docs/index.html`) is a Read surface in the same system: the navy top bar (wordmark, section links, course line), the pitch as a 36px action title over a 2px navy rule on a Ground band, then one reading column (980px, prose at 70ch) with 36px section titles, 16px subsection titles over a 2px navy rule, hairline tables with caps headers, and the unit economics as a ledger of labelled rows rather than cards.",
     "keyCharacteristics": [
       "An action title per exhibit",
       "A status mark and a word on every row",
