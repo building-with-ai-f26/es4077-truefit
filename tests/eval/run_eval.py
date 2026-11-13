@@ -36,6 +36,8 @@ async def run_start_date() -> bool:
     Cases with "expected_requirements" also score degree (verdict), work authorization (stance), and years
     of experience ("required:5" / "preferred:2"):
     each row must match in >= 90% of checks, and never a quoted requirement the posting doesn't state."""
+    meter = CostMeter()
+    llm._transport = meter
     cases = load_cases("start_date")
     agreed = 0
     invented = []
@@ -75,6 +77,7 @@ async def run_start_date() -> bool:
     req_rate = req_agreed / req_checks if req_checks else 1
     print(f"Requirement agreement: {req_agreed}/{req_checks} ({req_rate:.0%}); target ≥ 90%")
     print(f"Requirements quoted that the posting doesn't state: {len(invented_reqs)} {invented_reqs or ''}; target 0")
+    print(f"Cost: ${meter.cost:.4f} total, ${meter.cost / total:.4f} per check")
     return agreed / total >= 0.9 and not invented and req_rate >= 0.9 and not invented_reqs
 
 
