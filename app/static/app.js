@@ -80,7 +80,7 @@ async function api(path, body) {
   return data;
 }
 
-// ---- Step 1: start-date check (User Story 1) ------------------------------
+// ---- Step 1: eligibility check: start date, then degree, work authorization, years (User Story 1)
 
 const availabilityInput = document.getElementById("availability");
 const postingInput = document.getElementById("posting");
@@ -114,11 +114,9 @@ const VERDICT_DISPLAY = {
   not_stated: { tone: "none", text: "No start date is listed. That often means as soon as possible; ask the recruiter before you apply." },
 };
 
-// Action titles when the posting gives no start date and TrueFit assumes as soon as possible.
-const NO_DATE_TITLE = {
-  likely_too_early: "This role likely starts before you're available.",
-  likely_in_window_vague: "This role likely starts as soon as possible, which fits.",
-};
+// Status tone for the other requirements. Information-only rows (work authorization, years of
+// experience) and Not stated never count for or against the student.
+const REQUIREMENT_TONE = { meets: "good", doesnt_meet: "bad", unclear: "warn", not_stated: "none", info: "info" };
 
 // Status glyphs drawn as SVG, always shown next to a word (never color alone).
 const MARK_PATHS = {
@@ -126,6 +124,7 @@ const MARK_PATHS = {
   warn: '<circle cx="12" cy="12" r="10" fill="none" stroke="#b7791f" stroke-width="2.4"/><path d="M9.3 9.4a2.8 2.8 0 1 1 3.6 2.7c-.6.2-.9.7-.9 1.3v.6" fill="none" stroke="#b7791f" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1.3" fill="#b7791f"/>',
   bad: '<circle cx="12" cy="12" r="11" fill="#b42318"/><path d="M8 8l8 8M16 8l-8 8" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>',
   none: '<circle cx="12" cy="12" r="10" fill="none" stroke="#6b7484" stroke-width="2"/><path d="M8 12h8" stroke="#6b7484" stroke-width="2.4" stroke-linecap="round"/>',
+  info: '<circle cx="12" cy="12" r="10" fill="none" stroke="#14213d" stroke-width="2"/><circle cx="12" cy="7.6" r="1.4" fill="#14213d"/><path d="M12 11v6.2" stroke="#14213d" stroke-width="2.4" stroke-linecap="round"/>',
 };
 
 function statusCell(tag, tone, label) {
@@ -153,7 +152,7 @@ function setChecking(checking) {
   checkButton.disabled = checking;
   checkButton.replaceChildren();
   if (checking) checkButton.append(el("span", { class: "spinner", "aria-hidden": "true" }), "Checking…");
-  else checkButton.append("Check start date");
+  else checkButton.append("Check eligibility");
 }
 
 async function checkStartDate() {
@@ -169,7 +168,14 @@ async function checkStartDate() {
     tailorButton.disabled = false; // tailoring waits for a start-date result (FR-008)
     tailorHint.hidden = true;
     setStep("step-resume");
-    track("start_date_checked", { verdict: result.verdict, undergrad_warning: Boolean(result.undergrad_warning) });
+    const tally = eligibilityTally(result);
+    track("start_date_checked", {
+      verdict: result.verdict,
+      undergrad_warning: Boolean(result.undergrad_warning),
+      requirements_met: tally.met,
+      requirements_not_met: tally.notMet,
+      requirements_unclear: tally.check,
+    });
   } catch (err) {
     // The error is already shown; the saved availability stays as it was.
     track("start_date_check_failed", { error_code: err.code || "network_error" });
@@ -178,11 +184,27 @@ async function checkStartDate() {
   }
 }
 
+// The start date always counts; the other requirements count only when the posting states them.
+function eligibilityTally(result) {
+  const tones = [VERDICT_DISPLAY[result.verdict]?.tone || "none"];
+  for (const req of result.requirements || []) {
+    if (req.verdict !== "not_stated" && req.verdict !== "info") tones.push(REQUIREMENT_TONE[req.verdict]);
+  }
+  const count = (tone) => tones.filter((t) => t === tone).length;
+  return { stated: tones.length, met: count("good"), notMet: count("bad"), check: count("warn") + count("none") };
+}
+
+function eligibilityTitle({ stated, notMet, check }) {
+  if (notMet) return `You don't meet ${notMet} of the ${stated} requirements this posting states.`;
+  if (check) return `Nothing rules you out, but ${check} of the ${stated} requirements ${check === 1 ? "needs" : "need"} a closer look.`;
+  if (stated === 1) return "You meet the one requirement this posting states.";
+  return stated === 2 ? "You meet both requirements this posting states." : `You meet all ${stated} requirements this posting states.`;
+}
+
 function renderStartDate(result) {
   const display = VERDICT_DISPLAY[result.verdict] || { tone: "none", text: result.verdict_label };
   // With no quoted date TrueFit assumes ASAP; the server's note explains that in the row.
   const noDate = !result.mentions.length;
-  const title = (noDate && NO_DATE_TITLE[result.verdict]) || display.text;
   const rows = el("tbody");
 
   // One row per quoted start date; several rows when roles or offices start at different times.
@@ -202,12 +224,14 @@ function renderStartDate(result) {
       statusCell("td", display.tone, result.verdict_label),
       el("td", {}, el("p", { class: "plain" }, result.note || "The posting doesn't state a start date."))));
   }
-  if (result.undergrad_warning) {
+  for (const req of result.requirements || []) {
+    const evidence = req.quote
+      ? quoted(req.quote, req.note || "Quoted word for word from the posting")
+      : el("p", { class: "plain" }, "The posting doesn't state this.");
     rows.append(el("tr", {},
-      el("td", { class: "req" }, "Who it's for"),
-      statusCell("td", "warn", "Check"),
-      el("td", {}, quoted(result.undergrad_warning.quote,
-        "This role looks aimed at undergraduates. TrueFit is built for MBA and graduate roles, so check the posting before applying."))));
+      el("td", { class: "req" }, req.name),
+      statusCell("td", REQUIREMENT_TONE[req.verdict] || "none", req.verdict_label),
+      el("td", {}, evidence)));
   }
 
   const table = el("table", { class: "exhibit-table fresh" },
@@ -218,10 +242,10 @@ function renderStartDate(result) {
     rows);
 
   startDateResult.replaceChildren(
-    el("h3", { id: "exhibit-1-title", class: "action-title" }, title),
-    el("p", { class: "exhibit-sub" }, `Checked against your availability: ${result.availability.label}.`),
+    el("h3", { id: "exhibit-1-title", class: "action-title" }, eligibilityTitle(eligibilityTally(result))),
+    el("p", { class: "exhibit-sub" }, `Checked against your availability (${result.availability.label}) and an MBA. Work authorization and experience are shown for your information.`),
     table);
-  if (result.note && !noDate) startDateResult.append(el("p", { class: "exhibit-foot" }, result.note));
+  if (!noDate) startDateResult.append(el("p", { class: "exhibit-foot" }, `Start date: ${display.text}${result.note ? ` ${result.note.replace(/\.?$/, ".")}` : ""}`));
 }
 
 checkButton.addEventListener("click", checkStartDate);

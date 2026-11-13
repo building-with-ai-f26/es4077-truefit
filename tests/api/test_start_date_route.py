@@ -151,3 +151,17 @@ def test_graduate_posting_has_no_warning(client, fake_llm):
     fake_llm.queue(reply([], audience={"level": "graduate", "quote": "MBA graduates"}))
     body = client.post("/api/start-date", json={"posting": POSTING}).json()
     assert body["undergrad_warning"] is None
+
+
+
+def test_requirements_rows(client, fake_llm):
+    fake_llm.queue(reply(
+        [{"quote": "Start date: July 13, 2027.", "kind": "exact_date", "start": "2027-07-13"}],
+        requirements={"degree": {"level": "masters_or_mba", "quote": "Requirements: MBA"},
+                      "work_authorization": {"stance": "not_stated", "quote": None},
+                      "years_experience": {"min_years": 3, "level": "required", "quote": "3+ years of experience"}}))
+    body = client.post("/api/start-date", json={"posting": POSTING}).json()
+    assert [(r["requirement"], r["verdict"], r["verdict_label"]) for r in body["requirements"]] == [
+        ("degree", "meets", "Meets"),
+        ("work_authorization", "not_stated", "Not stated"),
+        ("years_experience", "info", "3+ years required")]

@@ -1,0 +1,10 @@
+{
+  "posting": "Director of Pricing, Fabrikam Industrial. Location: Dallas, TX. Start: June 2027. Requirements: Bachelor's degree required; MBA preferred. Minimum of 7 years of experience in pricing, finance, or strategy. Experience with SAP is a plus.",
+  "availability_text": "",
+  "expected_verdict": "in_window",
+  "expected_requirements": {
+    "degree": "meets",
+    "work_authorization": "not_stated",
+    "years_experience": "required:7"
+  }
+}

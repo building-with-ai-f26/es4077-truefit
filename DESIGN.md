@@ -1,6 +1,6 @@
 ---
 name: TrueFit
-description: Paste a job posting. Know if the start date works, and get a resume for it that's ATS-ready and 100% true.
+description: Paste a job posting. Know if you're eligible, starting with the start date, and get a resume for it that's ATS-ready and 100% true.
 colors:
   navy: "#14213d"
   ground: "#f6f7f9"
@@ -149,6 +149,7 @@ Restrained: deck navy owns the shell, teal owns the one action per step, highlig
 - **Warn** (warn text, warn-mark glyph, warn-bg): vague, partial, or flexible verdicts; Unverified bullets; the "Who it's for" undergraduate check.
 - **Bad** (bad, bad-bg): Outside window and request errors.
 - **None** (none): Not stated, and rows not checked yet.
+- **Information** (navy): information-only eligibility rows (work authorization, years of experience). They report what the posting says and never count for or against the student.
 
 ### Named Rules
 **The Highlighter Rule.** Yellow means "this is the proof." It sits behind quoted posting text and nothing else on the page, apart from the active-tab underline and selection.
@@ -198,7 +199,7 @@ Deck Navy, 64px tall, wordmark then three tabs ("1 Start date", "2 Your experien
 Exhibit number in teal caps, then the action title, then a Muted sub-line ("Checked against your availability: …") over a 2px navy rule. Below, a table: Requirement | Status | What the posting says. The empty state shows the same table with one "Not checked yet" row and a grey bar where the quote will go.
 
 ### Status mark
-A 24px SVG glyph followed by the status word, in the status color: filled green check (Meets / In window / Traced), amber outlined question mark (vague, partial, flexible, Unverified, Check), filled red cross (Outside window), grey outlined dash (Not stated, not checked yet). 20px inside resume bullets.
+A 24px SVG glyph followed by the status word, in the status color: filled green check (Meets / In window / Traced), amber outlined question mark (vague, partial, flexible, Unverified, Check), filled red cross (Outside window), grey outlined dash (Not stated, not checked yet), navy outlined "i" (information only, with a label naming what the posting says, e.g. "No sponsorship" or "4+ years required"). 20px inside resume bullets.
 
 ### Quoted proof
 Italic text on a highlighter wash, with a 13px Muted source line under it ("Quoted word for word from the posting").
@@ -219,7 +220,7 @@ White, 1px Field Edge border, 4px corners, 10px × 12px. Focus: teal border and 
 - **Do** open every exhibit with a one-sentence action title that answers the question.
 - **Do** pair every status color with its glyph and word.
 - **Do** put the quoted proof, highlighted, next to every claim, with where it came from.
-- **Do** show only what the app actually checks. Eligibility rows beyond start date wait until they are built.
+- **Do** show only what the app actually checks. Rows the app reports but doesn't judge use the information mark, never a status color.
 
 ### Don't:
 - **Don't** add shadows, gradients, or rounded corners beyond 4px.

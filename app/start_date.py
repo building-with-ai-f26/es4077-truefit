@@ -3,6 +3,7 @@
 The model only finds and quotes start-date text. Python checks the quote and decides the verdict.
 When a posting gives no start date but quotes a graduation window, that window is used instead:
 jobs for graduates start after graduation, so it is evidence, never a stated date.
+The same model call also quotes the posting's other hard requirements, which app/eligibility.py checks.
 """
 
 import calendar
@@ -10,7 +11,7 @@ from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from app import llm
+from app import eligibility, llm
 from app.availability import Availability, parse_availability
 from app.errors import ApiError
 from app.quotes import quote_in
@@ -73,6 +74,7 @@ class StartDateResult:
     mentions: list[Mention] = field(default_factory=list)
     note: str | None = None
     undergrad_quote: str | None = None  # set when the posting is aimed at undergraduates
+    requirements: list[eligibility.Requirement] = field(default_factory=list)  # degree, work authorization, years
 
     def to_dict(self) -> dict:
         return {
@@ -82,6 +84,7 @@ class StartDateResult:
             "mentions": [m.to_dict() for m in self.mentions],
             "note": self.note,
             "undergrad_warning": {"quote": self.undergrad_quote} if self.undergrad_quote else None,
+            "requirements": [r.to_dict() for r in self.requirements],
         }
 
 
@@ -228,12 +231,16 @@ def compute_verdict(mentions: list[Mention], availability: Availability, today: 
 
 # ---- Model extraction ------------------------------------------------------
 
-EXTRACTION_PROMPT = """You read job postings and find when the job STARTS. If no start date is given, you instead find the graduation window candidates must fall in (e.g., "Must be graduating in December 2026 or Spring 2027"), because such jobs start after graduation. Reply with one JSON object only.
+EXTRACTION_PROMPT = """You read job postings and find when the job STARTS. If no start date is given, you instead find the graduation window candidates must fall in (e.g., "Must be graduating in December 2026 or Spring 2027"), because such jobs start after graduation. You also quote the posting's other hard requirements: degree, work authorization, and years of experience. Reply with one JSON object only.
 
 Shape:
 {"is_job_posting": true|false, "is_english": true|false,
  "audience": {"level": "undergraduate"|"graduate"|"not_stated", "quote": "..."},
- "mentions": [{"quote": "...", "kind": "...", "start": "...", "end": "...", "season": "...", "year": 2027, "role_hint": "..."}]}
+ "mentions": [{"quote": "...", "kind": "...", "start": "...", "end": "...", "season": "...", "year": 2027, "role_hint": "..."}],
+ "requirements": {
+   "degree": {"level": "bachelors"|"masters_or_mba"|"phd"|"other"|"not_stated", "quote": "..."},
+   "work_authorization": {"stance": "no_sponsorship"|"sponsors"|"must_be_authorized"|"citizenship_required"|"not_stated", "quote": "..."},
+   "years_experience": {"min_years": 3, "level": "required"|"preferred"|"not_stated", "quote": "..."}}}
 
 Rules:
 - Only the date the job itself starts. Ignore application deadlines, interview dates, event dates, posting dates, and end dates.
@@ -256,6 +263,10 @@ Rules:
   (b) it is a new-grad, campus, or early-career program (e.g., "new grads", "recent graduates", "early career program", "analyst program") and a bachelor's degree is the only degree it names.
   Use "graduate" if it names an MBA, master's, or other graduate degree (even as "preferred"). A bachelor's listed as the minimum for an experienced role (e.g., "Bachelor's degree required, 4+ years of experience") is "not_stated", not "undergraduate".
   "quote" is copied character for character, as for mentions: the line naming the bachelor's degree or the undergraduate/new-grad audience. Null for "not_stated".
+- requirements: only what the posting itself states. Never infer a requirement from the job title, industry, or seniority. Each "quote" is copied character for character from the posting, the shortest phrase that states it; null when "not_stated".
+  - degree: the minimum degree the posting requires. "Bachelor's required, MBA preferred" is "bachelors". An MBA or master's that is required, or the only degree named (even as preferred), is "masters_or_mba". "phd" only if a PhD is required. "other" for a specific professional degree such as a JD or MD. A class year or graduation window alone is "not_stated".
+  - work_authorization: "no_sponsorship" if the employer will not sponsor or candidates must be authorized without sponsorship now or in the future. "sponsors" if it says visa sponsorship is available. "must_be_authorized" if it requires authorization to work but doesn't mention sponsorship. "citizenship_required" if it requires citizenship or a clearance that needs citizenship. Equal-opportunity statements are "not_stated".
+  - years_experience: the minimum years of work experience. "3-5 years" is 3. "required" if stated as a requirement or listed under requirements or qualifications without a label; "preferred" if marked preferred, a plus, or nice to have. min_years is a whole number written in the quote; null when "not_stated". If several are listed, use the general one for the role, not one for a single skill or tool.
 - is_job_posting is false if the text is not a job or internship posting. is_english is false if the posting is not in English."""
 
 
@@ -281,6 +292,7 @@ async def check_start_date(posting: str, availability_text: str | None) -> Start
 
     result = compute_verdict(mentions, availability, today)
     result.undergrad_quote = _undergrad_quote(reply.get("audience"), posting)
+    result.requirements = eligibility.check_requirements(reply, posting)
     return result
 
 
