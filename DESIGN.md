@@ -120,7 +120,7 @@ Every result TrueFit gives is laid out like an exhibit in a consulting deck, the
 
 The app (`app/static/`) is an Operate surface. A deck-navy top bar holds the wordmark and the three steps as tabs. Below it, each step is a band: a 440px white input panel on the left, and that step's exhibit on a cool grey ground on the right. On narrow screens each band stacks, with the exhibit under its inputs.
 
-The Product Page (`docs/index.html`) has not moved to this system yet. It still uses the earlier violet gradient sidebar and Open Sans, and gets The Exhibit after Build 2.
+The Product Page (`docs/index.html`) is a Read surface in the same system: the navy top bar (wordmark, section links, course line), the pitch as a 36px action title over a 2px navy rule on a Ground band, then one reading column (980px, prose at 70ch) with 36px section titles, 16px subsection titles over a 2px navy rule, hairline tables with caps headers, and the unit economics as a ledger of labelled rows rather than cards.
 
 **Key Characteristics:**
 - An action title per exhibit: one plain sentence that answers the question.
