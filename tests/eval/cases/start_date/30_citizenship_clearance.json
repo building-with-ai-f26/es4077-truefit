@@ -1,0 +1,10 @@
+{
+  "posting": "Strategy Analyst, Defense Programs. Blue Yonder Aerospace, Arlington, VA. Start date: June 14, 2027. Requirements: Bachelor's degree; U.S. citizenship required due to the need to obtain a security clearance; 2+ years of experience in consulting, government, or defense.",
+  "availability_text": "",
+  "expected_verdict": "in_window",
+  "expected_requirements": {
+    "degree": "meets",
+    "work_authorization": "citizenship_required",
+    "years_experience": "required:2"
+  }
+}

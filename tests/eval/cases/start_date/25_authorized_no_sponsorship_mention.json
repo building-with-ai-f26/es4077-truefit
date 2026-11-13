@@ -1,0 +1,10 @@
+{
+  "posting": "Strategy Manager, Litware Retail, Seattle. Start date: September 2027. What you'll need: an MBA or equivalent graduate degree; 4 years of professional experience; must be legally authorized to work in the United States. Litware is an equal opportunity employer.",
+  "availability_text": "",
+  "expected_verdict": "in_window",
+  "expected_requirements": {
+    "degree": "meets",
+    "work_authorization": "must_be_authorized",
+    "years_experience": "required:4"
+  }
+}

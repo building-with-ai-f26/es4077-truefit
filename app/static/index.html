@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap" />
-  <link rel="stylesheet" href="/static/styles.css?v=14" />
+  <link rel="stylesheet" href="/static/styles.css?v=15" />
   <!-- Filled from .env by the "/" route in app/main.py -->
   <meta name="posthog-token" content="{{POSTHOG_PROJECT_TOKEN}}" />
   <meta name="posthog-host" content="{{POSTHOG_HOST}}" />
@@ -17,7 +17,7 @@
   <header class="topbar">
     <span class="brand">TrueFit</span>
     <nav class="steps" aria-label="Steps">
-      <a href="#step-posting" aria-current="step"><b>1</b> Start date</a>
+      <a href="#step-posting" aria-current="step"><b>1</b> Eligibility</a>
       <a href="#step-resume"><b>2</b> <span class="full">Your experience</span><span class="short">Experience</span></a>
       <a href="#step-results"><b>3</b> <span class="full">Tailored resume</span><span class="short">Resume</span></a>
     </nav>
@@ -42,17 +42,22 @@
         </div>
         <textarea id="posting" rows="10" placeholder="Paste the full job posting text"></textarea>
 
-        <button id="check-start-date" class="primary" type="button">Check start date</button>
+        <button id="check-start-date" class="primary" type="button">Check eligibility</button>
       </section>
 
       <section class="exhibit" aria-labelledby="exhibit-1-title" aria-live="polite">
-        <p class="exhibit-no">Exhibit 1 · Start date</p>
+        <p class="exhibit-no">Exhibit 1 · Eligibility</p>
         <div id="start-date-result">
-          <h3 id="exhibit-1-title" class="action-title empty">Your start-date check appears here.</h3>
-          <p class="exhibit-sub">Paste a posting and choose Check start date. Every result shows the exact line it came from, so you can check it in seconds.</p>
+          <h3 id="exhibit-1-title" class="action-title empty">Your eligibility check appears here.</h3>
+          <p class="exhibit-sub">Paste a posting and choose Check eligibility. Every result shows the exact line it came from, so you can check it in seconds.</p>
           <table class="exhibit-table ghost">
             <thead><tr><th scope="col">Requirement</th><th scope="col">Status</th><th scope="col">What the posting says</th></tr></thead>
-            <tbody><tr><td class="req">Start date</td><td class="status none">Not checked yet</td><td><span class="ghost-bar"></span><span class="source">The quoted line from the posting goes here</span></td></tr></tbody>
+            <tbody>
+              <tr><td class="req">Start date</td><td class="status none">Not checked yet</td><td><span class="ghost-bar"></span><span class="source">The quoted line from the posting goes here</span></td></tr>
+              <tr><td class="req">Degree</td><td class="status none">Not checked yet</td><td><span class="ghost-bar"></span></td></tr>
+              <tr><td class="req">Work authorization</td><td class="status none">Not checked yet</td><td><span class="ghost-bar"></span></td></tr>
+              <tr><td class="req">Years of experience</td><td class="status none">Not checked yet</td><td><span class="ghost-bar"></span></td></tr>
+            </tbody>
           </table>
         </div>
       </section>
@@ -77,7 +82,7 @@
         </div>
 
         <button id="tailor" class="primary" type="button" disabled>Tailor resume</button>
-        <p id="tailor-hint" class="hint">Check the start date first.</p>
+        <p id="tailor-hint" class="hint">Check eligibility first.</p>
       </section>
 
       <!-- 3. Results -->

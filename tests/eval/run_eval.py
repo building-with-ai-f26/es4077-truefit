@@ -32,11 +32,16 @@ def load_cases(suite: str) -> list[tuple[str, dict]]:
 
 
 async def run_start_date() -> bool:
-    """SC-002: verdict (and undergrad warning) match expected in >= 90% of cases, and never a date for a posting that states none."""
+    """SC-002: verdict (and undergrad warning) match expected in >= 90% of cases, and never a date for a posting that states none.
+    Cases with "expected_requirements" also score degree (verdict), work authorization (stance), and years
+    of experience ("required:5" / "preferred:2"):
+    each row must match in >= 90% of checks, and never a quoted requirement the posting doesn't state."""
     cases = load_cases("start_date")
     agreed = 0
     invented = []
-    print(f"{'case':32} {'expected':24} {'got':24} ok")
+    req_checks = req_agreed = 0
+    invented_reqs = []
+    print(f"{'case':36} {'expected':24} {'got':24} ok")
     for name, case in cases:
         try:
             result = (await check_start_date(case["posting"], case.get("availability_text"))).to_dict()
@@ -48,15 +53,29 @@ async def run_start_date() -> bool:
         agreed += ok
         if case["expected_verdict"] in ("not_stated", "likely_too_early") and result and result["mentions"]:
             invented.append(name)
-        print(f"{name:32} {case['expected_verdict']:24} {got:24} {'✓' if ok else '✗'}{'  (undergrad warning)' if warned else ''}")
+        print(f"{name:36} {case['expected_verdict']:24} {got:24} {'✓' if ok else '✗'}{'  (undergrad warning)' if warned else ''}")
         if result and not ok:
             for m in result["mentions"]:
-                print(f"{'':32}   quote: {m['quote']!r} → {m['verdict']}")
+                print(f"{'':36}   quote: {m['quote']!r} → {m['verdict']}")
+        rows = {r["requirement"]: r for r in result["requirements"]} if result else {}
+        for key, expected in case.get("expected_requirements", {}).items():
+            row = rows.get(key, {})
+            req_checks += 1
+            got_req = row.get("detail") or row.get("verdict", "missing")  # information-only rows report what they found
+            req_ok = got_req == expected
+            req_agreed += req_ok
+            if expected == "not_stated" and row.get("quote"):
+                invented_reqs.append(f"{name}:{key}")
+            print(f"{'':36}   {key:22} {expected:20} {got_req:20} {'✓' if req_ok else '✗'}"
+                  + (f"  quote: {row['quote']!r}" if row.get("quote") and not req_ok else ""))
 
     total = len(cases)
     print(f"\nAgreement: {agreed}/{total} ({agreed / total:.0%}); target ≥ 90%")
     print(f"Dates returned for postings with no start date: {len(invented)} {invented or ''}; target 0")
-    return agreed / total >= 0.9 and not invented
+    req_rate = req_agreed / req_checks if req_checks else 1
+    print(f"Requirement agreement: {req_agreed}/{req_checks} ({req_rate:.0%}); target ≥ 90%")
+    print(f"Requirements quoted that the posting doesn't state: {len(invented_reqs)} {invented_reqs or ''}; target 0")
+    return agreed / total >= 0.9 and not invented and req_rate >= 0.9 and not invented_reqs
 
 
 class CostMeter(httpx.AsyncHTTPTransport):

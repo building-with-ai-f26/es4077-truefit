@@ -209,6 +209,7 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
 .status.warn { color: var(--warn); }
 .status.bad { color: var(--bad); }
 .status.none { color: var(--none); }
+.status.info { color: var(--navy); }
 
 /* Italic means verbatim: posting quotes and resume source lines only */
 .quote { margin: 0; font-style: italic; }

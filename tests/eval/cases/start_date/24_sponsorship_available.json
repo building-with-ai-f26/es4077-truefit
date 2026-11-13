@@ -1,0 +1,10 @@
+{
+  "posting": "Senior Associate, Corporate Development. Contoso Pharmaceuticals, Boston. This role begins in July 2027. We welcome international candidates; visa sponsorship is available for this position. Qualifications: MBA from a top program, 3+ years of experience in banking, consulting, or corporate development.",
+  "availability_text": "",
+  "expected_verdict": "in_window",
+  "expected_requirements": {
+    "degree": "meets",
+    "work_authorization": "sponsors",
+    "years_experience": "required:3"
+  }
+}
