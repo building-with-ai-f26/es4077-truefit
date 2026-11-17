@@ -18,7 +18,7 @@ Secondary audience: the course teaching team and the end-of-course sponsor. They
 
 The user pastes one job posting and their master resume. TrueFit then:
 
-1. Checks eligibility: finds the start date and the posting's degree, work-authorization, and years-of-experience requirements, quotes the line each came from, and gives a verdict for the start date (against when the student can start) and the degree (against an MBA). Work authorization and years of experience are shown for information.
+1. Checks eligibility: finds the start date and the posting's degree, sponsorship, and years-of-experience requirements, quotes the line each came from, and gives a verdict for the start date (against when the student can start) and the degree (against an MBA). Sponsorship and years of experience are shown for information.
 2. Writes a tailored, ATS-safe resume in which every bullet traces back to the student's own material.
 3. Lists the gaps between the posting and the student's experience, grouped as Required and Preferred.
 
@@ -57,7 +57,7 @@ Success means classmates use TrueFit instead of that mix, and say it is faster a
 
 - Runs in the same model call as the start-date check. Python confirms every quote appears word for word in the posting.
 - Degree gets a verdict (Meets, Doesn't meet, Unclear, Not stated) for a student finishing an MBA; a posting aimed at undergraduates is Unclear, with the quoted line.
-- Work authorization and years of experience are information only: the row names what the posting says ("No sponsorship", "4+ years required") with the quote. TrueFit never asks students about visas or their work history.
+- Sponsorship and years of experience are information only: the row names what the posting says ("No sponsorship", "4+ years required") with the quote. TrueFit never asks students about visas or their work history.
 - One verdict per requirement, no overall pass/fail. The action title counts only start date and degree.
 
 **Tailored resume**

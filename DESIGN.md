@@ -149,7 +149,7 @@ Restrained: deck navy owns the shell, teal owns the one action per step, highlig
 - **Warn** (warn text, warn-mark glyph, warn-bg): vague, partial, or flexible verdicts; Unverified bullets; the "Who it's for" undergraduate check.
 - **Bad** (bad, bad-bg): Outside window and request errors.
 - **None** (none): Not stated, and rows not checked yet.
-- **Information** (navy): information-only eligibility rows (work authorization, years of experience). They report what the posting says and never count for or against the student.
+- **Information** (navy): information-only eligibility rows (sponsorship, years of experience). They report what the posting says and never count for or against the student.
 
 ### Named Rules
 **The Highlighter Rule.** Yellow means "this is the proof." It sits behind quoted posting text and nothing else on the page, apart from the active-tab underline and selection.
