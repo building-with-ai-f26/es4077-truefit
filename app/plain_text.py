@@ -17,6 +17,7 @@ _REPLACEMENTS = {"‘": "'", "’": "'", "“": '"', "”": '"', "…": "...", "
 
 def normalize_chars(text: str) -> str:
     """Straight quotes, plain hyphens (except "–" in date ranges), no bullet symbols or non-ASCII characters."""
+    text = text.replace("\t", " ")  # pasted tabs keep words apart instead of gluing them
     for old, new in _REPLACEMENTS.items():
         text = text.replace(old, new)
     text = _LEADING_BULLET.sub("", text.strip())
