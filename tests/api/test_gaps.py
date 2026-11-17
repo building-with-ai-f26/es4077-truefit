@@ -1,5 +1,6 @@
 """Gap list (User Story 3, FR-016, FR-016a, FR-017): what the posting asks for that the student can't claim."""
 
+from app.gaps import MAX_BULLET_CHARS, _bullets, _posting_bullet
 from tests.api.test_tailor_route import MASTER, supported, tailored
 
 POSTING = ("Senior Analyst, Finance. Requirements: CPA required. Strong Excel and financial modeling. "
@@ -12,11 +13,11 @@ def req(text, quote, group="required", kind="tool_or_skill", supported=False, li
             "line_ids": list(line_ids), "related_line_ids": list(related)}
 
 
-def gaps_for(client, fake_llm, *requirements):
+def gaps_for(client, fake_llm, *requirements, posting=POSTING):
     fake_llm.gaps_reply = {"requirements": list(requirements)}
     fake_llm.queue(tailored({"text": "Built an Excel pricing model used by 3 regional teams", "source_line_ids": ["L6"]}),
                    supported("B1"))
-    response = client.post("/api/tailor", json={"posting": POSTING, "master_resume": MASTER})
+    response = client.post("/api/tailor", json={"posting": posting, "master_resume": MASTER})
     assert response.status_code == 200
     return response.json()["gaps"]
 
@@ -91,6 +92,48 @@ def test_related_lines_must_exist_and_hold_experience(client, fake_llm):
 def test_same_gap_listed_once(client, fake_llm):
     gaps = gaps_for(client, fake_llm, req("CPA", "CPA required", kind="credential"), req("cpa", "CPA required", kind="credential"))
     assert len(gaps["required"]) == 1
+
+
+def test_gaps_from_one_bullet_share_that_bullet(client, fake_llm):
+    posting = "Preferred qualifications:\n- Experience with Python, Tableau, or Looker\n- CFA charter\n" + POSTING
+    gaps = gaps_for(client, fake_llm,
+                    req("Python", "Python", group="preferred"),
+                    req("Tableau", "Tableau", group="preferred"),
+                    req("CFA", "CFA charter", group="preferred", kind="credential"),
+                    posting=posting)
+    assert [g["posting_bullet"] for g in gaps["preferred"]] == [
+        "Experience with Python, Tableau, or Looker", "Experience with Python, Tableau, or Looker", "CFA charter"]
+
+
+def test_wrapped_bullets_are_rejoined():
+    posting = """Minimum qualifications:
+- 5 years of experience in product management, consulting, or
+  corporate development
+• Experience with SQL and
+Tableau
+- Proficiency in Excel; familiarity with financial
+modeling a plus
+1. CPA or CFA
+
+Start date: July 2027
+Location: New York"""
+    assert _bullets(posting) == [
+        "Minimum qualifications:",
+        "5 years of experience in product management, consulting, or corporate development",
+        "Experience with SQL and Tableau",
+        "Proficiency in Excel; familiarity with financial modeling a plus",
+        "CPA or CFA",
+        "Start date: July 2027",
+        "Location: New York",
+    ]
+    # A quote that spans the wrap is still found in its bullet.
+    assert _posting_bullet(posting, "consulting, or corporate development").startswith("5 years of experience")
+
+
+def test_long_paragraph_falls_back_to_the_quote():
+    paragraph = "We want someone great. " * 20 + "CPA required."
+    assert len(paragraph) > MAX_BULLET_CHARS
+    assert _posting_bullet(paragraph, "CPA required") == "CPA required"
 
 
 def test_gap_call_sees_posting_and_numbered_lines(client, fake_llm):

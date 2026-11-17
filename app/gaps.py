@@ -8,6 +8,8 @@ The required/preferred wording guide and the gap notes are adapted from the job-
 skill (Paramchoudhary/ResumeSkills, MIT). Its match score and red-flag scan are left out on purpose.
 """
 
+import re
+
 from app import llm
 from app.quotes import quote_in
 
@@ -65,11 +67,51 @@ async def build_gap_list(posting: str, lines: list, numbered: str) -> dict:
         gaps[group].append({
             "text": text.strip(),
             "quote": quote,
+            "posting_bullet": _posting_bullet(posting, quote),
             "group": group,
             "note": _note(kind, group),
             "related_line_ids": [i for i in _ids(raw.get("related_line_ids")) if i in evidence][:2],
         })
     return {**gaps, "none_found": not gaps["required"] and not gaps["preferred"]}
+
+
+MAX_BULLET_CHARS = 400  # a "bullet" longer than this is a paragraph; show just the quote instead
+BULLET_START = re.compile(r"^\s*(?:[-*•●▪◦·–—]|\d{1,2}[.)])\s+")
+CARRIES_ON = re.compile(r"(?:[,&/(-]|\b(?:and|or|with|of|in|to|for|the|a|an))$", re.IGNORECASE)
+
+
+def _posting_bullet(posting: str, quote: str) -> str:
+    """The posting bullet the quote sits in, so gaps from the same bullet show together and can be found
+    in the posting. Falls back to the quote for long paragraphs."""
+    for bullet in _bullets(posting):
+        if quote_in(bullet, quote):
+            return bullet if len(bullet) <= MAX_BULLET_CHARS else quote
+    return quote
+
+
+def _bullets(posting: str) -> list[str]:
+    """Rejoin bullets that wrap onto several lines (common when pasting from a PDF).
+
+    A line continues the bullet above it if it's indented under a bullet, starts in lowercase, or the line
+    above stops mid-sentence ("..., or"). A bullet mark, a blank line, or a heading ending in ":" starts anew.
+    """
+    blocks: list[list[str]] = []
+    for raw in posting.splitlines():
+        text = " ".join(raw.split())
+        if not text:
+            blocks.append([])
+            continue
+        current = blocks[-1] if blocks else []
+        is_bullet = bool(BULLET_START.match(raw))
+        carries_on = current and not current[-1].endswith(":") and not is_bullet and (
+            (raw[:1].isspace() and BULLET_START.match(current[0]))
+            or text[0].islower()
+            or CARRIES_ON.search(current[-1]))
+        if carries_on:
+            current.append(text)
+        else:
+            blocks.append([BULLET_START.sub("", raw).strip() if is_bullet else text])
+    return [" ".join(block) for block in blocks if block]
 
 
 def _ids(raw) -> list[str]:

@@ -462,22 +462,38 @@ function renderGaps(gaps) {
     return;
   }
   for (const [group, label] of [["required", "Required"], ["preferred", "Preferred"]]) {
-    if (!gaps[group].length) continue;
-    gapList.append(el("h4", { class: "resume-section" }, `${label} (${gaps[group].length})`));
+    const rows = gapRows(gaps[group]);
+    if (!rows.length) continue;
+    gapList.append(el("h4", { class: "resume-section" }, `${label} (${rows.length})`));
     const list = el("ul", { class: "bullets fresh" });
-    for (const gap of gaps[group]) {
-      const body = el("div", { class: "bullet-body" }, quoted(gap.quote, "Quoted word for word from the posting"));
-      if (gap.note) body.append(el("p", { class: "gap-note" }, gap.note));
+    for (const row of rows) {
+      const body = el("div", { class: "bullet-body" }, quoted(row.line, "Quoted word for word from the posting"));
+      for (const note of row.notes) body.append(el("p", { class: "gap-note" }, note));
       const related = el("div", { class: "sources" });
-      for (const id of gap.related_line_ids) {
+      for (const id of row.related) {
         const line = tailorState.linesById.get(id);
         if (line) related.append(el("p", { class: "quote" }, `Closest in your ${line.source === "notes" ? "writing" : "resume"}: “${line.text.replace(/^[-*•●▪◦·–—]\s*/, "")}”`));
       }
       body.append(related);
-      list.append(el("li", { class: "bullet" }, el("span", { class: "gap-name" }, gap.text), body));
+      list.append(el("li", { class: "bullet" }, el("span", { class: "gap-name" }, row.names.join(", ")), body));
     }
     gapList.append(list);
   }
+}
+
+// Gaps from the same posting bullet share a row, so one bullet doesn't look like several gaps and the
+// quoted bullet is easy to find in the posting.
+function gapRows(gaps) {
+  const rows = new Map();
+  for (const gap of gaps) {
+    const line = gap.posting_bullet || gap.quote;
+    if (!rows.has(line)) rows.set(line, { line, names: [], notes: [], related: [] });
+    const row = rows.get(line);
+    row.names.push(gap.text);
+    if (gap.note && !row.notes.includes(gap.note)) row.notes.push(gap.note);
+    for (const id of gap.related_line_ids) if (!row.related.includes(id) && row.related.length < 2) row.related.push(id);
+  }
+  return [...rows.values()];
 }
 
 function startEdit(item, bullet, entry) {
