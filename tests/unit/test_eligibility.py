@@ -51,7 +51,7 @@ def test_no_sponsorship_is_reported_not_judged():
 
 @pytest.mark.parametrize("stance, label", [
     ("sponsors", "Sponsors visas"),
-    ("must_be_authorized", "Authorization required"),
+    ("must_be_authorized", "Ask recruiter"),
     ("citizenship_required", "Citizenship required"),
 ])
 def test_each_stance_has_a_label(stance, label):

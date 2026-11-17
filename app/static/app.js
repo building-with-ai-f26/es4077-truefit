@@ -243,7 +243,7 @@ function renderStartDate(result) {
 
   startDateResult.replaceChildren(
     el("h3", { id: "exhibit-1-title", class: "action-title" }, eligibilityTitle(eligibilityTally(result))),
-    el("p", { class: "exhibit-sub" }, `Checked against your availability (${result.availability.label}) and an MBA. Work authorization and experience are shown for your information.`),
+    el("p", { class: "exhibit-sub" }, `Checked against your availability (${result.availability.label}) and an MBA. Sponsorship and experience are shown for your information.`),
     table);
   if (!noDate) startDateResult.append(el("p", { class: "exhibit-foot" }, `Start date: ${display.text}${result.note ? ` ${result.note.replace(/\.?$/, ".")}` : ""}`));
 }
