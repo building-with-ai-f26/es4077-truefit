@@ -10,7 +10,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from pydantic import BaseModel
@@ -18,7 +18,10 @@ from posthog import Posthog
 from posthog.integrations.asgi import PosthogASGIMiddleware
 
 from app import config, start_date, tailor
+from app.docx_resume import build_docx, file_name, resume_blocks
 from app.errors import ApiError, ConfigError, ModelAccountProblem, ModelUnavailable
+from app.pdf_resume import build_pdf
+from app.resume_lines import split_lines
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 
@@ -175,6 +178,44 @@ async def post_tailor(body: TailorRequest):
     check_length(body.master_resume, "master_resume", 200, 20_000)
     check_length(body.background_notes or "", "background_writing", 0, 50_000)
     return await tailor.tailor_resume(body.posting, body.master_resume, body.background_notes)
+
+
+DOCX_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+
+class ResumeDocxRequest(BaseModel):
+    master_resume: str
+    background_notes: str | None = None
+    sections: list  # the tailored sections as shown in the browser, with the student's edits
+
+
+@app.post("/api/resume-docx")
+async def post_resume_docx(body: ResumeDocxRequest):
+    return _resume_file(body, "docx")
+
+
+@app.post("/api/resume-pdf")
+async def post_resume_pdf(body: ResumeDocxRequest):
+    return _resume_file(body, "pdf")
+
+
+def _resume_file(body: ResumeDocxRequest, kind: str) -> Response:
+    """The kept bullets as a one-page Word or PDF file. Nothing is stored or logged."""
+    check_length(body.master_resume, "master_resume", 200, 20_000)
+    check_length(body.background_notes or "", "background_writing", 0, 50_000)
+    lines = split_lines(body.master_resume, body.background_notes)
+    if kind == "pdf":
+        content, layout = build_pdf(resume_blocks(body.sections, lines))
+        media_type = "application/pdf"
+    else:
+        content, layout = build_docx(body.sections, lines)
+        media_type = DOCX_TYPE
+    name = file_name({line.id: line for line in lines}).replace(".docx", f".{kind}")
+    return Response(content, media_type=media_type, headers={
+        "Content-Disposition": f'attachment; filename="{name}"',
+        "X-Fits-One-Page": "true" if layout.fits_one_page else "false",
+        "X-Remove-Bullets": str(layout.remove_bullets),
+    })
 
 
 class VerifyBulletRequest(BaseModel):
