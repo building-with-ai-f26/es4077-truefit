@@ -31,6 +31,7 @@
 - `app/resume_lines.py` — Splits the master resume (L1, L2, ...) and the student's other writing (N1, N2, ...) into numbered lines; restores line breaks lost in PDF paste.
 - `app/trace_check.py` — Checks each bullet against the lines it cites: Python checks numbers and posting-only skills, then a model support check.
 - `app/plain_text.py` — Copy-ready, ATS-safe plain text (`app.js` mirrors these rules after edits).
+- `app/docx_resume.py` — One-page Word download from the same header rows and kept bullets; right-aligned tab stops for location and dates; steps down font size and margins to fit one page, never cuts bullets. Route: `/api/resume-docx`.
 - `app/config.py`, `app/errors.py` — Reads `.env`; shared error types.
 - `app/static/` — Plain HTML/CSS/JS frontend (`index.html`, `styles.css`, `app.js`, `posthog.js`).
 - `docs/index.html` — Public Product Page, living PRD, and weekly build log (GitHub Pages from `main` → `/docs`).

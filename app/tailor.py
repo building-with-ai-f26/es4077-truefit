@@ -96,7 +96,7 @@ def _validate(reply: dict, lines: list) -> list[dict]:
             ]
             headers, bullets = _repair_headers(headers, bullets, lines)
             if headers or bullets:
-                fields = _verified_fields(raw_entry.get("header_fields"), headers, lines)
+                fields = verified_fields(raw_entry.get("header_fields"), headers, lines)
                 entries.append({"header_line_ids": headers, "header_fields": fields, "bullets": bullets})
         if entries:
             sections.append({"heading": raw_section["heading"].strip(), "entries": entries})
@@ -191,7 +191,7 @@ def _regroup_by_master_section(sections: list[dict], lines: list) -> list[dict]:
 FIELD_NAMES = ("organization", "location", "title", "dates")
 
 
-def _verified_fields(raw, header_ids: list[str], lines: list) -> dict:
+def verified_fields(raw, header_ids: list[str], lines: list) -> dict:
     """Keep a header line's parts only if each is copied word for word from that line and together they
     cover the whole line, so nothing is invented or dropped. Otherwise the line shows as written."""
     if not isinstance(raw, dict):

@@ -102,10 +102,13 @@
         <div id="copy-block" hidden>
           <div class="label-row copy-row">
             <label for="plain-text">Copy-ready resume</label>
-            <button id="copy-resume" class="primary" type="button">Copy</button>
+            <div class="copy-actions">
+              <button id="download-docx" class="secondary" type="button">Download Word</button>
+              <button id="copy-resume" class="primary" type="button">Copy</button>
+            </div>
           </div>
           <textarea id="plain-text" rows="14" readonly></textarea>
-          <p id="copy-status" class="hint" aria-live="polite">Plain text for Workday or iCIMS: only the bullets you've kept.</p>
+          <p id="copy-status" class="hint" aria-live="polite">Plain text for Workday or iCIMS: only the bullets you've kept. Download Word gives the same bullets as a one-page .docx.</p>
         </div>
       </section>
     </div>

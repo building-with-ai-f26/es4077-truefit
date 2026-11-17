@@ -21,6 +21,7 @@ The user pastes one job posting and their master resume. TrueFit then:
 1. Checks eligibility: finds the start date and the posting's degree, sponsorship, and years-of-experience requirements, quotes the line each came from, and gives a verdict for the start date (against when the student can start) and the degree (against an MBA). Sponsorship and years of experience are shown for information.
 2. Writes a tailored, ATS-safe resume in which every bullet traces back to the student's own material.
 3. Lists the gaps between the posting and the student's experience, grouped as Required and Preferred.
+4. Copies the kept bullets as plain text, or downloads them as a one-page Word file with the same layout (company and location, then title and dates, left and right aligned).
 
 It replaces the current routine: reading every posting closely for a buried or vague start date, tailoring by hand or with ChatGPT, re-checking every line because the AI invents skills and metrics, then fixing scrambled fields in Workday or iCIMS.
 
@@ -123,7 +124,7 @@ Not yet available: outside-user usage (pod testing starts Nov 17, 2026), testimo
 1. **Truth over polish.** No claim, date, or number appears that the user's own material or the posting doesn't contain. Untraced content stays out by default.
 2. **Show the source.** Every extracted fact sits next to the exact text it came from, so it can be checked in seconds. When something isn't stated, the product says "Not stated."
 3. **One core workflow.** Posting and resume go in; verdict, tailored resume, and gaps come out. Anything beyond that requires a PRD update first.
-4. **Plain output that survives ATS parsers.** Copy-ready text pastes cleanly into Workday and iCIMS.
+4. **Plain output that survives ATS parsers.** Copy-ready text pastes cleanly into Workday and iCIMS; the Word download uses one column, a standard font, and no tables, text boxes, or Word header/footer.
 5. **Simple and explainable.** The builder must be able to defend every component at Demo Day and in the sponsor memo.
 
 ## Accessibility & Inclusion

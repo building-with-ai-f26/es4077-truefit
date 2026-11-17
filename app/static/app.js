@@ -563,6 +563,47 @@ copyButton.addEventListener("click", async () => {
   }
 });
 
+// ---- Word download (Build 3): the same kept bullets, as a one-page .docx built on the server --------
+
+const downloadButton = document.getElementById("download-docx");
+
+downloadButton.addEventListener("click", async () => {
+  clearError();
+  downloadButton.disabled = true;
+  try {
+    const response = await fetch("/api/resume-docx", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        master_resume: tailorState.request.master_resume,
+        background_notes: tailorState.request.background_notes,
+        sections: tailorState.sections,
+      }),
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data?.error?.message || "Couldn't build the Word file. Please try again.");
+    }
+    const fits = response.headers.get("X-Fits-One-Page") === "true";
+    const remove = Number(response.headers.get("X-Remove-Bullets") || 0);
+    const name = /filename="([^"]+)"/.exec(response.headers.get("Content-Disposition") || "")?.[1] || "Resume.docx";
+    const link = el("a", { href: URL.createObjectURL(await response.blob()), download: name });
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    copyStatus.textContent = fits
+      ? `Downloaded ${name}. It fits on one page.`
+      : `Downloaded ${name}, but it likely runs past one page. Remove about ${remove} ${remove === 1 ? "bullet" : "bullets"} and download again; TrueFit won't cut your content for you.`;
+    track("resume_downloaded", { fits_one_page: fits, bullets: allBullets().filter((b) => b.included).length });
+  } catch (err) {
+    showError(err.message === "Failed to fetch" ? "Couldn't reach TrueFit. Check that the app is running and try again." : err.message);
+    track("resume_download_failed");
+  } finally {
+    downloadButton.disabled = false;
+  }
+});
+
 // Mirrors app/plain_text.py so edits update the copy-ready text without another server call.
 const DATE_RANGE = /(\d{4})\s*[–—-]\s*((?:[A-Z][a-z]{2,8}\.?\s+)?\d{4}|Present|present|Current|current)/g;
 

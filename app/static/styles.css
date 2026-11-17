@@ -279,7 +279,22 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
 
 .copy-row { margin-top: 28px; align-items: center; }
 .copy-row label { margin: 0; }
-.copy-row .primary { margin-top: 0; }
+.copy-row .primary, .copy-row .secondary { margin-top: 0; }
+.copy-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  font: 700 16px var(--display);
+  color: var(--teal);
+  background: var(--panel);
+  border: 1px solid var(--teal);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.secondary:hover { color: var(--teal-dark); border-color: var(--teal-dark); }
+.secondary:disabled { opacity: 0.6; cursor: wait; }
 #plain-text {
   margin-top: 10px;
   font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -307,4 +322,6 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
   .exhibit-table .req, .exhibit-table .status { width: auto; }
   .exhibit-table td:last-child { grid-column: 1 / -1; margin-top: 8px; }
   .bullet { grid-template-columns: 1fr; gap: 4px; }
+  .copy-row { flex-wrap: wrap; }
+  .copy-row label { width: 100%; }
 }

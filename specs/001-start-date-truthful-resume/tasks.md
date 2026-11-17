@@ -222,6 +222,8 @@ confirm they fail before implementing.
   - render the gap list as "Required" and "Preferred" groups with quotes and notes, or "No gaps found" (FR-017)
 - [x] T042 [US3] Extend `tests/eval/run_eval.py --suite tailor` to score gaps against `expected_gaps`: recall of at least 80% and group agreement of at least 90% (SC-005) and fail on `not_gaps`, requirements the student's lines do back (related industry work counts)
 
+- [x] T042a [US3] One-page Word download (Build 3, Nov 17): `app/docx_resume.py` and `POST /api/resume-docx`, built from `header_rows` and kept bullets so it matches the copy-ready text; right-aligned tab stops keep company/location and title/dates aligned; layout rules adapted from the resume-formatter skill. Tests: `tests/unit/test_docx_resume.py`, `tests/api/test_resume_docx_route.py`. PostHog: `resume_downloaded` (`fits_one_page`, bullet count only).
+
 **Checkpoint**: All three stories work; the full core workflow is complete.
 
 ---
