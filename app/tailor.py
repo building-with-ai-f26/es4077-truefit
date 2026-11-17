@@ -1,12 +1,15 @@
-"""Tailored resume (User Story 2).
+"""Tailored resume (User Story 2) and gap list (User Story 3).
 
 The model only selects, reorders, and rewords the student's numbered lines, citing them for every bullet.
 Python then checks each bullet (trace_check) and renders the copy-ready text (plain_text).
+The gap list (gaps) runs alongside.
 """
 
+import asyncio
 
 from app import llm
 from app.errors import ModelUnavailable
+from app.gaps import build_gap_list
 from app.plain_text import render_plain_text
 from app.resume_lines import split_lines
 from app.trace_check import check_bullets
@@ -37,6 +40,12 @@ Rules:
 async def tailor_resume(posting: str, master_resume: str, background_notes: str | None = None) -> dict:
     lines = split_lines(master_resume, background_notes)
     numbered = "\n".join(_numbered(line) for line in lines)
+    # The gap list is its own model call, run at the same time so it adds no waiting.
+    result, gap_list = await asyncio.gather(_tailor(posting, lines, numbered), build_gap_list(posting, lines, numbered))
+    return {**result, "gaps": gap_list}
+
+
+async def _tailor(posting: str, lines: list, numbered: str) -> dict:
     reply = await llm.call(TAILOR_PROMPT, f"Job posting:\n<<<\n{posting}\n>>>\n\nStudent's numbered lines:\n<<<\n{numbered}\n>>>")
 
     sections = _validate(reply, lines)

@@ -325,11 +325,17 @@ async function tailorResume() {
       sections: result.resume.sections,
     };
     renderTailored(true);
+    renderGaps(result.gaps);
     copyBlock.hidden = false;
     setStep("step-results");
     resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
     const bullets = allBullets();
-    track("resume_tailored", { bullets: bullets.length, flagged: bullets.filter((b) => b.status === "flagged").length });
+    track("resume_tailored", {
+      bullets: bullets.length,
+      flagged: bullets.filter((b) => b.status === "flagged").length,
+      gaps_required: result.gaps?.required.length ?? 0,
+      gaps_preferred: result.gaps?.preferred.length ?? 0,
+    });
   } catch (_) {
     // The error is already shown.
   } finally {
@@ -440,6 +446,38 @@ function renderBullet(bullet, entry) {
   controls.append(toggle, edit);
   body.append(controls);
   return item;
+}
+
+// ---- Gap list (User Story 3): Required and Preferred, each quoted from the posting ----------------
+
+const gapBlock = document.getElementById("gap-block");
+const gapList = document.getElementById("gap-list");
+
+function renderGaps(gaps) {
+  gapList.replaceChildren();
+  gapBlock.hidden = !gaps;
+  if (!gaps) return;
+  if (gaps.none_found) { // FR-017: say so plainly
+    gapList.append(el("p", { class: "plain" }, "No gaps found: your own lines back every requirement this posting lists."));
+    return;
+  }
+  for (const [group, label] of [["required", "Required"], ["preferred", "Preferred"]]) {
+    if (!gaps[group].length) continue;
+    gapList.append(el("h4", { class: "resume-section" }, `${label} (${gaps[group].length})`));
+    const list = el("ul", { class: "bullets fresh" });
+    for (const gap of gaps[group]) {
+      const body = el("div", { class: "bullet-body" }, quoted(gap.quote, "Quoted word for word from the posting"));
+      if (gap.note) body.append(el("p", { class: "gap-note" }, gap.note));
+      const related = el("div", { class: "sources" });
+      for (const id of gap.related_line_ids) {
+        const line = tailorState.linesById.get(id);
+        if (line) related.append(el("p", { class: "quote" }, `Closest in your ${line.source === "notes" ? "writing" : "resume"}: “${line.text.replace(/^[-*•●▪◦·–—]\s*/, "")}”`));
+      }
+      body.append(related);
+      list.append(el("li", { class: "bullet" }, el("span", { class: "gap-name" }, gap.text), body));
+    }
+    gapList.append(list);
+  }
 }
 
 function startEdit(item, bullet, entry) {
