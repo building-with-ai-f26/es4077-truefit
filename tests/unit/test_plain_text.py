@@ -27,6 +27,13 @@ def test_render_includes_only_included_bullets_and_is_ascii():
     assert all(c.isascii() or c == "–" for c in text)
 
 
+def test_square_bullets_and_tabs_are_replaced_not_glued():
+    assert normalize_chars("▪ Built models") == "Built models"
+    assert normalize_chars("Python ▪ SQL ▪ Excel") == "Python | SQL | Excel"
+    assert normalize_chars("Built\tmodels for 6 clients") == "Built models for 6 clients"  # pasted tabs keep words apart
+    assert normalize_chars("Acme Corp\t\tNew York, NY") == "Acme Corp New York, NY"
+
+
 def test_empty_sections_are_skipped():
     assert render_plain_text([{"heading": "Skills", "entries": [{"header_line_ids": [], "bullets": [
         {"text": "x", "included": False}]}]}], LINES) == ""
