@@ -79,12 +79,21 @@ student chooses to continue from the start-date result (FR-008).
     "plain_text": "Experience\nAssociate, Acme Corp | New York, NY | Jun 2022 – Jul 2025\n- Grew regional revenue 12% by ...\n"
   },
   "gaps": {
-    "required": [ { "text": "CPA", "quote": "CPA required", "group": "required", "note": null } ],
-    "preferred": [ { "text": "Python", "quote": "Python a plus", "group": "preferred", "note": null } ],
+    "required": [ { "text": "CPA", "quote": "CPA required", "posting_bullet": "CPA required", "group": "required",
+                    "note": "Often a dealbreaker: a license or certification you can't get quickly.",
+                    "related_line_ids": [] } ],
+    "preferred": [ { "text": "Python", "quote": "Python a plus", "posting_bullet": "Python a plus", "group": "preferred",
+                     "note": "Usually something you can learn. If you've used something similar, say so.",
+                     "related_line_ids": ["L6"] } ],
     "none_found": false
   }
 }
 ```
+
+`note` is written by Python from the requirement's kind (credential, tool or skill, experience), never by
+the model, and may be null. `related_line_ids` (up to two) are real L/N lines showing the closest related
+experience. `posting_bullet` is the posting bullet the quote sits in (rejoined if it wraps onto several
+lines), or the quote itself for long paragraphs; the page shows gaps from the same bullet as one row. Soft skills and eligibility items (start date, degree, sponsorship, years, location) are never gaps.
 
 **Errors**: same format. `resume_too_short` / `resume_too_long`, `posting_too_short` /
 `posting_too_long`, `not_a_posting`, `not_english`, `model_unavailable`.

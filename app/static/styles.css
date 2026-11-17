@@ -271,6 +271,12 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
 .bullet-controls { display: flex; gap: 16px; margin-top: 8px; }
 .bullet-edit { margin-top: 2px; min-height: 4em; }
 
+/* Gap list: what the posting asks for that the student's lines don't back up */
+.gap-block { margin-top: 40px; padding-top: 16px; border-top: 2px solid var(--navy); }
+.gap-title { margin: 0; font: 700 20px/1.3 var(--display); color: var(--navy); }
+.gap-name { font-weight: 600; color: var(--navy); }
+.gap-note { margin: 6px 0 0; font-size: 13px; color: var(--ink); }
+
 .copy-row { margin-top: 28px; align-items: center; }
 .copy-row label { margin: 0; }
 .copy-row .primary { margin-top: 0; }

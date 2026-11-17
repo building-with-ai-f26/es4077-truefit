@@ -8,9 +8,7 @@
       "underwriting",
       "machine learning"
     ],
-    "preferred": [
-      "healthcare"
-    ]
+    "preferred": []
   },
   "forbidden_claims": [
     "forecast",

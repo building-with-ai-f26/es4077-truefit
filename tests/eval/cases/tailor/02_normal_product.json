@@ -5,5 +5,9 @@
     "required": [],
     "preferred": []
   },
-  "background_notes": ""
+  "background_notes": "",
+  "not_gaps": [
+    "payments",
+    "fintech"
+  ]
 }

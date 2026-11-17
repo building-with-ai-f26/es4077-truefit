@@ -325,11 +325,17 @@ async function tailorResume() {
       sections: result.resume.sections,
     };
     renderTailored(true);
+    renderGaps(result.gaps);
     copyBlock.hidden = false;
     setStep("step-results");
     resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
     const bullets = allBullets();
-    track("resume_tailored", { bullets: bullets.length, flagged: bullets.filter((b) => b.status === "flagged").length });
+    track("resume_tailored", {
+      bullets: bullets.length,
+      flagged: bullets.filter((b) => b.status === "flagged").length,
+      gaps_required: result.gaps?.required.length ?? 0,
+      gaps_preferred: result.gaps?.preferred.length ?? 0,
+    });
   } catch (_) {
     // The error is already shown.
   } finally {
@@ -440,6 +446,54 @@ function renderBullet(bullet, entry) {
   controls.append(toggle, edit);
   body.append(controls);
   return item;
+}
+
+// ---- Gap list (User Story 3): Required and Preferred, each quoted from the posting ----------------
+
+const gapBlock = document.getElementById("gap-block");
+const gapList = document.getElementById("gap-list");
+
+function renderGaps(gaps) {
+  gapList.replaceChildren();
+  gapBlock.hidden = !gaps;
+  if (!gaps) return;
+  if (gaps.none_found) { // FR-017: say so plainly
+    gapList.append(el("p", { class: "plain" }, "No gaps found: your own lines back every requirement this posting lists."));
+    return;
+  }
+  for (const [group, label] of [["required", "Required"], ["preferred", "Preferred"]]) {
+    const rows = gapRows(gaps[group]);
+    if (!rows.length) continue;
+    gapList.append(el("h4", { class: "resume-section" }, `${label} (${rows.length})`));
+    const list = el("ul", { class: "bullets fresh" });
+    for (const row of rows) {
+      const body = el("div", { class: "bullet-body" }, quoted(row.line, "Quoted word for word from the posting"));
+      for (const note of row.notes) body.append(el("p", { class: "gap-note" }, note));
+      const related = el("div", { class: "sources" });
+      for (const id of row.related) {
+        const line = tailorState.linesById.get(id);
+        if (line) related.append(el("p", { class: "quote" }, `Closest in your ${line.source === "notes" ? "writing" : "resume"}: “${line.text.replace(/^[-*•●▪◦·–—]\s*/, "")}”`));
+      }
+      body.append(related);
+      list.append(el("li", { class: "bullet" }, el("span", { class: "gap-name" }, row.names.join(", ")), body));
+    }
+    gapList.append(list);
+  }
+}
+
+// Gaps from the same posting bullet share a row, so one bullet doesn't look like several gaps and the
+// quoted bullet is easy to find in the posting.
+function gapRows(gaps) {
+  const rows = new Map();
+  for (const gap of gaps) {
+    const line = gap.posting_bullet || gap.quote;
+    if (!rows.has(line)) rows.set(line, { line, names: [], notes: [], related: [] });
+    const row = rows.get(line);
+    row.names.push(gap.text);
+    if (gap.note && !row.notes.includes(gap.note)) row.notes.push(gap.note);
+    for (const id of gap.related_line_ids) if (!row.related.includes(id) && row.related.length < 2) row.related.push(id);
+  }
+  return [...rows.values()];
 }
 
 function startEdit(item, bullet, entry) {

@@ -199,7 +199,7 @@ confirm they fail before implementing.
   - `•`/`▪` and tabs are removed or replaced
   - `–` is kept only in date ranges and turned into `-` elsewhere
   - every character is printable ASCII or a newline, except `–` in date ranges (guarantee 5)
-- [ ] T037 [P] [US3] Write `tests/api/test_gaps.py` using `fake_llm`, covering:
+- [x] T037 [P] [US3] Write `tests/api/test_gaps.py` using `fake_llm`, covering:
   - "CPA required" + "Python a plus" → CPA under `required`, Python under `preferred`
   - an `unlabeled` requirement → `required`
   - `supported: true` with no valid line IDs → kept as a gap
@@ -209,18 +209,18 @@ confirm they fail before implementing.
 ### Implementation for User Story 3
 
 - [x] T038 [P] [US3] Implement `normalize_chars(text)` and `render_plain_text(resume, lines) -> str` in `app/plain_text.py` per research.md §R10
-- [ ] T039 [US3] Implement `build_gap_list(posting, master_resume, lines)` in `app/tailor.py`:
+- [x] T039 [US3] Implement `build_gap_list(posting, lines, numbered)` in `app/gaps.py` (built Nov 17, with a required/preferred wording guide and per-gap notes adapted from the job-description-analyzer skill):
   - the requirements prompt asks for JSON `{requirements: [{text, quote, group, supported, line_ids}]}` with `group` in `required | preferred | unlabeled`, reading the posting's wording ("required", "must have" vs "preferred", "nice to have", "a plus")
   - drop requirements whose quote fails `quote_in`
   - map `unlabeled` to `required`
   - treat supported-without-valid-line-IDs as unsupported
   - return `{required, preferred, none_found}`
-- [ ] T040 [US3] In `app/tailor.py`, run the tailoring call and `build_gap_list` concurrently with `asyncio.gather`. Extend `POST /api/tailor` in `app/main.py` to return `resume.plain_text` (from included bullets) and `gaps` per contracts/api.md.
-- [ ] T041 [US3] In `app/static/app.js`:
+- [x] T040 [US3] In `app/tailor.py`, run the tailoring call and `build_gap_list` concurrently with `asyncio.gather`. Extend `POST /api/tailor` in `app/main.py` to return `resume.plain_text` (from included bullets) and `gaps` per contracts/api.md.
+- [x] T041 [US3] In `app/static/app.js`:
   - add `renderPlainText(state)`, mirroring `app/plain_text.py` (same headings, `- ` bullets, character rules), and rebuild it on every include/remove/edit
   - add a "Copy resume" button using `navigator.clipboard.writeText` with a "Copied" confirmation (FR-015)
   - render the gap list as "Required" and "Preferred" groups with quotes and notes, or "No gaps found" (FR-017)
-- [ ] T042 [US3] Extend `tests/eval/run_eval.py --suite tailor` to score gaps against `expected_gaps`: recall of at least 80% and group agreement of at least 90% (SC-005)
+- [x] T042 [US3] Extend `tests/eval/run_eval.py --suite tailor` to score gaps against `expected_gaps`: recall of at least 80% and group agreement of at least 90% (SC-005) and fail on `not_gaps`, requirements the student's lines do back (related industry work counts)
 
 **Checkpoint**: All three stories work; the full core workflow is complete.
 

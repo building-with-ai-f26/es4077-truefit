@@ -103,7 +103,7 @@ async def run_tailor() -> bool:
     meter = CostMeter()
     llm._transport = meter
     cases = load_cases("tailor")
-    violations, flagged_for_review, seconds = [], [], []
+    violations, flagged_for_review, seconds, gap_scores = [], [], [], []
     print(f"{'case':30} {'bullets':>7} {'kept':>5} {'flagged':>8} {'cost':>7} {'time':>6}")
     for name, case in cases:
         lines = split_lines(case["master_resume"], case.get("background_notes"))
@@ -135,7 +135,14 @@ async def run_tailor() -> bool:
                     violations.append(f"{name} {b['id']}: forbidden claim ({phrase}): {b['text']!r}")
         flagged = [b for b in bullets if b["status"] == "flagged"]
         flagged_for_review += [(name, b) for b in flagged]
-        print(f"{name:30} {len(bullets):7} {len(kept):5} {len(flagged):8} ${meter.cost - before:6.4f} {seconds[-1]:5.1f}s")
+        gap_score = score_gaps(case.get("expected_gaps", {}), result["gaps"])
+        for term in case.get("not_gaps", []):  # requirements the student's lines do back, e.g. related industry work
+            for g in result["gaps"]["required"] + result["gaps"]["preferred"]:
+                if term in g["text"].lower() or term in g["quote"].lower():
+                    violations.append(f"{name}: listed as a gap but the student's lines back it ({term}): {g['text']!r}")
+        gap_scores.append((name, gap_score))
+        print(f"{name:30} {len(bullets):7} {len(kept):5} {len(flagged):8} ${meter.cost - before:6.4f} {seconds[-1]:5.1f}s "
+              f"gaps {gap_score['found']}/{gap_score['expected']}")
 
     total = len(cases)
     print(f"\nCost: ${meter.cost:.4f} total, ${meter.cost / total:.4f} per tailoring run; "
@@ -146,7 +153,46 @@ async def run_tailor() -> bool:
     print(f"\nFlagged bullets to review by hand (false flag = a fair rewording you'd accept): {len(flagged_for_review)}")
     for name, b in flagged_for_review:
         print(f"  {name} {b['id']}: {b['text']!r}\n      reason: {b['flag_reason']}")
-    return not violations
+
+    # SC-005: the gap list catches at least 80% of expected gaps and groups at least 90% of those correctly.
+    expected = sum(s["expected"] for _, s in gap_scores)
+    found = sum(s["found"] for _, s in gap_scores)
+    same_group = sum(s["same_group"] for _, s in gap_scores)
+    recall = found / expected if expected else 1.0
+    agreement = same_group / found if found else 1.0
+    print(f"\nGap recall (target 80%): {found}/{expected} = {recall:.0%}")
+    print(f"Gap grouping agreement (target 90%): {same_group}/{found} = {agreement:.0%}")
+    for name, s in gap_scores:
+        for term in s["missed"]:
+            print(f"  {name}: missed expected gap {term!r}")
+        for term, wanted, got in s["wrong_group"]:
+            print(f"  {name}: {term!r} grouped {got}, expected {wanted}")
+        for text in s["extra"]:
+            print(f"  {name}: extra gap to review by hand: {text!r}")
+    return not violations and recall >= 0.8 and agreement >= 0.9
+
+
+def score_gaps(expected: dict, gaps: dict) -> dict:
+    """Match each expected gap term to a gap TrueFit listed (by name or quote) and compare their groups."""
+    listed = [(g, group) for group in ("required", "preferred") for g in gaps[group]]
+    matches = lambda term, g: term in g["text"].lower() or term in g["quote"].lower() or g["text"].lower() in term
+    score = {"expected": 0, "found": 0, "same_group": 0, "missed": [], "wrong_group": [], "extra": []}
+    used = set()
+    for wanted, terms in expected.items():
+        for term in terms:
+            score["expected"] += 1
+            hit = next(((i, group) for i, (g, group) in enumerate(listed) if matches(term.lower(), g)), None)
+            if hit is None:
+                score["missed"].append(term)
+                continue
+            used.add(hit[0])
+            score["found"] += 1
+            if hit[1] == wanted:
+                score["same_group"] += 1
+            else:
+                score["wrong_group"].append((term, wanted, hit[1]))
+    score["extra"] = [g["text"] for i, (g, _) in enumerate(listed) if i not in used]
+    return score
 
 
 SUITES = {"start_date": run_start_date, "tailor": run_tailor}

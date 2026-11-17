@@ -4,7 +4,8 @@
   "expected_gaps": {
     "required": [
       "Looker",
-      "Salesforce"
+      "Salesforce",
+      "attribution"
     ],
     "preferred": [
       "Tableau"
