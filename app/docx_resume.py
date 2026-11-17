@@ -2,11 +2,12 @@
 
 Layout follows ATS-safe rules (adapted from the resume-formatter skill, Paramchoudhary/ResumeSkills, MIT):
 one column, a standard font, no tables, text boxes, or Word header/footer, contact details centered in the body,
-name 16 pt, headings 12 pt, body 10-11 pt. Each job header keeps the page's layout: organization left and
+name 16 pt, headings 12 pt, body 11 pt at full size. Each job header keeps the page's layout: organization left and
 location right, then title left and dates right, using a right-aligned tab stop (not a table) so ATS
 parsers read it as plain lines.
 
-To fit one page TrueFit tries smaller sizes and margins from a length estimate. If it still won't fit, it
+To fit one page TrueFit shrinks all the text together (body to 8 pt at the smallest, name to 10 pt) and the
+margins (to 0.5 in), from a length estimate. If it still won't fit, it
 says roughly how many bullets to remove; it never cuts the student's content itself.
 """
 
@@ -25,13 +26,25 @@ from app.resume_lines import ResumeLine
 from app.tailor import verified_fields
 
 FONT = "Calibri"
-NAME_PT = 16
-HEADING_PT = 12
+NAME_PT = 16  # at full size; see name_pt()
+HEADING_PT = 12  # at full size; see heading_pt()
+MIN_BODY_PT, MIN_NAME_PT = 8, 10  # the student's floors: no text below 8 pt, the name no smaller than 10 pt
 PAGE_WIDTH_IN, PAGE_HEIGHT_IN = 8.5, 11  # US Letter
 BULLET_INDENT_IN = 0.25
 # Tried in order until the estimate fits one page: (body font pt, margin inches).
-LAYOUTS = [(11, 0.75), (10.5, 0.6), (10, 0.5)]
+LAYOUTS = [(11, 0.75), (10.5, 0.6), (10, 0.5), (9.5, 0.5), (9, 0.5), (8.5, 0.5), (8, 0.5)]
 AVG_CHAR_EM = 0.5  # average Calibri character width as a share of the font size; rounded up to stay safe
+
+
+def name_pt(body_pt: float) -> float:
+    """The name shrinks with the body text: 16 pt at 11 pt body, down to 10 pt at the 8 pt floor."""
+    share = (body_pt - MIN_BODY_PT) / (LAYOUTS[0][0] - MIN_BODY_PT)
+    return round(MIN_NAME_PT + share * (NAME_PT - MIN_NAME_PT), 1)
+
+
+def heading_pt(body_pt: float) -> float:
+    """Headings stay 1 pt larger than the body text so they still stand out."""
+    return body_pt + 1
 
 
 @dataclass
@@ -122,9 +135,9 @@ def _estimated_height(blocks: list[tuple], body_pt: float, margin_in: float) -> 
     for block in blocks:
         kind = block[0]
         if kind == "name":
-            height += NAME_PT / body_pt
+            height += name_pt(body_pt) / body_pt
         elif kind == "heading":
-            height += HEADING_PT / body_pt + 0.9  # space above plus the rule under it
+            height += heading_pt(body_pt) / body_pt + 0.9  # space above plus the rule under it
         elif kind == "header":
             height += _lines(block[1] + "    " + block[2], body_pt, margin_in) + (0.4 if block[3] else 0)
         elif kind == "bullet":
@@ -156,7 +169,7 @@ def _render(blocks: list[tuple], layout: Layout) -> bytes:
             p = doc.add_paragraph()
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             run = p.add_run(block[1])
-            run.bold, run.font.size = True, Pt(NAME_PT)
+            run.bold, run.font.size = True, Pt(name_pt(layout.body_pt))
         elif kind == "details":
             doc.add_paragraph(block[1]).alignment = WD_ALIGN_PARAGRAPH.CENTER
         elif kind == "heading":
@@ -164,7 +177,7 @@ def _render(blocks: list[tuple], layout: Layout) -> bytes:
             p.paragraph_format.space_before = Pt(10)
             p.paragraph_format.space_after = Pt(3)
             run = p.add_run(block[1])
-            run.bold, run.font.size = True, Pt(HEADING_PT)
+            run.bold, run.font.size = True, Pt(heading_pt(layout.body_pt))
             _bottom_rule(p)
         elif kind == "header":
             _, left, right, first = block

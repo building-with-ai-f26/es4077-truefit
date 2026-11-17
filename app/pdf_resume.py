@@ -18,7 +18,7 @@ from reportlab.lib.units import inch
 from reportlab.platypus import BaseDocTemplate, Frame, HRFlowable, PageTemplate, Paragraph, Spacer, Table, TableStyle
 from xml.sax.saxutils import escape
 
-from app.docx_resume import BULLET_INDENT_IN, HEADING_PT, LAYOUTS, NAME_PT, Layout
+from app.docx_resume import BULLET_INDENT_IN, LAYOUTS, Layout, heading_pt, name_pt
 
 FONT, BOLD = "Helvetica", "Helvetica-Bold"
 RIGHT_SHARE = 0.4  # the right column (location, dates) gets up to 40% of the line
@@ -58,9 +58,11 @@ def _render(blocks: list[tuple], body_pt: float, margin_in: float) -> tuple[byte
     lead = body_pt * 1.2
     body = ParagraphStyle("body", fontName=FONT, fontSize=body_pt, leading=lead)
     styles = {
-        "name": ParagraphStyle("name", parent=body, fontName=BOLD, fontSize=NAME_PT, leading=NAME_PT * 1.2, alignment=TA_CENTER),
+        "name": ParagraphStyle("name", parent=body, fontName=BOLD, fontSize=name_pt(body_pt), leading=name_pt(body_pt) * 1.2,
+                               alignment=TA_CENTER),
         "details": ParagraphStyle("details", parent=body, alignment=TA_CENTER),
-        "heading": ParagraphStyle("heading", parent=body, fontName=BOLD, fontSize=HEADING_PT, leading=HEADING_PT * 1.2, spaceBefore=10),
+        "heading": ParagraphStyle("heading", parent=body, fontName=BOLD, fontSize=heading_pt(body_pt),
+                                  leading=heading_pt(body_pt) * 1.2, spaceBefore=10),
         "left": body,
         "left_bold": ParagraphStyle("left_bold", parent=body, fontName=BOLD),
         "right": ParagraphStyle("right", parent=body, alignment=TA_RIGHT),

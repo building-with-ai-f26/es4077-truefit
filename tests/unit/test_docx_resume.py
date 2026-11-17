@@ -4,7 +4,7 @@ from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
 from docx.shared import Pt
 
-from app.docx_resume import LAYOUTS, build_docx, file_name
+from app.docx_resume import LAYOUTS, MIN_BODY_PT, MIN_NAME_PT, build_docx, file_name, heading_pt, name_pt
 from app.resume_lines import split_lines
 
 MASTER = """Jordan Lee
@@ -94,11 +94,30 @@ def test_longer_resume_steps_down_size_and_margins():
     assert layout.fits_one_page and (layout.body_pt, layout.margin_in) != LAYOUTS[0]
 
 
+def workstreams(n):
+    return [bullet(f"Led workstream {i} on pricing, forecasting, and market sizing for a consumer client portfolio") for i in range(n)]
+
+
+def test_all_text_shrinks_together_down_to_the_floors():
+    # Long enough to need the smallest layout: body 8 pt, name 10 pt, headings 9 pt, and nothing under 8 pt.
+    doc, layout = open_docx(sections(*workstreams(70)))
+    assert (layout.body_pt, layout.margin_in) == LAYOUTS[-1] == (MIN_BODY_PT, 0.5)
+    assert doc.styles["Normal"].font.size == Pt(8)
+    assert doc.paragraphs[0].runs[0].font.size == Pt(MIN_NAME_PT)
+    assert next(p for p in doc.paragraphs if p.text == "Experience").runs[0].font.size == Pt(9)
+    sizes = [run.font.size or doc.styles["Normal"].font.size for p in doc.paragraphs for run in p.runs]
+    assert min(sizes) == Pt(8)
+
+
+def test_sizes_step_down_together():
+    assert [(body, name_pt(body), heading_pt(body)) for body, _ in LAYOUTS] == [
+        (11, 16, 12), (10.5, 15, 11.5), (10, 14, 11), (9.5, 13, 10.5), (9, 12, 10), (8.5, 11, 9.5), (8, 10, 9)]
+
+
 def test_too_long_says_how_many_bullets_to_remove_and_keeps_them_all():
-    many = [bullet(f"Led workstream {i} on pricing, forecasting, and market sizing for a consumer client portfolio") for i in range(60)]
-    doc, layout = open_docx(sections(*many))
-    assert not layout.fits_one_page and layout.remove_bullets > 0
-    assert sum(1 for p in doc.paragraphs if p.text.startswith("Led workstream")) == 60  # nothing is cut
+    doc, layout = open_docx(sections(*workstreams(80)))
+    assert not layout.fits_one_page and layout.remove_bullets > 0 and layout.body_pt == MIN_BODY_PT
+    assert sum(1 for p in doc.paragraphs if p.text.startswith("Led workstream")) == 80  # nothing is cut
 
 
 def test_header_parts_not_in_the_line_are_ignored():

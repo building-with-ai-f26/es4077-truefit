@@ -50,10 +50,10 @@ def test_longer_resume_steps_down_size_and_margins():
 
 
 def test_too_long_measures_exactly_how_many_to_remove_and_cuts_nothing():
-    reader, layout = pdf_for(sections(*workstreams(60)))
-    assert not layout.fits_one_page and layout.remove_bullets > 0
-    assert "Led workstream 59" in "".join(page.extract_text() for page in reader.pages)  # nothing is cut
-    fewer, _ = pdf_for(sections(*workstreams(60 - layout.remove_bullets)))
+    reader, layout = pdf_for(sections(*workstreams(80)))
+    assert not layout.fits_one_page and layout.remove_bullets > 0 and layout.body_pt == 8
+    assert "Led workstream 79" in "".join(page.extract_text() for page in reader.pages)  # nothing is cut
+    fewer, _ = pdf_for(sections(*workstreams(80 - layout.remove_bullets)))
     assert len(fewer.pages) == 1  # removing that many does make it fit
-    one_less, _ = pdf_for(sections(*workstreams(60 - layout.remove_bullets + 1)))
+    one_less, _ = pdf_for(sections(*workstreams(80 - layout.remove_bullets + 1)))
     assert len(one_less.pages) == 2  # and that many is the fewest
