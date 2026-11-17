@@ -99,7 +99,7 @@ def workstreams(n):
 
 
 def test_all_text_shrinks_together_down_to_the_floors():
-    # Long enough to need the smallest layout: body 8 pt, name 10 pt, headings 9 pt, and nothing under 8 pt.
+    # Long enough to need the smallest layout: body 8 pt, name 11 pt, headings 9 pt, and nothing under 8 pt.
     doc, layout = open_docx(sections(*workstreams(70)))
     assert (layout.body_pt, layout.margin_in) == LAYOUTS[-1] == (MIN_BODY_PT, 0.5)
     assert doc.styles["Normal"].font.size == Pt(8)
@@ -111,7 +111,7 @@ def test_all_text_shrinks_together_down_to_the_floors():
 
 def test_sizes_step_down_together():
     assert [(body, name_pt(body), heading_pt(body)) for body, _ in LAYOUTS] == [
-        (11, 16, 12), (10.5, 15, 11.5), (10, 14, 11), (9.5, 13, 10.5), (9, 12, 10), (8.5, 11, 9.5), (8, 10, 9)]
+        (11, 16, 12), (10.5, 15, 11.5), (10, 14.5, 11), (9.5, 13.5, 10.5), (9, 12.5, 10), (8.5, 12, 9.5), (8, 11, 9)]
 
 
 def test_too_long_says_how_many_bullets_to_remove_and_keeps_them_all():
