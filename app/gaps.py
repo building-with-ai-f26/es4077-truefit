@@ -33,6 +33,7 @@ Rules:
   - "experience": a kind of work or industry experience (consumer goods, M&A, managing a team).
   - "soft_skill": communication, leadership, teamwork, curiosity, and other traits.
   - "eligibility": start date, degree or graduation timing, work authorization or sponsorship, years of experience, or location. TrueFit checks these separately.
+  - When a years line also names a kind of experience ("6+ years of experience in B2B product management"), list that kind of experience as its own requirement with kind "experience", quoting only those words ("B2B product management"). The number of years stays "eligibility".
   - "other": anything else.
 - "supported" is true only if a numbered line shows the student has it; list those lines in "line_ids". Goals and interests ("I'm eager to learn SQL") are NOT support.
 - For industry or domain experience, work in that industry or on closely related products counts, the way a recruiter would read it: invoicing and billing work at a bank counts as payments or fintech experience; market sizing for consumer clients counts as consumer goods experience. Credentials, tools, and named skills stay strict: they count only if a line names them.

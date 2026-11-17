@@ -1,0 +1,19 @@
+{
+  "posting": "Product Manager, Small Business Payments. Fabrikam Software, New York. Start date: July 2027.\n\nMinimum qualifications:\n- MBA expected by June 2027\n- 5+ years of experience in B2B SaaS product management, or\n  a related technical role\n- Experience writing product requirements and running customer interviews\n\nPreferred qualifications:\n- Experience with SQL or Python",
+  "master_resume": "EDUCATION\nColumbia Business School | MBA | Aug 2025 – May 2027\nUniversity of Texas at Austin | BBA, Marketing | Aug 2013 – May 2017\nEXPERIENCE\nMarketing Manager, Wingtip Retail | Austin, TX | Jun 2017 – Jul 2025\n- Wrote product requirements for a loyalty app feature used by 40,000 members\n- Ran 15 customer interviews to shape the loyalty program roadmap\n- Built weekly campaign reports in Excel for 3 regional teams\n- Managed a $2M annual paid media budget",
+  "background_notes": "",
+  "expected_gaps": {
+    "required": [
+      "B2B SaaS"
+    ],
+    "preferred": [
+      "SQL",
+      "Python"
+    ]
+  },
+  "forbidden_claims": [
+    "saas",
+    "sql",
+    "python"
+  ]
+}
