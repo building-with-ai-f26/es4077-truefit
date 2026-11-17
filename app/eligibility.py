@@ -21,7 +21,7 @@ VERDICT_LABELS = {
 
 REQUIREMENT_NAMES = {
     "degree": "Degree",
-    "work_authorization": "Work authorization",
+    "work_authorization": "Sponsorship",
     "years_experience": "Years of experience",
 }
 
@@ -37,7 +37,7 @@ NOTE_OTHER_DEGREE = "This role asks for a specific degree TrueFit doesn't check.
 STANCE_LABELS = {
     "no_sponsorship": "No sponsorship",
     "sponsors": "Sponsors visas",
-    "must_be_authorized": "Authorization required",
+    "must_be_authorized": "Ask recruiter",
     "citizenship_required": "Citizenship required",
 }
 STANCE_NOTES = {
