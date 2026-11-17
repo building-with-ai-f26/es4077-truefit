@@ -45,10 +45,14 @@ class Layout:
 def build_docx(raw_sections, lines: list[ResumeLine]) -> tuple[bytes, Layout]:
     """raw_sections come from the browser (with the student's edits), so header lines are re-checked
     against the master resume and only kept bullets are used."""
-    lines_by_id = {line.id: line for line in lines}
-    blocks = _blocks(clean_sections(raw_sections, lines), lines_by_id)
+    blocks = resume_blocks(raw_sections, lines)
     layout = choose_layout(blocks)
     return _render(blocks, layout), layout
+
+
+def resume_blocks(raw_sections, lines: list[ResumeLine]) -> list[tuple]:
+    """The checked resume as ordered blocks; the PDF download uses the same ones."""
+    return _blocks(clean_sections(raw_sections, lines), {line.id: line for line in lines})
 
 
 def clean_sections(raw_sections, lines: list[ResumeLine]) -> list[dict]:

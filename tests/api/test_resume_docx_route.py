@@ -23,3 +23,12 @@ def test_download_checks_resume_length(client):
 def test_malformed_sections_are_skipped(client):
     response = client.post("/api/resume-docx", json={"master_resume": MASTER, "sections": ["junk", {"heading": 3}, {"heading": "Experience", "entries": ["x"]}]})
     assert response.status_code == 200
+
+
+def test_pdf_download_returns_a_pdf(client):
+    response = client.post("/api/resume-pdf", json={"master_resume": MASTER, "sections": sections(bullet("Built an Excel pricing model"))})
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert response.headers["content-disposition"] == 'attachment; filename="Jordan Lee Resume.pdf"'
+    assert response.headers["x-fits-one-page"] == "true"
+    assert response.content.startswith(b"%PDF")

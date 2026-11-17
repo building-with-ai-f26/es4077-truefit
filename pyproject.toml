@@ -9,11 +9,13 @@ dependencies = [
     "httpx",
     "posthog>=7.69.0",
     "python-docx>=1.2.0",
+    "reportlab>=5.1.0",
 ]
 
 [dependency-groups]
 dev = [
     "playwright>=1.65.2",
+    "pypdf>=7.1.0",
     "pytest",
 ]
 

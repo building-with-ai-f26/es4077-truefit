@@ -21,7 +21,7 @@ The user pastes one job posting and their master resume. TrueFit then:
 1. Checks eligibility: finds the start date and the posting's degree, sponsorship, and years-of-experience requirements, quotes the line each came from, and gives a verdict for the start date (against when the student can start) and the degree (against an MBA). Sponsorship and years of experience are shown for information.
 2. Writes a tailored, ATS-safe resume in which every bullet traces back to the student's own material.
 3. Lists the gaps between the posting and the student's experience, grouped as Required and Preferred.
-4. Copies the kept bullets as plain text, or downloads them as a one-page Word file with the same layout (company and location, then title and dates, left and right aligned).
+4. Copies the kept bullets as plain text, or downloads them as a one-page Word or PDF file with the same layout (name and contact centered; company and location, then title and dates, left and right aligned).
 
 It replaces the current routine: reading every posting closely for a buried or vague start date, tailoring by hand or with ChatGPT, re-checking every line because the AI invents skills and metrics, then fixing scrambled fields in Workday or iCIMS.
 

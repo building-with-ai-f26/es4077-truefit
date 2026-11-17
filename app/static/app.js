@@ -323,6 +323,7 @@ async function tailorResume() {
       request,
       linesById: new Map(result.resume_lines.map((line) => [line.id, line])),
       sections: result.resume.sections,
+      gaps: result.gaps,
     };
     renderTailored(true);
     renderGaps(result.gaps);
@@ -388,17 +389,35 @@ function renderTailored(fresh = false) {
   if (name) tailoredBox.append(el("div", { class: "resume-contact" },
     el("div", { class: "resume-name" }, name), details ? el("div", { class: "resume-contact-details" }, details) : null));
   for (const section of tailorState.sections) {
+    // "Only unverified" hides traced bullets, and any job or section left with nothing to decide.
+    const shown = (entry) => entry.bullets.filter((b) => !tailorState.onlyUnverified || b.status === "flagged");
+    if (tailorState.onlyUnverified && !section.entries.some((e) => shown(e).length)) continue;
     tailoredBox.append(el("h3", { class: "resume-section" }, section.heading));
     for (const entry of section.entries) {
+      const bullets = shown(entry);
+      if (tailorState.onlyUnverified && !bullets.length) continue;
       const block = el("div", { class: "entry" });
       for (const row of headerRows(entry, tailorState.linesById)) {
         block.append(el("div", { class: `entry-header${row.org ? " org" : ""}` },
           el("span", {}, row[0]), row[1] ? el("span", { class: "entry-header-right" }, row[1]) : null));
       }
-      if (entry.bullets.length) {
-        const list = el("ul", { class: "bullets" });
-        for (const bullet of entry.bullets) list.append(renderBullet(bullet, entry));
-        block.append(list);
+      if (bullets.length) {
+        // A job can fold to one line once the student has checked it.
+        const flaggedHere = bullets.filter((b) => b.status === "flagged").length;
+        const fold = el("button", { class: "link-button entry-toggle", type: "button", "aria-expanded": String(!entry.collapsed) },
+          entry.collapsed ? "Show bullets" : "Hide bullets");
+        fold.addEventListener("click", () => {
+          entry.collapsed = !entry.collapsed;
+          renderTailored();
+        });
+        if (entry.collapsed) {
+          block.append(el("p", { class: "entry-summary" },
+            `${bullets.length} ${bullets.length === 1 ? "bullet" : "bullets"}${flaggedHere ? `, ${flaggedHere} unverified` : ""}`), fold);
+        } else {
+          const list = el("ul", { class: "bullets" });
+          for (const bullet of bullets) list.append(renderBullet(bullet, entry));
+          block.append(list, fold);
+        }
       }
       tailoredBox.append(block);
     }
@@ -413,6 +432,7 @@ function renderTailored(fresh = false) {
     ? `${kept} kept in the copy-ready resume. ${flagged} unverified ${flagged === 1 ? "bullet is" : "bullets are"} left out unless you put ${flagged === 1 ? "it" : "them"} back.`
     : `${kept} kept in the copy-ready resume. Each bullet shows the lines it came from.`);
   plainTextBox.value = renderPlainText(tailorState.sections, tailorState.linesById);
+  updateResultsBar();
 }
 
 function renderBullet(bullet, entry) {
@@ -425,8 +445,11 @@ function renderBullet(bullet, entry) {
     body.append(el("p", { class: "flag-reason" }, bullet.included || bullet.removed ? bullet.flag_reason : `Left out of your resume. ${bullet.flag_reason.replace(/\.$/, "")}.`));
   }
 
+  // Sources double a bullet's height, so traced bullets hide them behind "Show source";
+  // unverified bullets always show them, since that's what the student needs to judge.
+  const showSources = !traced || bullet.showSources;
   const sources = el("div", { class: "sources" });
-  for (const id of bullet.source_line_ids) {
+  for (const id of showSources ? bullet.source_line_ids : []) {
     const line = tailorState.linesById.get(id);
     if (line) sources.append(el("p", { class: "quote" }, `${line.source === "notes" ? "From your writing" : "From your resume"}: “${line.text.replace(/^[-*•●▪◦·–—]\s*/, "")}”`));
   }
@@ -445,6 +468,14 @@ function renderBullet(bullet, entry) {
   const edit = el("button", { class: "link-button", type: "button" }, "Edit");
   edit.addEventListener("click", () => startEdit(item, bullet, entry));
   controls.append(toggle, edit);
+  if (traced) {
+    const source = el("button", { class: "link-button", type: "button" }, bullet.showSources ? "Hide source" : "Show source");
+    source.addEventListener("click", () => {
+      bullet.showSources = !bullet.showSources;
+      renderTailored();
+    });
+    controls.append(source);
+  }
   body.append(controls);
   return item;
 }
@@ -565,15 +596,20 @@ copyButton.addEventListener("click", async () => {
   }
 });
 
-// ---- Word download (Build 3): the same kept bullets, as a one-page .docx built on the server --------
+// ---- Word and PDF downloads (Build 3): the same kept bullets as one-page files built on the server -----
 
-const downloadButton = document.getElementById("download-docx");
+const DOWNLOADS = { docx: "Word", pdf: "PDF" };
 
-downloadButton.addEventListener("click", async () => {
+for (const [kind, label] of Object.entries(DOWNLOADS)) {
+  const button = document.getElementById(`download-${kind}`);
+  button.addEventListener("click", () => downloadResume(kind, label, button));
+}
+
+async function downloadResume(kind, label, button) {
   clearError();
-  downloadButton.disabled = true;
+  button.disabled = true;
   try {
-    const response = await fetch("/api/resume-docx", {
+    const response = await fetch(`/api/resume-${kind}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -584,11 +620,11 @@ downloadButton.addEventListener("click", async () => {
     });
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
-      throw new Error(data?.error?.message || "Couldn't build the Word file. Please try again.");
+      throw new Error(data?.error?.message || `Couldn't build the ${label} file. Please try again.`);
     }
     const fits = response.headers.get("X-Fits-One-Page") === "true";
     const remove = Number(response.headers.get("X-Remove-Bullets") || 0);
-    const name = /filename="([^"]+)"/.exec(response.headers.get("Content-Disposition") || "")?.[1] || "Resume.docx";
+    const name = /filename="([^"]+)"/.exec(response.headers.get("Content-Disposition") || "")?.[1] || `Resume.${kind}`;
     const link = el("a", { href: URL.createObjectURL(await response.blob()), download: name });
     document.body.append(link);
     link.click();
@@ -596,14 +632,62 @@ downloadButton.addEventListener("click", async () => {
     setTimeout(() => URL.revokeObjectURL(link.href), 1000);
     copyStatus.textContent = fits
       ? `Downloaded ${name}. It fits on one page.`
-      : `Downloaded ${name}, but it likely runs past one page. Remove about ${remove} ${remove === 1 ? "bullet" : "bullets"} and download again; TrueFit won't cut your content for you.`;
-    track("resume_downloaded", { fits_one_page: fits, bullets: allBullets().filter((b) => b.included).length });
+      : `Downloaded ${name}, but it runs past one page. Remove about ${remove} ${remove === 1 ? "bullet" : "bullets"} and download again; TrueFit won't cut your content for you.`;
+    track("resume_downloaded", { format: kind, fits_one_page: fits, bullets: allBullets().filter((b) => b.included).length });
   } catch (err) {
     showError(err.message === "Failed to fetch" ? "Couldn't reach TrueFit. Check that the app is running and try again." : err.message);
-    track("resume_download_failed");
+    track("resume_download_failed", { format: kind });
   } finally {
-    downloadButton.disabled = false;
+    button.disabled = false;
   }
+}
+
+// ---- Jump bar: stays on screen while scrolling; jumps to unverified bullets, gaps, and export -------
+
+const resultsBar = document.getElementById("results-bar");
+const jumpUnverified = document.getElementById("jump-unverified");
+const jumpGaps = document.getElementById("jump-gaps");
+const onlyUnverified = document.getElementById("only-unverified");
+let jumpIndex = -1;
+
+function updateResultsBar() {
+  const flagged = allBullets().filter((b) => b.status === "flagged").length;
+  if (!flagged && tailorState.onlyUnverified) {
+    tailorState.onlyUnverified = false; // the last unverified bullet was fixed; show everything again
+    renderTailored();
+    return;
+  }
+  resultsBar.hidden = false;
+  jumpUnverified.textContent = flagged ? `Next unverified (${flagged})` : "No unverified bullets";
+  jumpUnverified.disabled = !flagged;
+  onlyUnverified.disabled = !flagged;
+  onlyUnverified.checked = Boolean(tailorState.onlyUnverified);
+  const gaps = tailorState.gaps;
+  const rows = gaps && !gaps.none_found ? gapRows(gaps.required).length + gapRows(gaps.preferred).length : 0;
+  jumpGaps.textContent = rows ? `Gaps (${rows})` : "No gaps";
+}
+
+// Each press moves to the next unverified bullet, opening any folded job that holds one.
+jumpUnverified.addEventListener("click", () => {
+  const folded = tailorState.sections.flatMap((s) => s.entries).filter((e) => e.collapsed && e.bullets.some((b) => b.status === "flagged"));
+  if (folded.length) {
+    folded.forEach((e) => { e.collapsed = false; });
+    renderTailored();
+  }
+  const items = [...tailoredBox.querySelectorAll(".bullet.flagged")];
+  if (!items.length) return;
+  jumpIndex = (jumpIndex + 1) % items.length;
+  items.forEach((item) => item.classList.remove("jumped"));
+  items[jumpIndex].classList.add("jumped");
+  items[jumpIndex].scrollIntoView({ behavior: "smooth", block: "center" });
+});
+jumpGaps.addEventListener("click", () => gapBlock.scrollIntoView({ behavior: "smooth", block: "start" }));
+document.getElementById("jump-export").addEventListener("click", () => copyBlock.scrollIntoView({ behavior: "smooth", block: "start" }));
+onlyUnverified.addEventListener("change", () => {
+  tailorState.onlyUnverified = onlyUnverified.checked;
+  jumpIndex = -1;
+  renderTailored();
+  track("only_unverified_toggled", { on: onlyUnverified.checked });
 });
 
 // Mirrors app/plain_text.py so edits update the copy-ready text without another server call.

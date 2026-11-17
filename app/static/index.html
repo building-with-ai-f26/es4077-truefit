@@ -90,6 +90,13 @@
         <p class="exhibit-no">Exhibit 2 · Tailored resume</p>
         <h3 id="results-heading" class="action-title empty">Your tailored resume appears here.</h3>
         <p id="tailor-summary" class="exhibit-sub" aria-live="polite">Every bullet shows the lines it came from. <strong>Unverified</strong> bullets couldn't be traced and are left out unless you put them back.</p>
+        <!-- Stays at the top while scrolling the results: jump to what needs a decision -->
+        <nav id="results-bar" class="results-bar" aria-label="Jump within the tailored resume" hidden>
+          <button id="jump-unverified" class="link-button" type="button"></button>
+          <button id="jump-gaps" class="link-button" type="button"></button>
+          <button id="jump-export" class="link-button" type="button">Copy &amp; download</button>
+          <label class="only-unverified"><input id="only-unverified" type="checkbox" /> Only unverified</label>
+        </nav>
         <div id="tailored-resume"></div>
 
         <!-- Gaps come before the copy-ready text so students see what to fix before they copy. -->
@@ -104,11 +111,12 @@
             <label for="plain-text">Copy-ready resume</label>
             <div class="copy-actions">
               <button id="download-docx" class="secondary" type="button">Download Word</button>
+              <button id="download-pdf" class="secondary" type="button">Download PDF</button>
               <button id="copy-resume" class="primary" type="button">Copy</button>
             </div>
           </div>
           <textarea id="plain-text" class="collapsed" rows="14" readonly></textarea>
-          <p id="copy-status" class="hint" aria-live="polite">Plain text for Workday or iCIMS: only the bullets you've kept. Download Word gives the same bullets as a one-page .docx.</p>
+          <p id="copy-status" class="hint" aria-live="polite">Plain text for Workday or iCIMS: only the bullets you've kept. Download Word or PDF gives the same bullets as a one-page file.</p>
         </div>
       </section>
     </div>

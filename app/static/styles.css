@@ -271,6 +271,28 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
 .bullet-controls { display: flex; gap: 16px; margin-top: 8px; }
 .bullet-edit { margin-top: 2px; min-height: 4em; }
 
+/* Jump bar: sticks to the top of the window while scrolling the results */
+.results-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+  margin: 16px 0 0;
+  padding: 10px 0;
+  background: var(--ground);
+  border-bottom: 1px solid var(--rule);
+}
+.results-bar .link-button { font-size: 14px; }
+.results-bar .link-button:disabled { color: var(--muted); cursor: default; text-decoration: none; }
+.only-unverified { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 0 auto; font-size: 14px; font-weight: 400; color: var(--ink); }
+.bullet.jumped { outline: 2px solid var(--highlight-solid); outline-offset: 4px; }
+.entry-toggle { margin-top: 4px; }
+.entry-summary { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+#tailored-resume .bullet, #gap-block { scroll-margin-top: 64px; }
+
 /* Gap list: what the posting asks for that the student's lines don't back up */
 .gap-block { margin-top: 40px; padding-top: 16px; border-top: 2px solid var(--navy); }
 .gap-title { margin: 0; font: 700 20px/1.3 var(--display); color: var(--navy); }
