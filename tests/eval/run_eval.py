@@ -136,6 +136,10 @@ async def run_tailor() -> bool:
         flagged = [b for b in bullets if b["status"] == "flagged"]
         flagged_for_review += [(name, b) for b in flagged]
         gap_score = score_gaps(case.get("expected_gaps", {}), result["gaps"])
+        for term in case.get("not_gaps", []):  # requirements the student's lines do back, e.g. related industry work
+            for g in result["gaps"]["required"] + result["gaps"]["preferred"]:
+                if term in g["text"].lower() or term in g["quote"].lower():
+                    violations.append(f"{name}: listed as a gap but the student's lines back it ({term}): {g['text']!r}")
         gap_scores.append((name, gap_score))
         print(f"{name:30} {len(bullets):7} {len(kept):5} {len(flagged):8} ${meter.cost - before:6.4f} {seconds[-1]:5.1f}s "
               f"gaps {gap_score['found']}/{gap_score['expected']}")

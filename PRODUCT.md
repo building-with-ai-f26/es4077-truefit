@@ -72,7 +72,7 @@ Success means classmates use TrueFit instead of that mix, and say it is faster a
 
 **Gap list**
 
-- Gaps are grouped Required and Preferred, and unlabeled requirements count as Required. Each gap quotes the posting and may carry a short note on how serious it is (a required license is often a dealbreaker; a tool is usually learnable) and the closest related line from the student's own writing. Soft skills and eligibility items are never gaps. Built in Build 3 (Nov 17).
+- Gaps are grouped Required and Preferred, and unlabeled requirements count as Required. Each gap quotes the posting and may carry a short note on how serious it is (a required license is often a dealbreaker; a tool is usually learnable) and the closest related line from the student's own writing. Soft skills and eligibility items are never gaps. Related industry experience fills an industry gap (billing work at a bank counts as fintech); credentials, tools, and named skills must be named in the student's lines. Built in Build 3 (Nov 17).
 
 **Privacy**
 

@@ -220,7 +220,7 @@ confirm they fail before implementing.
   - add `renderPlainText(state)`, mirroring `app/plain_text.py` (same headings, `- ` bullets, character rules), and rebuild it on every include/remove/edit
   - add a "Copy resume" button using `navigator.clipboard.writeText` with a "Copied" confirmation (FR-015)
   - render the gap list as "Required" and "Preferred" groups with quotes and notes, or "No gaps found" (FR-017)
-- [x] T042 [US3] Extend `tests/eval/run_eval.py --suite tailor` to score gaps against `expected_gaps`: recall of at least 80% and group agreement of at least 90% (SC-005)
+- [x] T042 [US3] Extend `tests/eval/run_eval.py --suite tailor` to score gaps against `expected_gaps`: recall of at least 80% and group agreement of at least 90% (SC-005) and fail on `not_gaps`, requirements the student's lines do back (related industry work counts)
 
 **Checkpoint**: All three stories work; the full core workflow is complete.
 

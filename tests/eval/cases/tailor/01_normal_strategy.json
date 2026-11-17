@@ -7,5 +7,8 @@
       "SQL"
     ]
   },
-  "background_notes": ""
+  "background_notes": "",
+  "not_gaps": [
+    "consumer goods"
+  ]
 }

@@ -33,6 +33,7 @@ Rules:
   - "eligibility": start date, degree or graduation timing, work authorization or sponsorship, years of experience, or location. TrueFit checks these separately.
   - "other": anything else.
 - "supported" is true only if a numbered line shows the student has it; list those lines in "line_ids". Goals and interests ("I'm eager to learn SQL") are NOT support.
+- For industry or domain experience, work in that industry or on closely related products counts, the way a recruiter would read it: invoicing and billing work at a bank counts as payments or fintech experience; market sizing for consumer clients counts as consumer goods experience. Credentials, tools, and named skills stay strict: they count only if a line names them.
 - If the student doesn't have it, "related_line_ids" lists up to two lines showing the closest related experience they do have, or [] if none.
 - List each requirement once."""
 
