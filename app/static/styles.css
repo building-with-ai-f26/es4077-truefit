@@ -302,6 +302,15 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
   min-height: 8em;
   max-height: none;
 }
+/* Collapsed to a short preview until Copy is pressed, so it doesn't push the gaps and bullets away */
+#plain-text.collapsed {
+  height: 5.6em;
+  min-height: 0;
+  overflow: hidden;
+  resize: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 45%, transparent);
+  mask-image: linear-gradient(to bottom, #000 45%, transparent);
+}
 
 /* ---- Narrow screens: one column, exhibit under its inputs -------------- */
 @media (max-width: 900px) {

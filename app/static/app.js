@@ -327,6 +327,7 @@ async function tailorResume() {
     renderTailored(true);
     renderGaps(result.gaps);
     copyBlock.hidden = false;
+    plainTextBox.classList.add("collapsed"); // a new resume starts as a short preview
     setStep("step-results");
     resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
     const bullets = allBullets();
@@ -554,6 +555,7 @@ copyButton.addEventListener("click", async () => {
   if (copied) {
     copyStatus.textContent = "Copied. Paste it into the application's resume field.";
     copyButton.textContent = "Copied";
+    plainTextBox.classList.remove("collapsed"); // show the full text once it's copied
     setTimeout(() => { copyButton.textContent = "Copy"; }, 2000);
     track("resume_copied", { bullets: allBullets().filter((b) => b.included).length });
   } else {

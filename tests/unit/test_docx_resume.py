@@ -1,7 +1,7 @@
 import io
 
 from docx import Document
-from docx.enum.text import WD_TAB_ALIGNMENT
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
 from docx.shared import Pt
 
 from app.docx_resume import LAYOUTS, build_docx, file_name
@@ -75,6 +75,8 @@ def test_ats_safe_structure():
     assert doc.styles["Normal"].font.name == "Calibri"
     name = doc.paragraphs[0].runs[0]
     assert name.bold and name.font.size == Pt(16)
+    assert doc.paragraphs[0].alignment == doc.paragraphs[1].alignment == WD_ALIGN_PARAGRAPH.CENTER  # name and contact
+    assert all(p.alignment is None for p in doc.paragraphs[2:])  # everything else stays left
     heading = next(p for p in doc.paragraphs if p.text == "Experience").runs[0]
     assert heading.bold and heading.font.size == Pt(12)
     assert next(p for p in doc.paragraphs if p.text.startswith("Built")).style.name == "List Bullet"

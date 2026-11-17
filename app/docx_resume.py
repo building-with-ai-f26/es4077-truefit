@@ -1,7 +1,7 @@
 """One-page Word download (Build 3): the same kept bullets and header rows as the copy-ready text.
 
 Layout follows ATS-safe rules (adapted from the resume-formatter skill, Paramchoudhary/ResumeSkills, MIT):
-one column, a standard font, no tables, text boxes, or Word header/footer, contact details in the body,
+one column, a standard font, no tables, text boxes, or Word header/footer, contact details centered in the body,
 name 16 pt, headings 12 pt, body 10-11 pt. Each job header keeps the page's layout: organization left and
 location right, then title left and dates right, using a right-aligned tab stop (not a table) so ATS
 parsers read it as plain lines.
@@ -15,7 +15,7 @@ import math
 from dataclasses import dataclass
 
 from docx import Document
-from docx.enum.text import WD_TAB_ALIGNMENT
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt
@@ -149,10 +149,12 @@ def _render(blocks: list[tuple], layout: Layout) -> bytes:
     for block in blocks:
         kind = block[0]
         if kind == "name":
-            run = doc.add_paragraph().add_run(block[1])
+            p = doc.add_paragraph()
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            run = p.add_run(block[1])
             run.bold, run.font.size = True, Pt(NAME_PT)
         elif kind == "details":
-            doc.add_paragraph(block[1])
+            doc.add_paragraph(block[1]).alignment = WD_ALIGN_PARAGRAPH.CENTER
         elif kind == "heading":
             p = doc.add_paragraph()
             p.paragraph_format.space_before = Pt(10)
