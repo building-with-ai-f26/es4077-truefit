@@ -40,6 +40,7 @@ LAYOUTS = [(11, 1.0), (10.5, 1.0), (10, 1.0), (10, 0.9), (10, 0.8), (10, 0.7), (
 # Spare space on the page is shared out as extra_pt, the same for every section and entry gap, up to one line.
 SECTION_GAP_PT, ENTRY_GAP_PT, FIRST_ENTRY_GAP_PT = 12, 8, 4
 HEADING_SPACE_AFTER_PT = 3  # between a heading's rule and its first entry
+BULLET_GAP_MAX_PT = 2  # once every gap is at its cap, up to this much space between bullets fills the rest
 HEADING_RULE_PT = 2  # Word adds the rule's own space (1 pt) and width under each heading
 RESERVE_LINES = 1  # Word's layout can only be estimated (checked against real Word, Nov 18), so one line stays free
 WORD_LEADING = 1.22  # Word's single line spacing for Calibri, as a multiple of the font size
@@ -64,6 +65,7 @@ class Layout:
     fits_one_page: bool
     remove_bullets: int  # about how many bullets to remove if it doesn't fit; 0 if it does
     extra_pt: float = 0  # added to every section and entry gap so the resume reaches the bottom margin
+    bullet_extra_pt: float = 0  # space above each bullet, used only once extra_pt is at its cap
 
 
 def gap_kinds(blocks: list[tuple]) -> list[str | None]:
@@ -142,7 +144,7 @@ def choose_layout(blocks: list[tuple]) -> Layout:
     for body_pt, margin_in in LAYOUTS:
         spare = _page_lines(body_pt, margin_in) - RESERVE_LINES - _estimated_height(blocks, body_pt, margin_in)
         if spare >= 0:
-            return Layout(body_pt, margin_in, True, 0, _extra_pt(blocks, body_pt, spare))
+            return Layout(body_pt, margin_in, True, 0, *_extra_space(blocks, body_pt, spare))
     body_pt, margin_in = LAYOUTS[-1]
     over = _estimated_height(blocks, body_pt, margin_in) + RESERVE_LINES - _page_lines(body_pt, margin_in)
     bullets = [_lines(b[1], body_pt, margin_in, BULLET_INDENT_IN) * BULLET_LEADING / WORD_LEADING for b in blocks if b[0] == "bullet"]
@@ -150,12 +152,16 @@ def choose_layout(blocks: list[tuple]) -> Layout:
     return Layout(body_pt, margin_in, False, max(1, math.ceil(over / per_bullet)))
 
 
-def _extra_pt(blocks: list[tuple], body_pt: float, spare_lines: float) -> float:
-    """The spare space shared out over the section and entry gaps, at most one line each."""
+def _extra_space(blocks: list[tuple], body_pt: float, spare_lines: float) -> tuple[float, float]:
+    """The spare space shared out over the section and entry gaps (at most one line each), then whatever is left
+    over the bullets (at most BULLET_GAP_MAX_PT each)."""
+    spare_pt = FILL_SAFETY * spare_lines * body_pt * WORD_LEADING
     gaps = sum(kind in ("section", "entry") for kind in gap_kinds(blocks))
-    if not gaps:
-        return 0
-    return min(body_pt * 1.2, FILL_SAFETY * spare_lines * body_pt * WORD_LEADING / gaps)
+    extra = min(body_pt * 1.2, spare_pt / gaps) if gaps else 0
+    if gaps and extra < body_pt * 1.2:
+        return extra, 0
+    bullets = sum(block[0] == "bullet" for block in blocks)
+    return extra, min(BULLET_GAP_MAX_PT, (spare_pt - gaps * extra) / bullets) if bullets else 0
 
 
 def _page_lines(body_pt: float, margin_in: float) -> float:
@@ -250,12 +256,22 @@ def _render(blocks: list[tuple], layout: Layout) -> bytes:
                 p.add_run("\t" + right)
         elif kind == "bullet":
             p = doc.add_paragraph(block[1], style="List Bullet")
+            if layout.bullet_extra_pt:
+                p.paragraph_format.space_before = Pt(layout.bullet_extra_pt)
+                _no_contextual_spacing(p)
             p.paragraph_format.left_indent = Inches(BULLET_INDENT_IN)
             p.paragraph_format.first_line_indent = Inches(-BULLET_INDENT_IN)
 
     out = io.BytesIO()
     doc.save(out)
     return out.getvalue()
+
+
+def _no_contextual_spacing(paragraph) -> None:
+    """Word's List Bullet style ignores space between bullets ("contextual spacing"); turn that off here."""
+    off = OxmlElement("w:contextualSpacing")
+    off.set(qn("w:val"), "0")
+    paragraph._p.get_or_add_pPr().append(off)
 
 
 def _bottom_rule(paragraph) -> None:

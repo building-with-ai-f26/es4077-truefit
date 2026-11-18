@@ -1,6 +1,6 @@
 # Downloads: clearer spacing, 1-inch margins, fill the page (design)
 
-Nov 18, 2026 · Status: draft for approval
+Nov 18, 2026 · Status: approved Nov 18, built
 
 ## Why
 Testing the Word and PDF downloads with a real resume (student, Nov 18): the two schools in Education, and the jobs in Experience, run together (each gets only 5 pt above it), and a resume that fits leaves empty space at the bottom of the page. The student wants Word's standard 1-inch margins and a resume that fills the page.
@@ -24,7 +24,8 @@ Testing the Word and PDF downloads with a real resume (student, Nov 18): the two
 
 ## Decisions
 - Spread the spacing, capped (a half-page resume still leaves some space at the bottom).
-- Margins (option B): 1 inch at 11, 10.5, and 10 pt text; if it doesn't fit at 1 inch with 10 pt text, margins narrow (0.75, 0.6, 0.5 inch) before text goes below 10 pt; then text shrinks to the 8 pt floor at 0.5 inch, as today.
+- Once every section and entry gap is at its cap, up to 2 pt of space between bullets fills more of the page (student's choice, Nov 18, after seeing a same-length-bullet sample leave ~1.3 in).
+- Margins (option B): 1 inch at 11, 10.5, and 10 pt text; if it doesn't fit at 1 inch with 10 pt text, margins narrow (0.9, 0.8, 0.7, 0.6, 0.5 inch) before text goes below 10 pt; then text shrinks to the 8 pt floor at 0.5 inch, as today.
 
 ## Builder's calls (proposed; the student can correct)
 - **Base spacing:** 8 pt above each school or job after the first in a section (was 5 pt), 12 pt above each section heading (was 10 pt). This alone fixes the run-together look even when the page is full.

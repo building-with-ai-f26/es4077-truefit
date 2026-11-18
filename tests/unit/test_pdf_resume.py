@@ -121,3 +121,12 @@ def test_no_entry_gaps():
     content, layout = build_pdf([("name", "Jordan Lee"), ("details", "jordan@example.com"), ("heading", "Education"),
                                  ("header", "NYU Stern", "2027", True)])
     assert len(PdfReader(io.BytesIO(content)).pages) == 1 and layout.fits_one_page
+
+
+def test_space_between_bullets_only_after_gaps_are_full():
+    _, short = two_schools(bullet("Built an Excel pricing model"))
+    assert short.extra_pt == short.body_pt * 1.2 and 0 < short.bullet_extra_pt <= 2  # gaps full, so bullets spread a little
+    for n in range(10, 40):
+        _, layout = two_schools(*workstreams(n))
+        if layout.extra_pt < layout.body_pt * 1.2:
+            assert layout.bullet_extra_pt == 0  # gaps not full yet: bullets stay together

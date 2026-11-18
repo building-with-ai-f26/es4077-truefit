@@ -18,7 +18,7 @@ from reportlab.lib.units import inch
 from reportlab.platypus import BaseDocTemplate, Frame, HRFlowable, PageTemplate, Paragraph, Spacer, Table, TableStyle
 from xml.sax.saxutils import escape
 
-from app.docx_resume import (BULLET_INDENT_IN, ENTRY_GAP_PT, FIRST_ENTRY_GAP_PT, LAYOUTS, SECTION_GAP_PT, Layout, gap_kinds,
+from app.docx_resume import (BULLET_GAP_MAX_PT, BULLET_INDENT_IN, ENTRY_GAP_PT, FIRST_ENTRY_GAP_PT, LAYOUTS, SECTION_GAP_PT, Layout, gap_kinds,
                               heading_pt, name_pt)
 
 FONT, BOLD = "Helvetica", "Helvetica-Bold"
@@ -32,21 +32,34 @@ def build_pdf(blocks: list[tuple]) -> tuple[bytes, Layout]:
     for body_pt, margin_in in LAYOUTS:
         content, pages = _render(blocks, body_pt, margin_in)
         if pages == 1:
-            extra, content = _fill_page(blocks, body_pt, margin_in, content)
-            return content, Layout(body_pt, margin_in, True, 0, extra)
+            extra, bullet_extra, content = _fill_page(blocks, body_pt, margin_in, content)
+            return content, Layout(body_pt, margin_in, True, 0, extra, bullet_extra)
     return content, Layout(body_pt, margin_in, False, _bullets_to_remove(blocks, body_pt, margin_in))
 
 
-def _fill_page(blocks: list[tuple], body_pt: float, margin_in: float, content: bytes) -> tuple[float, bytes]:
-    """The most extra space per gap (up to one line) that still fits one page, so the resume reaches the bottom."""
-    low, high = 0.0, body_pt * 1.2
-    best = content
-    capped, pages = _render(blocks, body_pt, margin_in, high)
+def _fill_page(blocks: list[tuple], body_pt: float, margin_in: float, content: bytes) -> tuple[float, float, bytes]:
+    """The most extra space per gap (up to one line) that still fits one page, so the resume reaches the bottom;
+    if every gap reaches its cap, then the most space between bullets (up to BULLET_GAP_MAX_PT)."""
+    cap = body_pt * 1.2
+    capped, pages = _render(blocks, body_pt, margin_in, cap)
+    if pages != 1:
+        extra, content = _most_that_fits(lambda x: _render(blocks, body_pt, margin_in, x), cap, content)
+        return extra, 0, content
+    if not any(block[0] == "bullet" for block in blocks):
+        return cap, 0, capped
+    bullet_extra, content = _most_that_fits(lambda x: _render(blocks, body_pt, margin_in, cap, x), BULLET_GAP_MAX_PT, capped)
+    return cap, bullet_extra, content
+
+
+def _most_that_fits(render, high: float, fallback: bytes) -> tuple[float, bytes]:
+    """Binary search for the largest value in [0, high] whose render is one page."""
+    low, best = 0.0, fallback
+    trial, pages = render(high)
     if pages == 1:
-        return high, capped
+        return high, trial
     for _ in range(FILL_ROUNDS):
         middle = (low + high) / 2
-        trial, pages = _render(blocks, body_pt, margin_in, middle)
+        trial, pages = render(middle)
         if pages == 1:
             low, best = middle, trial
         else:
@@ -68,7 +81,8 @@ def _bullets_to_remove(blocks: list[tuple], body_pt: float, margin_in: float) ->
     return max(1, low)
 
 
-def _render(blocks: list[tuple], body_pt: float, margin_in: float, extra_pt: float = 0) -> tuple[bytes, int]:
+def _render(blocks: list[tuple], body_pt: float, margin_in: float, extra_pt: float = 0,
+            bullet_extra_pt: float = 0) -> tuple[bytes, int]:
     out = io.BytesIO()
     margin = margin_in * inch
     width, height = LETTER[0] - 2 * margin, LETTER[1] - 2 * margin
@@ -88,7 +102,8 @@ def _render(blocks: list[tuple], body_pt: float, margin_in: float, extra_pt: flo
         "left": body,
         "left_bold": ParagraphStyle("left_bold", parent=body, fontName=BOLD),
         "right": ParagraphStyle("right", parent=body, alignment=TA_RIGHT),
-        "bullet": ParagraphStyle("bullet", parent=body, leftIndent=BULLET_INDENT_IN * inch, bulletIndent=0.08 * inch),
+        "bullet": ParagraphStyle("bullet", parent=body, leftIndent=BULLET_INDENT_IN * inch, bulletIndent=0.08 * inch,
+                                 spaceBefore=bullet_extra_pt),
     }
 
     gaps = {"section": SECTION_GAP_PT + extra_pt, "entry": ENTRY_GAP_PT + extra_pt, "first_entry": FIRST_ENTRY_GAP_PT}

@@ -207,3 +207,12 @@ def test_word_bullet_lines_are_taller():
     one_bullet = _estimated_height([("bullet", "Built a model")], 10, 1.0)
     one_line = _estimated_height([("details", "Built a model")], 10, 1.0)
     assert one_bullet / one_line >= 1.28 / 1.22
+
+
+def test_word_space_between_bullets_only_after_gaps_are_full():
+    doc, layout = open_docx(two_school_sections(*workstreams(20)), two_school_master())  # gaps at the cap, room left
+    assert layout.extra_pt == layout.body_pt * 1.2 and 0 < layout.bullet_extra_pt <= 2
+    bullets = [p for p in doc.paragraphs if p.text.startswith("Led workstream")]
+    assert all(p.paragraph_format.space_before == Pt(layout.bullet_extra_pt) for p in bullets)
+    _, filled = open_docx(two_school_sections(*workstreams(33)), two_school_master())  # gaps not full
+    assert filled.bullet_extra_pt == 0
