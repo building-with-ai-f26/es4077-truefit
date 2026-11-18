@@ -1,6 +1,6 @@
 # Word file upload for the master resume and background (design)
 
-Nov 18, 2026 · Build 3 → 4 · Status: draft for approval
+Nov 18, 2026 · Build 3 → 4 · Status: approved Nov 18, built
 
 ## Why
 Pasting a long resume is error-prone: students can miss part of it when copying, and reviewing it in a textbox invites typos, accidental deletions, and stray spaces. Letting them pick the Word file they already keep removes both problems. This reverses the v1 out-of-scope item "uploading PDF or Word files (text paste only)" for Word only.
