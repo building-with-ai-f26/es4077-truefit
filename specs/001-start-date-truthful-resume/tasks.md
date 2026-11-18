@@ -190,7 +190,7 @@ confirm they fail before implementing.
 
 ### Tests for User Story 3 ⚠️ write first, confirm they fail
 
-- [ ] T036 [P] [US3] Write `tests/unit/test_plain_text.py`, covering:
+- [x] T036 [P] [US3] Write `tests/unit/test_plain_text.py`, covering:
   - output contains only included bullets
   - headings sit on their own line with a blank line before
   - role lines are copied verbatim from header lines
@@ -231,7 +231,7 @@ confirm they fail before implementing.
 ## Phase 6: Polish & Cross-Cutting Concerns
 
 - [ ] T043 [P] Write `tests/api/test_no_content_logs.py`. It runs each route with a posting and resume containing a unique marker string, captures logs with `caplog`, and asserts the marker never appears (FR-019, constitution).
-- [ ] T044 [P] Fill in `AGENTS.md` §1 (overview, user and workflow, stack: Python 3.12 / FastAPI / plain HTML+JS / OpenRouter) and §2. The §2 commands are `uv sync`, `uv run uvicorn app.main:app --reload`, `uv run pytest`, and `uv run python tests/eval/run_eval.py` (Constitution governance: keep AGENTS.md consistent).
+- [x] T044 [P] Fill in `AGENTS.md` §1 (overview, user and workflow, stack: Python 3.12 / FastAPI / plain HTML+JS / OpenRouter) and §2. The §2 commands are `uv sync`, `uv run uvicorn app.main:app --reload`, `uv run pytest`, and `uv run python tests/eval/run_eval.py` (Constitution governance: keep AGENTS.md consistent).
 - [ ] T045 [P] Update the "Local setup" section of `README.md` with the same install and run commands and the `.env` steps from quickstart.md
 - [ ] T046 Run all 15 manual scenarios in `specs/001-start-date-truthful-resume/quickstart.md`, time scenarios 1 and 7 (SC-001), and record results and known limits in the Build log in `docs/index.html`
 - [ ] T047 Update `docs/index.html` PRD §3 (architecture: Page → Python server → OpenRouter model → deterministic checks → result) and §4 "Est. Cost Per User Run", using measured token usage from an eval run

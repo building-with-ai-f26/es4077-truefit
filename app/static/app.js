@@ -695,6 +695,7 @@ const DATE_RANGE = /(\d{4})\s*[–—-]\s*((?:[A-Z][a-z]{2,8}\.?\s+)?\d{4}|Prese
 
 function normalizeChars(text) {
   return text
+    .replace(/\t/g, " ") // pasted tabs keep words apart instead of gluing them
     .replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/…/g, "...").replace(/ /g, " ")
     .trim()
     .replace(/^[-*•●▪◦·]\s*/, "")
