@@ -40,7 +40,13 @@
           <label for="posting">Job posting</label>
           <button id="sample-posting" class="link-button quiet" type="button">Try a sample posting</button>
         </div>
-        <textarea id="posting" rows="10" placeholder="Paste the full job posting text"></textarea>
+        <div id="posting-link-status" class="file-row" hidden>
+          <span class="file-name"></span>
+          <button id="posting-link-edit" class="link-button" type="button">Edit text</button>
+          <button id="posting-link-remove" class="link-button" type="button">Remove</button>
+        </div>
+        <textarea id="posting" rows="10" placeholder="Paste the job posting text, or a link to it"></textarea>
+        <p id="posting-link-error" class="file-error" role="alert" hidden></p>
 
         <button id="check-start-date" class="primary" type="button">Check eligibility</button>
       </section>
