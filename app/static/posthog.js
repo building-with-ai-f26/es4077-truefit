@@ -9,5 +9,8 @@
   posthog.init(token, {
     api_host: host,
     defaults: '2026-08-30',
+    // Replays show clicks and scrolling, never words: the page shows students' resumes and postings.
+    session_recording: { maskAllInputs: true, maskTextSelector: '*' },
+    mask_all_text: true, // and clicks never send the clicked element's text
   });
 })();
