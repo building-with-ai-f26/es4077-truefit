@@ -360,10 +360,12 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
   .action-title { font-size: 28px; }
   .error { margin: 16px 20px 0; }
   .exhibit-table thead { display: none; }
-  .exhibit-table tr { display: grid; grid-template-columns: 1fr auto; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+  /* Each row stacks: name, then status (left-aligned so the icons line up), then the quote */
+  .exhibit-table tr { display: grid; grid-template-columns: 1fr; padding: 14px 0; border-bottom: 1px solid var(--rule); }
   .exhibit-table td { padding: 0; border: none; }
   .exhibit-table .req, .exhibit-table .status { width: auto; }
-  .exhibit-table td:last-child { grid-column: 1 / -1; margin-top: 8px; }
+  .exhibit-table .status { margin-top: 6px; }
+  .exhibit-table td:last-child { margin-top: 8px; }
   .bullet { grid-template-columns: 1fr; gap: 4px; }
   .copy-row { flex-wrap: wrap; }
   .copy-row label { width: 100%; }
