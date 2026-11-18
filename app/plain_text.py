@@ -9,7 +9,7 @@ import unicodedata
 
 from app.resume_lines import ResumeLine
 
-_LEADING_BULLET = re.compile(r"^[\-\*•●▪◦·]\s*")
+_LEADING_BULLET = re.compile(r"^(?:-(?!\d)|[*•●▪◦·])\s*")  # "-15%" is a minus sign, not a bullet
 _DATE_RANGE = re.compile(
     r"(\d{4})\s*[–—-]\s*((?:[A-Z][a-z]{2,8}\.?\s+)?\d{4}|Present|present|Current|current)")
 _REPLACEMENTS = {"‘": "'", "’": "'", "“": '"', "”": '"', "…": "...", " ": " "}

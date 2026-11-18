@@ -581,7 +581,7 @@ function renderBullet(bullet, entry) {
   const sources = el("div", { class: "sources" });
   for (const id of showSources ? bullet.source_line_ids : []) {
     const line = tailorState.linesById.get(id);
-    if (line) sources.append(el("p", { class: "quote" }, `${line.source === "notes" ? "From your writing" : "From your resume"}: “${line.text.replace(/^[-*•●▪◦·–—]\s*/, "")}”`));
+    if (line) sources.append(el("p", { class: "quote" }, `${line.source === "notes" ? "From your writing" : "From your resume"}: “${line.text.replace(/^(?:-(?!\d)|[*•●▪◦·–—])\s*/, "")}”`));
   }
   body.append(sources);
 
@@ -634,7 +634,7 @@ function renderGaps(gaps) {
       const related = el("div", { class: "sources" });
       for (const id of row.related) {
         const line = tailorState.linesById.get(id);
-        if (line) related.append(el("p", { class: "quote" }, `Closest in your ${line.source === "notes" ? "writing" : "resume"}: “${line.text.replace(/^[-*•●▪◦·–—]\s*/, "")}”`));
+        if (line) related.append(el("p", { class: "quote" }, `Closest in your ${line.source === "notes" ? "writing" : "resume"}: “${line.text.replace(/^(?:-(?!\d)|[*•●▪◦·–—])\s*/, "")}”`));
       }
       body.append(related);
       list.append(el("li", { class: "bullet" }, el("span", { class: "gap-name" }, row.names.join(", ")), body));
@@ -828,7 +828,7 @@ function normalizeChars(text) {
     .replace(/\t/g, " ") // pasted tabs keep words apart instead of gluing them
     .replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/…/g, "...").replace(/ /g, " ")
     .trim()
-    .replace(/^[-*•●▪◦·]\s*/, "")
+    .replace(/^(?:-(?!\d)|[*•●▪◦·])\s*/, "") // "-15%" is a minus sign, not a bullet
     .replace(/\s*[•●▪◦·]\s*/g, " | ")
     .replace(DATE_RANGE, "$1 \u0000 $2")
     .replace(/[–—]/g, "-")

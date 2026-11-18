@@ -37,3 +37,10 @@ def test_square_bullets_and_tabs_are_replaced_not_glued():
 def test_empty_sections_are_skipped():
     assert render_plain_text([{"heading": "Skills", "entries": [{"header_line_ids": [], "bullets": [
         {"text": "x", "included": False}]}]}], LINES) == ""
+
+
+def test_normalize_keeps_a_leading_minus_sign():
+    """A minus sign is part of the number, not a bullet: "-15%" must not become "15%"."""
+    assert normalize_chars("-15% cost per order after re-slotting") == "-15% cost per order after re-slotting"
+    assert normalize_chars("- -15% cost per order") == "-15% cost per order"
+    assert normalize_chars("-Led a team of 5") == "Led a team of 5"
