@@ -50,3 +50,22 @@
 4. **Verify changes:** Run relevant checks. For a reproducible logic bug, use a failing test to demonstrate the fix when practical. Record manual checks and known limitations; follow the selected Build 4 evaluation track.
 5. **Zero secrets in code:** Never hardcode API keys, tokens, or credentials. Always read from environment variables (`.env`) and update `.env.example` when new variables are needed.
 6. **Stop when looping:** If a fix fails twice in a row, stop, summarize what failed, and ask the human before trying a third approach.
+7. **Never log what students send, or where TrueFit fetches from** *(from a real mistake, Nov 18)*: when I added posting links, the web library (httpx) wrote every link it fetched into the server log at its default level. A test caught it. Any new library that makes requests or handles uploads gets a test that puts a marker string in the input and checks it's not in the logs.
+8. **Respect a site's limits and blocks** *(from a real mistake, Nov 18)*: when Workday answered "too many requests," I retried with browser-like settings to get around it, and the permission check stopped me. If a site rate-limits or blocks TrueFit, stop and ask; test with one real link the student gives instead.
+
+## 5. Shipping
+- **Live site:** Render web service `truefit` (free plan, no database), deployed from the public repo address. [to fill in: live URL]
+- **How a change ships:** branch → pull request → `uv run pytest` passes → the student approves the merge → in Render, **Manual Deploy → Deploy latest commit** (the class organization hasn't approved Render's GitHub access, so merges don't deploy on their own).
+- **After a deploy:** open the live URL, run a sample posting through "Check eligibility," and confirm the event in PostHog.
+- **Secrets:** `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `POSTHOG_PROJECT_TOKEN`, `POSTHOG_HOST`, `PYTHON_VERSION`, `ENVIRONMENT=production` live in Render's environment settings, never in the repo. `render.yaml` lists them without values.
+- **Rollback:** in Render, open **Events**, pick the last good deploy, and choose **Rollback**. Then fix forward on a branch.
+- **Limits:** see `app/rate_limit.py` and `SECURITY.md`. The OpenRouter key has its own credit limit ($10).
+
+## 6. Ask me first
+- Merging anything to `main` (it publishes the Product Page and is what gets deployed).
+- Anything that spends OpenRouter credit: the model evals, live tests that tailor a resume.
+- Changing Render settings, environment variables, or the rate limits.
+- Changing what's logged, what's sent to PostHog, or what's stored anywhere (TrueFit stores nothing on the server).
+- Changing a model prompt or the truthfulness rules.
+- Adding a dependency, a database, or sign-in.
+- Deleting files, branches, or anything that can't be undone.
