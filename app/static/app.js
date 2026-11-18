@@ -12,21 +12,23 @@ function loadProfile() {
         masterResume: typeof saved.masterResume === "string" ? saved.masterResume : "",
         backgroundNotes: typeof saved.backgroundNotes === "string" ? saved.backgroundNotes : "",
         availabilityText: typeof saved.availabilityText === "string" ? saved.availabilityText : "",
+        noteFiles: Array.isArray(saved.noteFiles) ? saved.noteFiles.filter((f) => typeof f?.text === "string") : [],
         savedAt: saved.savedAt || null,
       };
     }
   } catch (_) {
     // Corrupt value: treat as nothing saved.
   }
-  return { masterResume: "", backgroundNotes: "", availabilityText: "", savedAt: null };
+  return { masterResume: "", backgroundNotes: "", availabilityText: "", noteFiles: [], savedAt: null };
 }
 
-function saveProfile({ masterResume, backgroundNotes, availabilityText }) {
+function saveProfile({ masterResume, backgroundNotes, availabilityText, noteFiles }) {
   const current = loadProfile();
   const profile = {
     masterResume: masterResume ?? current.masterResume,
     backgroundNotes: backgroundNotes ?? current.backgroundNotes,
     availabilityText: availabilityText ?? current.availabilityText,
+    noteFiles: noteFiles ?? current.noteFiles, // text read from Word files, never the files
     savedAt: new Date().toISOString(),
   };
   localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
@@ -272,22 +274,134 @@ function fillSavedProfile() {
   const profile = loadProfile();
   masterResumeInput.value = profile.masterResume;
   notesInput.value = profile.backgroundNotes;
-  showSavedAt(profile.masterResume || profile.backgroundNotes ? profile.savedAt : null);
+  noteFiles = profile.noteFiles;
+  renderNoteFiles();
+  showSavedAt(profile.masterResume || profile.backgroundNotes || noteFiles.length ? profile.savedAt : null);
 }
 
 document.getElementById("save-profile").addEventListener("click", () => {
-  const profile = saveProfile({ masterResume: masterResumeInput.value, backgroundNotes: notesInput.value });
+  const profile = saveProfile({ masterResume: masterResumeInput.value, backgroundNotes: notesInput.value, noteFiles });
   showSavedAt(profile.savedAt);
 });
 
 document.getElementById("clear-profile").addEventListener("click", () => {
   clearProfile(); // FR-021: removes the resume, notes, and availability from this device
-  masterResumeInput.value = "";
+  clearResumeFile();
   notesInput.value = "";
+  noteFiles = [];
+  renderNoteFiles();
   availabilityInput.value = "";
   showSavedAt(null);
   track("resume_cleared");
 });
+
+// Word files instead of pasting: the server reads the text; only the text is kept, never the file.
+
+const WORD_ONLY = "TrueFit reads Word files (.docx). For a PDF, open it and paste the text.";
+const resumeFileInput = document.getElementById("resume-file");
+const resumeFileStatus = document.getElementById("resume-file-status");
+const resumeFileName = resumeFileStatus.querySelector(".file-name");
+const resumeFileEdit = document.getElementById("resume-file-edit");
+const notesFileInput = document.getElementById("notes-file");
+const noteFilesList = document.getElementById("note-files");
+let noteFiles = []; // [{ name, text, lines }] in the order added, sent before the typed notes
+
+async function readDocx(file, box) {
+  clearError();
+  try {
+    if (!file.name.toLowerCase().endsWith(".docx")) throw Object.assign(new Error(WORD_ONLY), { code: "not_docx" });
+    let response;
+    try {
+      response = await fetch("/api/read-docx", { method: "POST", body: file });
+    } catch (_) {
+      throw Object.assign(new Error("Couldn't reach TrueFit. Check that the app is running and try again."), { code: "network_error" });
+    }
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw Object.assign(new Error(data?.error?.message || "Couldn't read this file. Please paste the text."), { code: data?.error?.code });
+    }
+    track("file_read", { box, lines: data.lines });
+    return data;
+  } catch (err) {
+    showError(err.message);
+    track("file_read_failed", { box, error_code: err.code || "unknown" });
+    throw err;
+  }
+}
+
+function clearResumeFile() {
+  masterResumeInput.value = "";
+  masterResumeInput.readOnly = false;
+  masterResumeInput.classList.remove("locked");
+  resumeFileStatus.hidden = true;
+}
+
+document.getElementById("resume-file-button").addEventListener("click", () => resumeFileInput.click());
+resumeFileInput.addEventListener("change", async () => {
+  const file = resumeFileInput.files[0];
+  resumeFileInput.value = ""; // choosing the same file again still fires "change"
+  if (!file) return;
+  try {
+    const { text, lines } = await readDocx(file, "resume");
+    masterResumeInput.value = text;
+    masterResumeInput.readOnly = true; // locked so a stray keystroke can't change it
+    masterResumeInput.classList.add("locked");
+    resumeFileName.textContent = `✓ ${file.name} · ${lines} ${lines === 1 ? "line" : "lines"} read`;
+    resumeFileEdit.hidden = false;
+    resumeFileStatus.hidden = false;
+  } catch (_) {
+    // readDocx showed the message; keep whatever was there before
+  }
+});
+resumeFileEdit.addEventListener("click", () => {
+  masterResumeInput.readOnly = false;
+  masterResumeInput.classList.remove("locked");
+  resumeFileName.textContent = `From ${resumeFileName.textContent.replace(/^✓ /, "").split(" · ")[0]}`;
+  resumeFileEdit.hidden = true;
+  masterResumeInput.focus();
+});
+document.getElementById("resume-file-remove").addEventListener("click", clearResumeFile);
+
+document.getElementById("notes-file-button").addEventListener("click", () => notesFileInput.click());
+notesFileInput.addEventListener("change", async () => {
+  const files = [...notesFileInput.files];
+  notesFileInput.value = "";
+  for (const file of files) {
+    try {
+      const { text, lines } = await readDocx(file, "notes");
+      const entry = { name: file.name, text, lines };
+      const same = noteFiles.findIndex((f) => f.name === file.name);
+      if (same >= 0) noteFiles[same] = entry; // the same file again replaces it, so it isn't counted twice
+      else noteFiles.push(entry);
+    } catch (_) {
+      // message shown; go on with the other files
+    }
+  }
+  renderNoteFiles();
+});
+
+function renderNoteFiles() {
+  noteFilesList.replaceChildren(...noteFiles.map((file) => {
+    const preview = el("pre", { class: "file-preview" }, file.text);
+    preview.hidden = true;
+    const toggle = el("button", { class: "link-button", type: "button" }, "Preview");
+    toggle.addEventListener("click", () => {
+      preview.hidden = !preview.hidden;
+      toggle.textContent = preview.hidden ? "Preview" : "Hide";
+    });
+    const remove = el("button", { class: "link-button", type: "button" }, "Remove");
+    remove.addEventListener("click", () => {
+      noteFiles = noteFiles.filter((f) => f !== file);
+      renderNoteFiles();
+    });
+    return el("li", {}, el("div", { class: "file-row" }, el("span", { class: "file-name" }, `✓ ${file.name} · ${file.lines} ${file.lines === 1 ? "line" : "lines"}`), toggle, remove), preview);
+  }));
+}
+
+// What TrueFit uses as "More about your experience": each file's text in the order added, then the textbox.
+function backgroundNotesText() {
+  return [...noteFiles.map((f) => f.text), notesInput.value].filter((t) => t.trim()).join("\n\n");
+}
 
 fillSavedProfile();
 
@@ -314,7 +428,7 @@ async function tailorResume() {
   const request = {
     posting: postingInput.value,
     master_resume: masterResumeInput.value,
-    background_notes: notesInput.value,
+    background_notes: backgroundNotesText(),
   };
   setTailoring(true);
   try {
