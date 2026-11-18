@@ -76,6 +76,7 @@
           </span>
           <input id="resume-file" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden />
         </div>
+        <p id="resume-file-error" class="file-error" role="alert" hidden></p>
         <div id="resume-file-status" class="file-row" hidden>
           <span class="file-name"></span>
           <button id="resume-file-edit" class="link-button" type="button">Edit text</button>
@@ -88,6 +89,7 @@
           <button id="notes-file-button" class="link-button" type="button">Add Word file</button>
           <input id="notes-file" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple hidden />
         </div>
+        <p id="notes-file-error" class="file-error" role="alert" hidden></p>
         <textarea id="background-notes" rows="5" placeholder="Type or paste anything that describes your past work: notes, past cover letters, behavioral (STAR) stories, application essays."></textarea>
         <ul id="note-files" class="file-list"></ul>
         <p class="hint">TrueFit uses what you say you <em>did</em> here (actions, results, skills you used) to write bullets, along with your resume and nothing else. Goals and things you hope to learn are never turned into claims.</p>

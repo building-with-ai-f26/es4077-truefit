@@ -8,6 +8,7 @@ The file's XML is walked directly rather than through python-docx's paragraph an
 those skip text Word's own templates rely on: content controls (w:sdt), tracked insertions, and nested tables.
 """
 
+import re
 import zipfile
 from io import BytesIO
 
@@ -19,6 +20,7 @@ from lxml.etree import XMLSyntaxError
 MC_FALLBACK = "{http://schemas.openxmlformats.org/markup-compatibility/2006}Fallback"
 # Never read: deleted text, Word's old-version copy of a text box, and text boxes (read after their paragraph).
 SKIPPED = {qn("w:del"), MC_FALLBACK, qn("w:txbxContent"), qn("w:pPr"), qn("w:rPr")}
+TYPED_BULLET = re.compile(r"^(?:[*•●▪◦·]|-(?=\s))\s*")  # a hyphen only when a space follows, so "-15%" keeps its sign
 CONTAINERS = {qn("w:sdt"), qn("w:sdtContent"), qn("w:customXml"), qn("w:ins")}
 
 
@@ -63,7 +65,7 @@ def _block_lines(parent, style_names) -> list[str]:
 def _paragraph_lines(p, style_names) -> list[str]:
     text = "".join(_run_text(p))
     if text.strip() and _is_list_item(p, style_names):
-        text = f"- {text.strip()}"
+        text = f"- {TYPED_BULLET.sub('', text.strip())}"  # a bullet typed inside a Word list isn't doubled
     boxed = [line for box in _text_boxes(p) for line in _block_lines(box, style_names) if line.strip()]
     return [text] + boxed
 
@@ -88,10 +90,13 @@ def _is_list_item(p, style_names) -> bool:
     p_pr = p.find(qn("w:pPr"))
     if p_pr is None:
         return False
-    if p_pr.find(qn("w:numPr")) is not None:
-        return True
+    num_id = p_pr.find(f'{qn("w:numPr")}/{qn("w:numId")}')
+    if num_id is not None:
+        return num_id.get(qn("w:val")) != "0"  # numId 0: the author switched the list off
     style = p_pr.find(qn("w:pStyle"))
-    return style is not None and style_names.get(style.get(qn("w:val")), "").startswith("List")
+    name = style_names.get(style.get(qn("w:val")), "") if style is not None else ""
+    # "List Bullet", "List Number"... carry numbering; "List Paragraph" and "List Continue" are only indents
+    return name.startswith("List") and not name.startswith(("List Paragraph", "List Continue"))
 
 
 def _text_boxes(p) -> list:

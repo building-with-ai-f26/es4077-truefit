@@ -12,7 +12,10 @@ function loadProfile() {
         masterResume: typeof saved.masterResume === "string" ? saved.masterResume : "",
         backgroundNotes: typeof saved.backgroundNotes === "string" ? saved.backgroundNotes : "",
         availabilityText: typeof saved.availabilityText === "string" ? saved.availabilityText : "",
-        noteFiles: Array.isArray(saved.noteFiles) ? saved.noteFiles.filter((f) => typeof f?.text === "string") : [],
+        noteFiles: Array.isArray(saved.noteFiles)
+          ? saved.noteFiles.filter((f) => typeof f?.text === "string")
+              .map((f) => ({ name: String(f.name ?? "Word file"), text: f.text, lines: f.text.split("\n").filter((l) => l.trim()).length }))
+          : [],
         savedAt: saved.savedAt || null,
       };
     }
@@ -290,6 +293,7 @@ document.getElementById("clear-profile").addEventListener("click", () => {
   notesInput.value = "";
   noteFiles = [];
   renderNoteFiles();
+  clearFileError("notes");
   availabilityInput.value = "";
   showSavedAt(null);
   track("resume_cleared");
@@ -306,8 +310,15 @@ const notesFileInput = document.getElementById("notes-file");
 const noteFilesList = document.getElementById("note-files");
 let noteFiles = []; // [{ name, text, lines }] in the order added, sent before the typed notes
 
+// File problems show next to the button that caused them, not in the error box at the top of the page.
+const fileErrors = { resume: document.getElementById("resume-file-error"), notes: document.getElementById("notes-file-error") };
+
+function clearFileError(box) {
+  fileErrors[box].replaceChildren();
+  fileErrors[box].hidden = true;
+}
+
 async function readDocx(file, box) {
-  clearError();
   try {
     if (!file.name.toLowerCase().endsWith(".docx")) throw Object.assign(new Error(WORD_ONLY), { code: "not_docx" });
     let response;
@@ -323,13 +334,16 @@ async function readDocx(file, box) {
     track("file_read", { box, lines: data.lines });
     return data;
   } catch (err) {
-    showError(err.message);
+    if (fileErrors[box].childNodes.length) fileErrors[box].append(el("br"));
+    fileErrors[box].append(`${file.name}: ${err.message}`); // several files can fail at once, so each names its file
+    fileErrors[box].hidden = false;
     track("file_read_failed", { box, error_code: err.code || "unknown" });
     throw err;
   }
 }
 
 function clearResumeFile() {
+  clearFileError("resume");
   masterResumeInput.value = "";
   masterResumeInput.readOnly = false;
   masterResumeInput.classList.remove("locked");
@@ -341,6 +355,7 @@ resumeFileInput.addEventListener("change", async () => {
   const file = resumeFileInput.files[0];
   resumeFileInput.value = ""; // choosing the same file again still fires "change"
   if (!file) return;
+  clearFileError("resume");
   try {
     const { text, lines } = await readDocx(file, "resume");
     masterResumeInput.value = text;
@@ -366,6 +381,7 @@ document.getElementById("notes-file-button").addEventListener("click", () => not
 notesFileInput.addEventListener("change", async () => {
   const files = [...notesFileInput.files];
   notesFileInput.value = "";
+  clearFileError("notes");
   for (const file of files) {
     try {
       const { text, lines } = await readDocx(file, "notes");

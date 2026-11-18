@@ -151,3 +151,26 @@ def test_damaged_document_xml_raises():
             dst.writestr(item, data[: len(data) // 2] if item.filename == "word/document.xml" else data)
     with pytest.raises(NotDocx):
         read_docx_text(damaged.getvalue())
+
+
+def test_numbering_switched_off_is_not_a_bullet():
+    """numId 0 means the author turned the list off, e.g. on a heading."""
+    def build(d):
+        d.add_paragraph("SKILLS")._p.get_or_add_pPr().append(
+            parse_xml(f'<w:numPr {nsdecls("w")}><w:ilvl w:val="0"/><w:numId w:val="0"/></w:numPr>'))
+    assert read_docx_text(docx_bytes(build)) == "SKILLS"
+
+
+def test_list_paragraph_style_without_numbering_is_not_a_bullet():
+    data = docx_bytes(lambda d: d.add_paragraph("EXPERIENCE", style="List Paragraph"))
+    assert read_docx_text(data) == "EXPERIENCE"
+
+
+def test_typed_bullet_in_a_list_item_is_not_doubled():
+    data = docx_bytes(lambda d: d.add_paragraph("• Built a model", style="List Bullet"))
+    assert read_docx_text(data) == "- Built a model"
+
+
+def test_leading_minus_sign_is_kept():
+    data = docx_bytes(lambda d: d.add_paragraph("-15% cost per order after re-slotting", style="List Bullet"))
+    assert read_docx_text(data) == "- -15% cost per order after re-slotting"
