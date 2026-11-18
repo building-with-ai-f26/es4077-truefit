@@ -45,3 +45,15 @@ def test_text_is_not_logged(client, caplog):
     caplog.set_level(logging.DEBUG)
     read(client, docx_bytes(lambda d: d.add_paragraph("SECRETLINE")))
     assert "SECRETLINE" not in caplog.text
+
+
+def test_file_that_unpacks_huge_is_refused(client):
+    """A small .docx can unpack into something huge (a "zip bomb"); it's refused before it's opened."""
+    import io
+    import zipfile
+    out = io.BytesIO()
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("word/document.xml", b"0" * (60 * 1024 * 1024))
+    assert len(out.getvalue()) < 5 * 1024 * 1024  # small enough to pass the upload limit
+    response = read(client, out.getvalue())
+    assert response.status_code == 413 and response.json()["error"]["code"] == "file_too_large"

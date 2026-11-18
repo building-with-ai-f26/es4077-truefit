@@ -17,9 +17,9 @@ from pydantic import BaseModel
 from posthog import Posthog
 from posthog.integrations.asgi import PosthogASGIMiddleware
 
-from app import config, start_date, tailor
+from app import config, rate_limit, start_date, tailor
 from app.docx_resume import build_docx, file_name, resume_blocks
-from app.docx_text import NotDocx, read_docx_text
+from app.docx_text import NotDocx, read_docx_text, unpacks_too_large
 from app.errors import ApiError, ConfigError, ModelAccountProblem, ModelUnavailable
 from app.pdf_resume import build_pdf
 from app.posting_link import LinkProblem, read_posting_link
@@ -86,6 +86,16 @@ async def revalidate_static(request: Request, call_next):
     if request.url.path.startswith("/static/"):
         response.headers["Cache-Control"] = "no-cache"
     return response
+
+
+@app.middleware("http")
+async def limit_requests(request: Request, call_next):
+    """Refuse API calls over the per-visitor and site-wide limits before they reach a route (see app/rate_limit.py)."""
+    who = rate_limit.visitor(request.headers.get("x-forwarded-for"), request.client.host if request.client else None)
+    refused = rate_limit.check(request.url.path, who)
+    if refused:
+        return JSONResponse(status_code=429, content={"error": {"code": refused, "message": rate_limit.MESSAGES[refused]}})
+    return await call_next(request)
 
 
 @app.middleware("http")
@@ -189,7 +199,7 @@ MAX_DOCX_BYTES = 5 * 1024 * 1024
 async def post_read_docx(request: Request):
     """The text of a Word file the student chose instead of pasting. The file and text are never stored or logged."""
     data = await request.body()
-    if len(data) > MAX_DOCX_BYTES:
+    if len(data) > MAX_DOCX_BYTES or unpacks_too_large(data):
         raise ApiError(413, "file_too_large", "This file is over 5 MB. Save a copy without images, or paste the text.")
     try:
         text = read_docx_text(data)

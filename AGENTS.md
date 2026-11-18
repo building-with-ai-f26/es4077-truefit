@@ -35,6 +35,8 @@
 - `app/pdf_resume.py` — The same blocks as a text-based one-page PDF (reportlab); measures pages exactly to fit or to say how many bullets to remove. Route: `/api/resume-pdf`.
 - `app/docx_text.py` — Text of an uploaded Word file (list items as "- " bullets, table rows as one line, header text first, text boxes once); nothing stored or logged. Route: `/api/read-docx` (5 MB limit).
 - `app/posting_link.py` — A job posting from a link: Greenhouse, Lever, and Workday public job data; Ashby and other pages through their JobPosting data only (never the rest of the page). LinkedIn, Indeed, Glassdoor, Handshake, and 12twenty answered without fetching. Every redirect checked for private addresses; 10 s timeout; 2 MB limit; links and text never logged (httpx request logging is turned down). Route: `/api/posting-link`.
+- `app/rate_limit.py` — Limits for the live site, checked in `main.py` before any route: AI routes (start-date, tailor, verify-bullet) 10 a minute and 50 a day per visitor, 200 a day for the whole site; other API routes 30 a minute per visitor. In memory; resets on restart. The visitor is the last address in `X-Forwarded-For` (added by the host).
+- `render.yaml` — Render web service (free plan, no database); secrets entered in the Render dashboard.
 - `app/config.py`, `app/errors.py` — Reads `.env`; shared error types.
 - `app/static/` — Plain HTML/CSS/JS frontend (`index.html`, `styles.css`, `app.js`, `posthog.js`).
 - `docs/index.html` — Public Product Page, living PRD, and weekly build log (GitHub Pages from `main` → `/docs`).

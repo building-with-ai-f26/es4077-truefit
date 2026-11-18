@@ -28,6 +28,18 @@ class NotDocx(Exception):
     """The bytes aren't a Word (.docx) file TrueFit can open."""
 
 
+MAX_UNPACKED_BYTES = 50 * 1024 * 1024  # a real resume unpacks to well under 1 MB; a "zip bomb" to gigabytes
+
+
+def unpacks_too_large(data: bytes) -> bool:
+    """True when the file's contents would unpack to more than MAX_UNPACKED_BYTES (checked without unpacking)."""
+    try:
+        with zipfile.ZipFile(BytesIO(data)) as archive:
+            return sum(item.file_size for item in archive.infolist()) > MAX_UNPACKED_BYTES
+    except (zipfile.BadZipFile, ValueError):
+        return False  # not a zip at all; reading it reports not_docx
+
+
 def read_docx_text(data: bytes) -> str:
     try:
         document = Document(BytesIO(data))
