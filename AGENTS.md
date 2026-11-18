@@ -16,7 +16,7 @@
 - **Install dependencies:** `cp .env.example .env` (add your key and model), then `uv sync`
 - **Run locally:** `uv run uvicorn app.main:app --reload` → http://localhost:8000
 - **Run deterministic tests:** `uv run pytest` (unit + API tests; no API key, no cost)
-- **Run model evals:** `uv run python tests/eval/run_eval.py --suite start_date`
+- **Run model evals:** `uv run python tests/eval/run_eval.py --suite start_date` (add `--cases 13 16` to run only some cases)
   (real model calls — costs money; ask before running)
 
 ## 3. Project Structure
