@@ -22,6 +22,7 @@ from docx.oxml.ns import qn
 from docx.shared import Inches, Pt
 
 from app.plain_text import contact_rows, header_rows, normalize_chars
+from app import calibri_widths
 from app.resume_lines import ResumeLine
 from app.tailor import verified_fields
 
@@ -38,7 +39,11 @@ LAYOUTS = [(11, 1.0), (10.5, 1.0), (10, 1.0), (10, 0.9), (10, 0.8), (10, 0.7), (
 # Space above each section heading, each school or job after the first in its section, and the first one (pt).
 # Spare space on the page is shared out as extra_pt, the same for every section and entry gap, up to one line.
 SECTION_GAP_PT, ENTRY_GAP_PT, FIRST_ENTRY_GAP_PT = 12, 8, 4
-AVG_CHAR_EM = 0.5  # average Calibri character width as a share of the font size; rounded up to stay safe
+HEADING_SPACE_AFTER_PT = 3  # between a heading's rule and its first entry
+HEADING_RULE_PT = 2  # Word adds the rule's own space (1 pt) and width under each heading
+RESERVE_LINES = 1  # Word's layout can only be estimated (checked against real Word, Nov 18), so one line stays free
+WORD_LEADING = 1.22  # Word's single line spacing for Calibri, as a multiple of the font size
+BULLET_LEADING = 1.28  # bulleted lines are taller: the bullet symbol's font (measured in Word, Nov 18)
 
 
 def name_pt(body_pt: float) -> float:
@@ -130,40 +135,70 @@ def _blocks(sections: list[dict], lines_by_id: dict[str, ResumeLine]) -> list[tu
     return blocks
 
 
+FILL_SAFETY = 0.95  # Word's layout can only be estimated, so 5% of the spare space is left unused
+
+
 def choose_layout(blocks: list[tuple]) -> Layout:
     for body_pt, margin_in in LAYOUTS:
-        if _estimated_height(blocks, body_pt, margin_in) <= _page_lines(body_pt, margin_in):
-            return Layout(body_pt, margin_in, True, 0)
+        spare = _page_lines(body_pt, margin_in) - RESERVE_LINES - _estimated_height(blocks, body_pt, margin_in)
+        if spare >= 0:
+            return Layout(body_pt, margin_in, True, 0, _extra_pt(blocks, body_pt, spare))
     body_pt, margin_in = LAYOUTS[-1]
-    over = _estimated_height(blocks, body_pt, margin_in) - _page_lines(body_pt, margin_in)
-    bullets = [_lines(b[1], body_pt, margin_in, BULLET_INDENT_IN) for b in blocks if b[0] == "bullet"]
+    over = _estimated_height(blocks, body_pt, margin_in) + RESERVE_LINES - _page_lines(body_pt, margin_in)
+    bullets = [_lines(b[1], body_pt, margin_in, BULLET_INDENT_IN) * BULLET_LEADING / WORD_LEADING for b in blocks if b[0] == "bullet"]
     per_bullet = sum(bullets) / len(bullets) if bullets else 1
     return Layout(body_pt, margin_in, False, max(1, math.ceil(over / per_bullet)))
 
 
+def _extra_pt(blocks: list[tuple], body_pt: float, spare_lines: float) -> float:
+    """The spare space shared out over the section and entry gaps, at most one line each."""
+    gaps = sum(kind in ("section", "entry") for kind in gap_kinds(blocks))
+    if not gaps:
+        return 0
+    return min(body_pt * 1.2, FILL_SAFETY * spare_lines * body_pt * WORD_LEADING / gaps)
+
+
 def _page_lines(body_pt: float, margin_in: float) -> float:
-    return (PAGE_HEIGHT_IN - 2 * margin_in) * 72 / (body_pt * 1.2)
+    return (PAGE_HEIGHT_IN - 2 * margin_in) * 72 / (body_pt * WORD_LEADING)
 
 
-def _lines(text: str, body_pt: float, margin_in: float, indent_in: float = 0, size_pt: float | None = None) -> int:
+def _lines(text: str, body_pt: float, margin_in: float, indent_in: float = 0, size_pt: float | None = None,
+           bold: bool = False) -> int:
+    """Lines the text takes in Word: wrapped word by word using Calibri's real character widths."""
     width_pt = (PAGE_WIDTH_IN - 2 * margin_in - indent_in) * 72
-    per_line = max(1, int(width_pt / ((size_pt or body_pt) * AVG_CHAR_EM)))
-    return max(1, math.ceil(len(text) / per_line))
+    widths = calibri_widths.BOLD if bold else calibri_widths.REGULAR
+    size = size_pt or body_pt
+    measure = lambda s: sum(widths.get(c, 1000) for c in s) * size / 1000
+    space = measure(" ")
+    lines, used = 1, 0.0
+    for word in text.split():
+        w = measure(word)
+        if used and used + space + w > width_pt:
+            lines, used = lines + 1, 0.0
+        used += (space if used else 0) + w
+        while used > width_pt:  # a word longer than the line breaks across lines
+            lines, used = lines + 1, used - width_pt
+    return lines
 
 
 def _estimated_height(blocks: list[tuple], body_pt: float, margin_in: float) -> float:
-    """Height in body-text lines, counting wrapped bullets, larger name and heading text, and spacing."""
+    """Height in body-text lines, counting wrapped bullets, larger name and heading text, and spacing
+    (gaps at their base size; extra_pt is worked out from what's left)."""
+    lead = body_pt * WORD_LEADING
+    base = {"section": SECTION_GAP_PT, "entry": ENTRY_GAP_PT, "first_entry": FIRST_ENTRY_GAP_PT}
     height = 0.0
-    for block in blocks:
+    for block, gap in zip(blocks, gap_kinds(blocks)):
         kind = block[0]
+        if gap:
+            height += base[gap] / lead
         if kind == "name":
             height += name_pt(body_pt) / body_pt
         elif kind == "heading":
-            height += heading_pt(body_pt) / body_pt + 0.9  # space above plus the rule under it
+            height += heading_pt(body_pt) / body_pt + (HEADING_SPACE_AFTER_PT + HEADING_RULE_PT) / lead
         elif kind == "header":
-            height += _lines(block[1] + "    " + block[2], body_pt, margin_in) + (0.4 if block[3] else 0)
+            height += _lines(block[1] + "    " + block[2], body_pt, margin_in, bold=block[3])
         elif kind == "bullet":
-            height += _lines(block[1], body_pt, margin_in, BULLET_INDENT_IN)
+            height += _lines(block[1], body_pt, margin_in, BULLET_INDENT_IN) * BULLET_LEADING / WORD_LEADING
         else:
             height += _lines(block[1], body_pt, margin_in)
     return height
@@ -185,7 +220,7 @@ def _render(blocks: list[tuple], layout: Layout) -> bytes:
     normal.paragraph_format.space_before = Pt(0)
     normal.paragraph_format.line_spacing = 1.0
 
-    for block in blocks:
+    for block, gap in zip(blocks, gap_kinds(blocks)):
         kind = block[0]
         if kind == "name":
             p = doc.add_paragraph()
@@ -196,16 +231,18 @@ def _render(blocks: list[tuple], layout: Layout) -> bytes:
             doc.add_paragraph(block[1]).alignment = WD_ALIGN_PARAGRAPH.CENTER
         elif kind == "heading":
             p = doc.add_paragraph()
-            p.paragraph_format.space_before = Pt(10)
-            p.paragraph_format.space_after = Pt(3)
+            p.paragraph_format.space_before = Pt(SECTION_GAP_PT + layout.extra_pt)
+            p.paragraph_format.space_after = Pt(HEADING_SPACE_AFTER_PT)
             run = p.add_run(block[1])
             run.bold, run.font.size = True, Pt(heading_pt(layout.body_pt))
             _bottom_rule(p)
         elif kind == "header":
             _, left, right, first = block
             p = doc.add_paragraph()
-            if first:
-                p.paragraph_format.space_before = Pt(5)
+            if gap == "entry":
+                p.paragraph_format.space_before = Pt(ENTRY_GAP_PT + layout.extra_pt)
+            elif gap == "first_entry":
+                p.paragraph_format.space_before = Pt(FIRST_ENTRY_GAP_PT)
             p.paragraph_format.tab_stops.add_tab_stop(text_width, WD_TAB_ALIGNMENT.RIGHT)
             left_run = p.add_run(left)
             left_run.bold = first  # organization line in bold, as on the page

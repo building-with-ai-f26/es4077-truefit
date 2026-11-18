@@ -89,7 +89,7 @@ def test_us_letter_and_first_layout_when_short():
 
 
 def test_longer_resume_steps_down_size_and_margins():
-    many = [bullet(f"Led workstream {i} on pricing, forecasting, and market sizing for a consumer client portfolio") for i in range(30)]
+    many = [bullet(f"Led workstream {i} on pricing, forecasting, and market sizing for a consumer client portfolio") for i in range(45)]
     _, layout = open_docx(sections(*many))
     assert layout.fits_one_page and (layout.body_pt, layout.margin_in) != LAYOUTS[0]
 
@@ -133,3 +133,77 @@ def test_header_parts_not_in_the_line_are_ignored():
 def test_file_name_uses_the_name_line():
     lines = {line.id: line for line in split_lines(MASTER, None)}
     assert file_name(lines) == "Jordan Lee Resume.docx"
+
+
+# ---- Spacing and filling the page (specs/2026-11-18-fill-page-design.md) ----
+
+from app.docx_resume import ENTRY_GAP_PT, _estimated_height, _page_lines, gap_kinds, resume_blocks  # noqa: E402
+
+LONG_SCHOOL = "University of Michigan College of Literature, Science, and the Arts, Department of Economics Honors Program"
+
+
+def two_school_sections(*bullets):
+    return [
+        {"heading": "Education", "entries": [{"header_line_ids": ["L4"], "bullets": []},
+                                             {"header_line_ids": ["L5"], "bullets": []}]},
+        {"heading": "Experience", "entries": [{"header_line_ids": ["L7"], "header_fields": {"L7": ACME_FIELDS["L6"]},
+                                               "bullets": list(bullets)}]},
+    ]
+
+
+def two_school_master(school="University of Michigan"):
+    return MASTER.replace("NYU Stern School of Business | MBA | Aug 2025 – May 2027",
+                          f"NYU Stern School of Business | MBA | Aug 2025 – May 2027\n{school} | BA, Economics | Sep 2014 – May 2018")
+
+
+def test_word_short_resume_uses_one_inch_margins():
+    doc, layout = open_docx(sections(bullet("Built an Excel pricing model")))
+    assert layout.margin_in == 1.0 and doc.sections[0].left_margin.inches == doc.sections[0].bottom_margin.inches == 1.0
+
+
+def test_word_schools_have_space_between():
+    doc, layout = open_docx(two_school_sections(bullet("Built an Excel pricing model")), two_school_master())
+    michigan = next(p for p in doc.paragraphs if p.text.startswith("University of Michigan"))
+    assert michigan.paragraph_format.space_before >= Pt(ENTRY_GAP_PT + layout.extra_pt) >= Pt(ENTRY_GAP_PT)
+
+
+def test_word_extra_space_fills_estimate():
+    raw = two_school_sections(*workstreams(33))  # fits at 11 pt, 1 inch, with spare space under the cap
+    _, layout = open_docx(raw, two_school_master())
+    blocks = resume_blocks(raw, split_lines(two_school_master(), None))
+    lead = layout.body_pt * 1.22
+    gaps = sum(kind in ("section", "entry") for kind in gap_kinds(blocks))  # Education, Experience, Michigan
+    used = _estimated_height(blocks, layout.body_pt, layout.margin_in) * lead + gaps * layout.extra_pt
+    assert 0 < layout.extra_pt < layout.body_pt * 1.2
+    assert used <= _page_lines(layout.body_pt, layout.margin_in) * lead
+
+
+def test_word_extra_space_counts_wrapped_headers():
+    raw = two_school_sections(*workstreams(33))  # fits at 11 pt, 1 inch, with spare space under the cap
+    _, short_name = open_docx(raw, two_school_master())
+    _, long_name = open_docx(raw, two_school_master(LONG_SCHOOL))
+    # the wrapped name takes room: less extra space, or a smaller layout
+    assert long_name.extra_pt < short_name.extra_pt or LAYOUTS.index((long_name.body_pt, long_name.margin_in)) > LAYOUTS.index((short_name.body_pt, short_name.margin_in))
+
+
+def test_word_full_page_gets_no_extra_space():
+    _, layout = open_docx(sections(*workstreams(80)))
+    assert layout.extra_pt == 0 and not layout.fits_one_page
+
+
+def test_word_wrapping_matches_real_word():
+    """Checked against Microsoft Word on Nov 18: this bullet takes 2 lines at 11 pt with 1-inch margins and
+    1 line at 10 pt with 0.7-inch margins (it used to be estimated at 2 for both, leaving the page a third empty)."""
+    from app.docx_resume import BULLET_INDENT_IN, _lines
+    text = "Led pricing and market sizing workstream 0 for a consumer portfolio, growing revenue 12% across 3 regions"
+    assert _lines(text, 11, 1.0, BULLET_INDENT_IN) == 2
+    assert _lines(text, 10, 0.7, BULLET_INDENT_IN) == 1
+    assert _lines(text, 10.5, 1.0, BULLET_INDENT_IN) == 2
+
+
+def test_word_bullet_lines_are_taller():
+    """Measured in Word on Nov 18: bulleted lines are 1.26-1.28 times the font size apart (the bullet symbol is taller),
+    plain lines 1.22. Counting bullets at 1.22 let 40-bullet resumes spill onto a second page."""
+    one_bullet = _estimated_height([("bullet", "Built a model")], 10, 1.0)
+    one_line = _estimated_height([("details", "Built a model")], 10, 1.0)
+    assert one_bullet / one_line >= 1.28 / 1.22
