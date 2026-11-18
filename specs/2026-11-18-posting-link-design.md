@@ -1,6 +1,6 @@
 # Job posting from a link (design)
 
-Nov 18, 2026 · Status: draft for approval
+Nov 18, 2026 · Status: approved Nov 18, built
 
 ## Why
 Pasting a long job posting is error-prone in the same ways as pasting a resume: part of it gets missed and text gets mangled. Many postings can be read from a link. This revisits the Build 2 decision to stay paste-only ("many job sites block automated reading or need a login"): that is still true for LinkedIn, Indeed, and school job boards like NYU's 12twenty, but their **Apply** button usually leads to the company's own job site, which often can be read, and tech companies mostly post on sites with public, login-free data.
@@ -21,7 +21,7 @@ Pasting a long job posting is error-prone in the same ways as pasting a resume: 
 ## Approaches
 - A. Only Greenhouse, Lever, Ashby, and Workday, through their public data. Cleanest, but company career pages on other systems fail even though nothing blocks them.
 - B. Any link: download the page and pull out its main text. Widest, but picks up menus, banners, and other jobs, and many job pages fill in their text with JavaScript after loading.
-- **C. (chosen by the student)** The four sites above through their public data, plus any page that carries Google's standard "JobPosting" data (the label career sites add so jobs appear in Google search: SmartRecruiters, iCIMS, many company pages). TrueFit uses only that labeled job content. Anything else: paste.
+- **C. (chosen by the student)** The four sites above through their public data, plus any page that carries Google's standard "JobPosting" data (the label career sites add so jobs appear in Google search, e.g. Ashby job pages and many company pages; SmartRecruiters turned out to use an older format and isn't read). TrueFit uses only that labeled job content. Anything else: paste.
 
 ## What the student sees (decided: one box)
 ```
