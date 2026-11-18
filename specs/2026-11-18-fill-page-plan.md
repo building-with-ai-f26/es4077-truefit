@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- `LAYOUTS = [(11, 1.0), (10.5, 1.0), (10, 1.0), (10, 0.75), (10, 0.6), (10, 0.5), (9.5, 0.5), (9, 0.5), (8.5, 0.5), (8, 0.5)]` (body pt, margin in), tried in order.
+- `LAYOUTS = [(11, 1.0), (10.5, 1.0), (10, 1.0), (10, 0.9), (10, 0.8), (10, 0.7), (10, 0.6), (10, 0.5), (9.5, 0.5), (9, 0.5), (8.5, 0.5), (8, 0.5)]` (0.1-inch steps; changed during the build) (body pt, margin in), tried in order.
 - `SECTION_GAP_PT = 12` above each section heading; `ENTRY_GAP_PT = 8` above each school/job after the first in its section; the first entry in a section keeps `FIRST_ENTRY_GAP_PT = 4`.
 - `extra_pt` is added to every section and entry gap; `0 <= extra_pt <= body_pt * 1.2` (one body line).
 - Text never grows above 11 pt; 8 pt floor, name at least 11 pt, never cut bullets (unchanged).

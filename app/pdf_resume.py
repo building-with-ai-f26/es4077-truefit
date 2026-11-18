@@ -5,7 +5,9 @@ left and location right, then title left and dates right. The text is real text 
 parsers can read it. Helvetica stands in for Calibri, which can't be bundled.
 
 Unlike the Word file, the PDF's page count can be measured exactly, so TrueFit renders each layout and keeps
-the first that fits one page. If none does, it measures how many bullets would need to go and cuts nothing.
+the first that fits one page (1-inch margins first; see LAYOUTS), then fills the page by measuring the most space
+it can add between sections and entries, then bullets. If none fits, it measures how many bullets would need to
+go and cuts nothing.
 """
 
 import io
@@ -106,7 +108,8 @@ def _render(blocks: list[tuple], body_pt: float, margin_in: float, extra_pt: flo
                                  spaceBefore=bullet_extra_pt),
     }
 
-    gaps = {"section": SECTION_GAP_PT + extra_pt, "entry": ENTRY_GAP_PT + extra_pt, "first_entry": FIRST_ENTRY_GAP_PT}
+    gaps = {"section": SECTION_GAP_PT + extra_pt, "entry": ENTRY_GAP_PT + extra_pt, "one_line_entry": ENTRY_GAP_PT,
+            "first_entry": FIRST_ENTRY_GAP_PT}
     story = []
     for block, gap in zip(blocks, gap_kinds(blocks)):
         kind, text = block[0], escape(block[1])

@@ -6,13 +6,16 @@ name 16 pt, headings 12 pt, body 11 pt at full size. Each job header keeps the p
 location right, then title left and dates right, using a right-aligned tab stop (not a table) so ATS
 parsers read it as plain lines.
 
-To fit one page TrueFit shrinks all the text together (body to 8 pt at the smallest, name to 11 pt) and the
-margins (to 0.5 in), from a length estimate. If it still won't fit, it
-says roughly how many bullets to remove; it never cuts the student's content itself.
+To fit one page TrueFit keeps 1-inch margins while the text is 10 pt or larger, then narrows the margins (to
+0.5 in), then shrinks all the text together (body to 8 pt at the smallest, name to 11 pt), from a length estimate
+that uses Calibri's real character widths and line heights measured in Word. A resume that fits fills the page:
+spare space goes between sections and entries, then between bullets. If it still won't fit, it says roughly how
+many bullets to remove; it never cuts the student's content itself.
 """
 
 import io
 import math
+import re
 from dataclasses import dataclass
 
 from docx import Document
@@ -44,6 +47,7 @@ BULLET_GAP_MAX_PT = 2  # once every gap is at its cap, up to this much space bet
 HEADING_RULE_PT = 2  # Word adds the rule's own space (1 pt) and width under each heading
 RESERVE_LINES = 1  # Word's layout can only be estimated (checked against real Word, Nov 18), so one line stays free
 WORD_LEADING = 1.22  # Word's single line spacing for Calibri, as a multiple of the font size
+WRAP_ROOM = 0.99  # a line within 1% of the text width counts as wrapping: Word's rounding can differ slightly
 BULLET_LEADING = 1.28  # bulleted lines are taller: the bullet symbol's font (measured in Word, Nov 18)
 
 
@@ -68,16 +72,25 @@ class Layout:
     bullet_extra_pt: float = 0  # space above each bullet, used only once extra_pt is at its cap
 
 
+_YEAR = re.compile(r"\b(?:19|20)\d{2}\b")
+
+
 def gap_kinds(blocks: list[tuple]) -> list[str | None]:
     """For each block, the space above it: "section" (a heading), "entry" (a school or job after the first in its
-    section), "first_entry", or None. Only "section" and "entry" gaps grow to fill the page."""
+    section), "one_line_entry" (a one-line item with nothing on the right, like "Skills: ..."), "first_entry",
+    or None. Only "section" and "entry" gaps grow to fill the page."""
     kinds, seen_entry = [], False
-    for block in blocks:
+    for i, block in enumerate(blocks):
         if block[0] == "heading":
             kinds.append("section")
             seen_entry = False
         elif block[0] == "header" and block[3]:
-            kinds.append("entry" if seen_entry else "first_entry")
+            following = blocks[i + 1] if i + 1 < len(blocks) else None
+            # Nothing under it, nothing on the right, and no year in it: a line like "Skills: Excel, SQL",
+            # not a school or job ("University of Michigan | BA | Sep 2014 – May 2018")
+            one_line = not block[2] and not _YEAR.search(block[1]) and (
+                following is None or following[0] == "heading" or (following[0] == "header" and following[3]))
+            kinds.append("first_entry" if not seen_entry else "one_line_entry" if one_line else "entry")
             seen_entry = True
         else:
             kinds.append(None)
@@ -171,7 +184,7 @@ def _page_lines(body_pt: float, margin_in: float) -> float:
 def _lines(text: str, body_pt: float, margin_in: float, indent_in: float = 0, size_pt: float | None = None,
            bold: bool = False) -> int:
     """Lines the text takes in Word: wrapped word by word using Calibri's real character widths."""
-    width_pt = (PAGE_WIDTH_IN - 2 * margin_in - indent_in) * 72
+    width_pt = (PAGE_WIDTH_IN - 2 * margin_in - indent_in) * 72 * WRAP_ROOM
     widths = calibri_widths.BOLD if bold else calibri_widths.REGULAR
     size = size_pt or body_pt
     measure = lambda s: sum(widths.get(c, 1000) for c in s) * size / 1000
@@ -191,7 +204,8 @@ def _estimated_height(blocks: list[tuple], body_pt: float, margin_in: float) -> 
     """Height in body-text lines, counting wrapped bullets, larger name and heading text, and spacing
     (gaps at their base size; extra_pt is worked out from what's left)."""
     lead = body_pt * WORD_LEADING
-    base = {"section": SECTION_GAP_PT, "entry": ENTRY_GAP_PT, "first_entry": FIRST_ENTRY_GAP_PT}
+    base = {"section": SECTION_GAP_PT, "entry": ENTRY_GAP_PT, "one_line_entry": ENTRY_GAP_PT,
+            "first_entry": FIRST_ENTRY_GAP_PT}
     height = 0.0
     for block, gap in zip(blocks, gap_kinds(blocks)):
         kind = block[0]
@@ -247,6 +261,8 @@ def _render(blocks: list[tuple], layout: Layout) -> bytes:
             p = doc.add_paragraph()
             if gap == "entry":
                 p.paragraph_format.space_before = Pt(ENTRY_GAP_PT + layout.extra_pt)
+            elif gap == "one_line_entry":
+                p.paragraph_format.space_before = Pt(ENTRY_GAP_PT)
             elif gap == "first_entry":
                 p.paragraph_format.space_before = Pt(FIRST_ENTRY_GAP_PT)
             p.paragraph_format.tab_stops.add_tab_stop(text_width, WD_TAB_ALIGNMENT.RIGHT)

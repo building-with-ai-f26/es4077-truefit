@@ -137,7 +137,7 @@ def test_file_name_uses_the_name_line():
 
 # ---- Spacing and filling the page (specs/2026-11-18-fill-page-design.md) ----
 
-from app.docx_resume import ENTRY_GAP_PT, _estimated_height, _page_lines, gap_kinds, resume_blocks  # noqa: E402
+from app.docx_resume import ENTRY_GAP_PT, RESERVE_LINES, _estimated_height, _page_lines, gap_kinds, resume_blocks  # noqa: E402
 
 LONG_SCHOOL = "University of Michigan College of Literature, Science, and the Arts, Department of Economics Honors Program"
 
@@ -175,7 +175,7 @@ def test_word_extra_space_fills_estimate():
     gaps = sum(kind in ("section", "entry") for kind in gap_kinds(blocks))  # Education, Experience, Michigan
     used = _estimated_height(blocks, layout.body_pt, layout.margin_in) * lead + gaps * layout.extra_pt
     assert 0 < layout.extra_pt < layout.body_pt * 1.2
-    assert used <= _page_lines(layout.body_pt, layout.margin_in) * lead
+    assert used <= (_page_lines(layout.body_pt, layout.margin_in) - RESERVE_LINES) * lead  # one line stays free
 
 
 def test_word_extra_space_counts_wrapped_headers():
@@ -216,3 +216,26 @@ def test_word_space_between_bullets_only_after_gaps_are_full():
     assert all(p.paragraph_format.space_before == Pt(layout.bullet_extra_pt) for p in bullets)
     _, filled = open_docx(two_school_sections(*workstreams(33)), two_school_master())  # gaps not full
     assert filled.bullet_extra_pt == 0
+
+
+def test_one_line_items_do_not_grow_apart():
+    """Lines like "Skills: ..." and "Languages: ..." can come back as one-line entries: they keep the base gap,
+    while schools and jobs with a second row or bullets grow to fill the page."""
+    blocks = [("heading", "Education"), ("header", "NYU Stern", "2027", True), ("header", "MBA", "", False),
+              ("header", "University of Michigan", "2018", True), ("header", "BA, Economics", "", False),
+              ("heading", "Additional Information"), ("header", "Skills: Excel, SQL", "", True),
+              ("header", "Languages: Spanish", "", True), ("header", "Interests: chess", "", True)]
+    assert gap_kinds(blocks) == ["section", "first_entry", None, "entry", None,
+                                 "section", "first_entry", "one_line_entry", "one_line_entry"]
+
+
+def test_wrapping_leaves_a_little_room_at_the_edge():
+    """A line within a hair of the text width counts as wrapping: Word's rounding can differ slightly."""
+    from app.docx_resume import BULLET_INDENT_IN, _lines
+    width = (8.5 - 2 * 1.0 - BULLET_INDENT_IN) * 72
+    from app import calibri_widths
+    measure = lambda s: sum(calibri_widths.REGULAR[c] for c in s) * 11 / 1000
+    text = "x"
+    while measure(text + " x") < width * 0.995:
+        text += " x"
+    assert measure(text) < width and _lines(text, 11, 1.0, BULLET_INDENT_IN) == 2  # just under the edge: wraps
