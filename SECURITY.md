@@ -44,13 +44,13 @@ Checked before any route runs (`app/rate_limit.py`):
 ### Proof: 30 calls, calls 11–30 refused
 
 - Automated: `tests/api/test_rate_limit.py::test_thirty_quick_calls_are_refused_after_ten`.
-- Live: [to fill in: result and screenshot from the live site]
+- Live (Nov 18, after the fix below): 30 calls in a row to `/api/start-date` with a too-short posting (no AI used): **calls 1–10 allowed, 11–30 refused** with `429` and "Too many requests. Try again in a minute." Also live: `/docs` returns 404; `nosniff` and `X-Frame-Options: DENY` on responses.
 
 ## Left, and why
 
 - **Rejected requests still count.** A request that's refused for being too short still counts toward the visitor's and the site's AI limits, so someone could use up the 200-a-day cap with junk requests: the site would stop checking for the day, but no credit is spent.
 - **Limits are kept in memory.** They reset when the server restarts (Render's free plan sleeps after 15 minutes idle). Someone could wait for a restart to get a fresh 50; the 200-a-day site cap and the OpenRouter credit limit still bound the cost.
-- **The visitor is identified by network address**: the `CF-Connecting-IP` header that Cloudflare (in front of Render) sets and visitors can't fake. People behind one network (a school's Wi-Fi) share a limit. *Found live, Nov 18:* the first version used the last `X-Forwarded-For` entry, which on Render is one of several relay servers, so the first live 30-call test let 25 through; fixed with a test. [to fill in: confirm the live 30-call test after the fix]
+- **The visitor is identified by network address**: the `CF-Connecting-IP` header that Cloudflare (in front of Render) sets and visitors can't fake. People behind one network (a school's Wi-Fi) share a limit. *Found live, Nov 18:* the first version used the last `X-Forwarded-For` entry, which on Render is one of several relay servers, so the first live 30-call test let 25 through; fixed with a test, and the live 30-call test now refuses calls 11–30.
 - **A domain that changes its address between the check and the fetch** (DNS rebinding) could still reach a private address. The fetch is a blind read of job data from the server's own network, and Render's network has nothing private of mine on it; fixing this fully needs a custom network layer.
 - **No Content-Security-Policy yet.** PostHog loads scripts from its own domain; a strict policy needs testing so it doesn't break analytics.
 - **The model sees what students paste.** It goes to OpenRouter for each check, under OpenRouter's terms. The page doesn't say this yet.
