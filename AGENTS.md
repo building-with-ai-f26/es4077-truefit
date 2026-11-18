@@ -55,8 +55,8 @@
 9. **Stage files by name, and look for " 2" copies** *(from a real mistake, Nov 18)*: this repo sits on an iCloud-synced Desktop, which makes copies like `rate_limit 2.py` when files change mid-sync. `git add -A` committed two of them into PR #47. Add files by name, and check `git status` for names ending in " 2" before committing.
 
 ## 5. Shipping
-- **Live site:** Render web service `truefit` (free plan, no database), deployed from the public repo address. https://es4077-truefit.onrender.com
-- **How a change ships:** branch → pull request → `uv run pytest` passes → the student approves the merge → in Render, **Manual Deploy → Deploy latest commit** (the class organization hasn't approved Render's GitHub access, so merges don't deploy on their own).
+- **Live site:** Render web service `truefit` (free plan, no database), connected to this GitHub repo. https://es4077-truefit.onrender.com
+- **How a change ships:** branch → pull request → `uv run pytest` passes → the student approves the merge → Render deploys `main` on its own (Auto-Deploy on commit, live in about 2 minutes; turned on Nov 18 after the class organization approved Render's GitHub access). **Manual Deploy → Deploy latest commit** in Render still works if a deploy needs a retry.
 - **After a deploy:** open the live URL, run a sample posting through "Check eligibility," and confirm the event in PostHog.
 - **Secrets:** `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `POSTHOG_PROJECT_TOKEN`, `POSTHOG_HOST`, `PYTHON_VERSION`, `ENVIRONMENT=production` live in Render's environment settings, never in the repo. `render.yaml` lists them without values.
 - **Rollback:** in Render, open **Events**, pick the last good deploy, and choose **Rollback**. Then fix forward on a branch.
