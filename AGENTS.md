@@ -52,6 +52,7 @@
 6. **Stop when looping:** If a fix fails twice in a row, stop, summarize what failed, and ask the human before trying a third approach.
 7. **Never log what students send, or where TrueFit fetches from** *(from a real mistake, Nov 18)*: when I added posting links, the web library (httpx) wrote every link it fetched into the server log at its default level. A test caught it. Any new library that makes requests or handles uploads gets a test that puts a marker string in the input and checks it's not in the logs.
 8. **Respect a site's limits and blocks** *(from a real mistake, Nov 18)*: when Workday answered "too many requests," I retried with browser-like settings to get around it, and the permission check stopped me. If a site rate-limits or blocks TrueFit, stop and ask; test with one real link the student gives instead.
+9. **Stage files by name, and look for " 2" copies** *(from a real mistake, Nov 18)*: this repo sits on an iCloud-synced Desktop, which makes copies like `rate_limit 2.py` when files change mid-sync. `git add -A` committed two of them into PR #47. Add files by name, and check `git status` for names ending in " 2" before committing.
 
 ## 5. Shipping
 - **Live site:** Render web service `truefit` (free plan, no database), deployed from the public repo address. https://es4077-truefit.onrender.com
