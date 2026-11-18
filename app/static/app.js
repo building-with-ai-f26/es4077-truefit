@@ -102,6 +102,7 @@ Join our Corporate Strategy team to size new markets, build business cases, and 
 
 Qualifications
 - MBA expected by May 2027
+- 3+ years of experience in consulting, strategy, or finance
 - Strong financial modeling and Excel skills
 - SQL a plus
 
