@@ -32,10 +32,11 @@ Job posting                         Try a sample posting
 ```
 - When the box holds only a link, TrueFit reads it right away. The posting text replaces the link, **locked** like a resume read from Word, with "✓ Read from boards.greenhouse.io · 42 lines", **Edit text**, and **Remove**.
 - When the link can't be read, the box keeps the link and a note appears under it, e.g. for LinkedIn: "TrueFit can't open LinkedIn, Indeed, or school job boards like 12twenty. Open the posting, click Apply, and paste that link, or paste the posting text." Other failures say what happened (page needs a login, no job data on the page, site didn't respond) and end with "paste the posting text."
+- **One link at a time** (student's decision): when the box holds only links and there are two or more, nothing is read and a note says "Paste one link at a time." A posting's text that happens to contain links is still treated as text.
 - Pasting text works exactly as today.
 
 ## Decisions
-- Approach C; one box; locked text with Edit text / Remove; the LinkedIn/Indeed/12twenty note with the Apply-button tip.
+- Approach C; one box; one link at a time; locked text with Edit text / Remove; the LinkedIn/Indeed/12twenty note with the Apply-button tip.
 
 ## Builder's calls (proposed; the student can correct)
 - **Sites read through their public data:** Greenhouse (`boards.greenhouse.io`, `job-boards.greenhouse.io`), Lever (`jobs.lever.co`), Ashby (`jobs.ashbyhq.com`), Workday (`*.myworkdayjobs.com`). Any other link: the page's JobPosting data, if present.

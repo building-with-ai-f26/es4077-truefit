@@ -30,6 +30,7 @@
 | `no_job_data` | TrueFit couldn't find the job details on this page. Paste the posting text. |
 | `several_jobs` | This page lists more than one job. Open the one you want, or paste the posting text. |
 | `too_large` | This page is too large to read. Paste the posting text. |
+| `one_link` (browser only) | Paste one link at a time. |
 | `site_unreachable` | The job site didn't respond. Try again, or paste the posting text. |
 
 ## Review Focus
@@ -144,12 +145,13 @@ def test_link_and_text_not_logged(client, monkeypatch, caplog): "SECRETPOSTING" 
 Behavior:
 - Placeholder: "Paste the job posting text, or a link to it".
 - When the box's trimmed value matches `^https?://\S+$` (only a link), read it on `paste` and on `change`; while reading, the status row says "Reading the posting…" and the box is read-only. Success: the box holds the text, locked; status "✓ Read from {host} · {lines} lines" (1 → "line"), **Edit text** (unlocks, status becomes "From {host}"), **Remove** (clears the box and status). Failure: the box keeps the link, editable; `#posting-link-error` under the box shows the message.
+- **One link at a time:** when the box holds only links (whitespace-separated, each matching `^https?://\S+$`) and there are two or more, no request is made and `#posting-link-error` says "Paste one link at a time." (`posting_link_failed` `{ error_code: "one_link" }`).
 - "Try a sample posting" clears any link status/error and unlocks the box.
 - PostHog: `posting_link_read` `{ site, lines }`; `posting_link_failed` `{ error_code }`.
 
 - [ ] **Step 1: Implement the markup and JS above** (ids: `posting-link-status`, `posting-link-edit`, `posting-link-remove`, `posting-link-error`).
 - [ ] **Step 2:** `node --check app/static/app.js` and `uv run pytest -q`. Expected: OK, all pass.
-- [ ] **Step 3: Browser check (Playwright; `/api/posting-link` intercepted with fixed replies, PostHog blocked), desktop and phone:** paste a Greenhouse link → locked text and "✓ Read from boards.greenhouse.io · N lines"; Edit text unlocks; Remove empties. Paste a LinkedIn link → the blocked message under the box, top error box hidden, link still in the box. Paste "Apply here: https://x.com/1 for this role" → no request made (treated as text). Sample posting after a link → unlocked, no status. Check eligibility after reading a link sends the read text as `posting`. No sideways scroll.
+- [ ] **Step 3: Browser check (Playwright; `/api/posting-link` intercepted with fixed replies, PostHog blocked), desktop and phone:** paste a Greenhouse link → locked text and "✓ Read from boards.greenhouse.io · N lines"; Edit text unlocks; Remove empties. Paste a LinkedIn link → the blocked message under the box, top error box hidden, link still in the box. Paste "Apply here: https://x.com/1 for this role" → no request made (treated as text). Paste two links ("https://a.com/1 https://b.com/2", and on two lines) → "Paste one link at a time." and no request made. Sample posting after a link → unlocked, no status. Check eligibility after reading a link sends the read text as `posting`. No sideways scroll.
 - [ ] **Step 4: Commit** `feat: paste a posting link in the Job posting box`.
 
 ### Task 4: Real links, docs, pull request
