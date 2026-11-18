@@ -156,15 +156,26 @@ def test_lever_posting(web):
 
 
 def test_ashby_posting(web):
-    web.pages["https://api.ashbyhq.com/posting-api/job-board/acme"] = httpx.Response(200, json={"jobs": [
-        {"id": "other", "title": "Other", "descriptionHtml": "<p>No</p>"},
-        {"id": "j1", "title": "PM", "location": "NYC", "employmentType": "FullTime", "descriptionHtml": "<p>Ship</p>"}]})
-    assert read("https://jobs.ashbyhq.com/acme/j1")["text"] == "PM\nNYC\nEmployment type: FullTime\n\nShip"
+    """Ashby's public data is the whole job board at once (over 3 MB at Ramp), so the job's own page is read."""
+    web.pages["https://jobs.ashbyhq.com/acme/j1"] = ld_page({"@type": "JobPosting", "title": " PM",
+        "hiringOrganization": {"name": "Acme"}, "employmentType": "FULL_TIME", "description": "<p>Ship</p>"})
+    result = read("https://jobs.ashbyhq.com/acme/j1")
+    assert result["text"] == "PM\nAcme\nEmployment type: FULL_TIME\n\nShip"
+    assert result["site"] == "ashby"
+    assert web.seen == ["https://jobs.ashbyhq.com/acme/j1"]
 
 
 def test_ashby_job_missing(web):
-    web.pages["https://api.ashbyhq.com/posting-api/job-board/acme"] = httpx.Response(200, json={"jobs": []})
     assert problem("https://jobs.ashbyhq.com/acme/j1") == "not_found"
+
+
+def test_job_data_lists_every_location(web):
+    web.pages["https://careers.example.com/jobs/8"] = ld_page({"@type": "JobPosting", "title": "Investigator",
+        "jobLocation": [{"address": {"addressLocality": "Seattle", "addressRegion": "WA"}},
+                        {"address": {"addressLocality": "New York", "addressRegion": "NY"}},
+                        {"address": {"addressLocality": "Seattle", "addressRegion": "WA"}}],
+        "description": "<p>Investigate</p>"})
+    assert read("https://careers.example.com/jobs/8")["text"].splitlines()[1] == "Seattle, WA; New York, NY"
 
 
 def test_workday_posting(web):

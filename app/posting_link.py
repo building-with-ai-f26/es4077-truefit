@@ -140,13 +140,8 @@ async def read_posting_link(url: str) -> dict:
             text = posting_text(job.get("text", ""), None, categories.get("location"),
                                 job.get("description", "") + lists + job.get("additional", ""),
                                 _extras(None, categories.get("commitment")))
-        elif kind == "ashby":
-            board = _json(await _get(client, f"https://api.ashbyhq.com/posting-api/job-board/{ids['org']}"))
-            job = next((j for j in board.get("jobs") or [] if j.get("id") == ids["job_id"]), None)
-            if job is None:
-                raise LinkProblem("not_found")
-            text = posting_text(job.get("title", ""), None, _place(job.get("location")), job.get("descriptionHtml", ""),
-                                _extras(None, job.get("employmentType")))
+        elif kind == "ashby":  # Ashby's public data is the whole board at once (3 MB at Ramp); its job page is smaller
+            text = _job_data_text(await _get(client, f"https://jobs.ashbyhq.com/{ids['org']}/{ids['job_id']}"))
         elif kind == "workday":
             info = _json(await _get(client, f"https://{ids['host']}/wday/cxs/{ids['tenant']}/{ids['site']}/{ids['path']}"))
             job = info.get("jobPostingInfo") or {}
@@ -240,14 +235,15 @@ def _job_postings(data) -> list[dict]:
 
 
 def _job_location(location) -> str | None:
-    if isinstance(location, list):
-        location = location[0] if location else None
-    if not isinstance(location, dict):
-        return location if isinstance(location, str) else None
-    address = location.get("address")
-    if isinstance(address, dict):
-        return ", ".join(str(address[k]) for k in ("addressLocality", "addressRegion") if address.get(k)) or None
-    return address if isinstance(address, str) else None
+    """Every place the job lists (a job in Seattle and New York is not just a Seattle job), each once."""
+    places = []
+    for item in location if isinstance(location, list) else [location]:
+        address = item.get("address") if isinstance(item, dict) else item
+        if isinstance(address, dict):
+            address = ", ".join(str(address[k]) for k in ("addressLocality", "addressRegion") if address.get(k))
+        if isinstance(address, str) and address.strip() and address.strip() not in places:
+            places.append(address.strip())
+    return "; ".join(places) or None
 
 
 def _place(location) -> str | None:
