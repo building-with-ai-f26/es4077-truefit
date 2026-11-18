@@ -58,7 +58,7 @@ Success means classmates use TrueFit instead of that mix, and say it is faster a
 
 - Runs in the same model call as the start-date check. Python confirms every quote appears word for word in the posting.
 - Degree gets a verdict (Meets, Doesn't meet, Unclear, Not stated) for a student finishing an MBA; a posting aimed at undergraduates is Unclear, with the quoted line.
-- Sponsorship and years of experience are information only: the row names what the posting says ("No sponsorship", "4+ years required") with the quote. TrueFit never asks students about visas or their work history.
+- Sponsorship and years of experience are information only: the row names what the posting says ("No sponsorship", "4+ years required") with the quote. The Sponsorship row appears only when the posting mentions sponsorship or work authorization. TrueFit never asks students about visas or their work history.
 - One verdict per requirement, no overall pass/fail. The action title counts only start date and degree.
 
 **Tailored resume**

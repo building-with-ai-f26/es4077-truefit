@@ -233,7 +233,11 @@ function renderStartDate(result) {
       statusCell("td", display.tone, result.verdict_label),
       el("td", {}, el("p", { class: "plain" }, result.note || "The posting doesn't state a start date."))));
   }
-  for (const req of result.requirements || []) {
+  // Sponsorship shows only when the posting mentions it: most don't, and a "Not stated" row there was clutter
+  // (student's decision, Nov 18). When a posting does mention it, it can decide whether someone can apply.
+  const shown = (result.requirements || []).filter((req) => !(req.requirement === "work_authorization" && req.verdict === "not_stated"));
+  const sponsorshipShown = shown.some((req) => req.requirement === "work_authorization");
+  for (const req of shown) {
     const evidence = req.quote
       ? quoted(req.quote, req.note || "Quoted word for word from the posting")
       : el("p", { class: "plain" }, "The posting doesn't state this.");
@@ -252,7 +256,7 @@ function renderStartDate(result) {
 
   startDateResult.replaceChildren(
     el("h3", { id: "exhibit-1-title", class: "action-title" }, eligibilityTitle(eligibilityTally(result))),
-    el("p", { class: "exhibit-sub" }, `Checked against your availability (${result.availability.label}) and an MBA. Sponsorship and experience are shown for your information.`),
+    el("p", { class: "exhibit-sub" }, `Checked against your availability (${result.availability.label}) and an MBA. ${sponsorshipShown ? "Sponsorship and experience are" : "Experience is"} shown for your information.`),
     table);
   if (!noDate) startDateResult.append(el("p", { class: "exhibit-foot" }, `Start date: ${display.text}${result.note ? ` ${result.note.replace(/\.?$/, ".")}` : ""}`));
 }
