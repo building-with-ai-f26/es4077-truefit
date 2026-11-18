@@ -281,3 +281,12 @@ def test_start_date_on_or_before_posting_date_is_dropped(web):
 def test_html_to_text_skips_code_and_separates_cells():
     html = "<style>.a{color:red}</style><script>var x=1</script><table><tr><td>Base</td><td>$100k</td></tr></table>"
     assert html_to_text(html) == "Base $100k"
+
+
+def test_workday_details_link_reads_the_job():
+    """Workday's search results link to .../details/{title}_{id}; its data is at job/{title}_{id} (checked live, Nov 18)."""
+    url = ("https://nvidia.wd5.myworkdayjobs.com/en-US/NVIDIAExternalCareerSite/details/"
+           "Accelerated-Computing-GPU-Product-Manager_JR2028023?locationHierarchy1=2fcb&jobFamilyGroup=0c40")
+    assert site_kind(url) == ("workday", {"host": "nvidia.wd5.myworkdayjobs.com", "tenant": "nvidia",
+                                          "site": "NVIDIAExternalCareerSite",
+                                          "path": "job/Accelerated-Computing-GPU-Product-Manager_JR2028023"})

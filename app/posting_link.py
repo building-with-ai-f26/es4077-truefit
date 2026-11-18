@@ -65,10 +65,11 @@ def site_kind(url: str) -> tuple[str, dict]:
         return "lever", {"company": path[0], "posting_id": path[1]}
     if host == "jobs.ashbyhq.com" and len(path) >= 2:
         return "ashby", {"org": path[0], "job_id": path[1]}
-    if host.endswith(".myworkdayjobs.com") and "job" in path:
-        job = path.index("job")
+    if host.endswith(".myworkdayjobs.com") and ("job" in path or "details" in path):
+        job = path.index("job") if "job" in path else path.index("details")
         if job >= 1:  # the career site name sits just before "job" (after an optional locale like en-US)
-            job_path = path[job:]
+            # Search results link to details/{title}_{id}; Workday's data for it is at job/{title}_{id}.
+            job_path = ["job"] + path[job + 1:]
             if "apply" in job_path:  # the Apply page's link still names the job before "/apply"
                 job_path = job_path[:job_path.index("apply")]
             return "workday", {"host": host, "tenant": host.split(".")[0], "site": path[job - 1],
