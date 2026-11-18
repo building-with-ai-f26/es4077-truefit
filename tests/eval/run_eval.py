@@ -3,6 +3,7 @@
 Usage:
     uv run python tests/eval/run_eval.py --suite start_date
     uv run python tests/eval/run_eval.py --suite tailor
+    uv run python tests/eval/run_eval.py --suite tailor --cases 13 16   # only these cases, by number
 """
 
 import argparse
@@ -27,18 +28,23 @@ from app.trace_check import GENERIC_JOB_WORDS, _stem, extract_numbers, posting_o
 CASES_DIR = Path(__file__).resolve().parent / "cases"
 
 
-def load_cases(suite: str) -> list[tuple[str, dict]]:
-    return [(p.stem, json.loads(p.read_text())) for p in sorted((CASES_DIR / suite).glob("*.json"))]
+def load_cases(suite: str, only: list[str] | None = None) -> list[tuple[str, dict]]:
+    paths = sorted((CASES_DIR / suite).glob("*.json"))
+    if only:
+        paths = [p for p in paths if p.stem.split("_")[0].lstrip("0") in {n.lstrip("0") for n in only}]
+        if not paths:
+            sys.exit(f"No {suite} cases numbered {', '.join(only)}")
+    return [(p.stem, json.loads(p.read_text())) for p in paths]
 
 
-async def run_start_date() -> bool:
+async def run_start_date(only: list[str] | None = None) -> bool:
     """SC-002: verdict (and undergrad warning) match expected in >= 90% of cases, and never a date for a posting that states none.
     Cases with "expected_requirements" also score degree (verdict), work authorization (stance), and years
     of experience ("required:5" / "preferred:2"):
     each row must match in >= 90% of checks, and never a quoted requirement the posting doesn't state."""
     meter = CostMeter()
     llm._transport = meter
-    cases = load_cases("start_date")
+    cases = load_cases("start_date", only)
     agreed = 0
     invented = []
     req_checks = req_agreed = 0
@@ -98,11 +104,11 @@ class CostMeter(httpx.AsyncHTTPTransport):
         return response
 
 
-async def run_tailor() -> bool:
+async def run_tailor(only: list[str] | None = None) -> bool:
     """SC-003: no kept bullet with a number or posting-only word missing from its sources, and none claiming an expected gap."""
     meter = CostMeter()
     llm._transport = meter
-    cases = load_cases("tailor")
+    cases = load_cases("tailor", only)
     violations, flagged_for_review, seconds, gap_scores = [], [], [], []
     print(f"{'case':30} {'bullets':>7} {'kept':>5} {'flagged':>8} {'cost':>7} {'time':>6}")
     for name, case in cases:
@@ -201,8 +207,9 @@ SUITES = {"start_date": run_start_date, "tailor": run_tailor}
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--suite", choices=SUITES, default="start_date")
+    parser.add_argument("--cases", nargs="+", metavar="N", help="run only these case numbers, e.g. --cases 13 16")
     args = parser.parse_args()
-    passed = asyncio.run(SUITES[args.suite]())
+    passed = asyncio.run(SUITES[args.suite](args.cases))
     print("PASS" if passed else "FAIL")
     sys.exit(0 if passed else 1)
 
