@@ -87,3 +87,67 @@ def test_text_box_fallback_copy_is_not_read_twice():
             f'<mc:AlternateContent><mc:Choice Requires="wps"><w:drawing><wps:txbx>{box}</wps:txbx></w:drawing></mc:Choice>'
             f'<mc:Fallback><w:pict><v:textbox>{box}</v:textbox></w:pict></mc:Fallback></mc:AlternateContent></w:r>'))
     assert read_docx_text(docx_bytes(build)) == "CERTIFICATIONS\nLean Six Sigma"
+
+
+def sdt(inner: str) -> str:
+    return f'<w:sdt {nsdecls("w")}><w:sdtContent>{inner}</w:sdtContent></w:sdt>'
+
+
+def test_block_content_control_is_read():
+    """Word's own resume templates wrap sections in content controls."""
+    def build(d):
+        d.add_paragraph("EDUCATION")
+        d.element.body.insert(1, parse_xml(sdt('<w:p><w:r><w:t>Acme Corp, Analyst</w:t></w:r></w:p>')))
+    assert read_docx_text(docx_bytes(build)) == "EDUCATION\nAcme Corp, Analyst"
+
+
+def test_inline_content_control_is_read():
+    def build(d):
+        d.add_paragraph("Name: ")._p.append(parse_xml(sdt('<w:r><w:t>Jane Doe</w:t></w:r>')))
+    assert read_docx_text(docx_bytes(build)) == "Name: Jane Doe"
+
+
+def test_first_page_header_comes_first():
+    def build(d):
+        d.sections[0].different_first_page_header_footer = True
+        d.sections[0].first_page_header.paragraphs[0].text = "Jane Doe"
+        d.add_paragraph("EDUCATION")
+    assert read_docx_text(docx_bytes(build)) == "Jane Doe\nEDUCATION"
+
+
+def test_tracked_insertion_is_kept_and_deletion_dropped():
+    def build(d):
+        p = d.add_paragraph("Led ")
+        p._p.append(parse_xml(f'<w:ins {nsdecls("w")} w:id="1" w:author="Coach"><w:r><w:t>team of 5</w:t></w:r></w:ins>'))
+        p._p.append(parse_xml(f'<w:del {nsdecls("w")} w:id="2" w:author="Coach"><w:r><w:delText> people</w:delText></w:r></w:del>'))
+    assert read_docx_text(docx_bytes(build)) == "Led team of 5"
+
+
+def test_nested_table_in_a_cell_is_read():
+    def build(d):
+        outer = d.add_table(rows=1, cols=2).rows[0].cells
+        outer[0].text = "Acme"
+        inner = outer[1].add_table(rows=1, cols=2).rows[0].cells
+        inner[0].text, inner[1].text = "Analyst", "2020 – 2022"
+    text = read_docx_text(docx_bytes(build))
+    assert "Acme" in text and "Analyst 2020 – 2022" in text
+
+
+def test_bullet_alone_in_a_cell_keeps_its_bullet():
+    def build(d):
+        cell = d.add_table(rows=1, cols=1).rows[0].cells[0]
+        cell.paragraphs[0].text = "Built model"
+        cell.paragraphs[0].style = d.styles["List Bullet"]
+    assert read_docx_text(docx_bytes(build)) == "- Built model"
+
+
+def test_damaged_document_xml_raises():
+    import zipfile
+    good = BytesIO(docx_bytes(lambda d: d.add_paragraph("A")))
+    damaged = BytesIO()
+    with zipfile.ZipFile(good) as src, zipfile.ZipFile(damaged, "w") as dst:
+        for item in src.infolist():
+            data = src.read(item)
+            dst.writestr(item, data[: len(data) // 2] if item.filename == "word/document.xml" else data)
+    with pytest.raises(NotDocx):
+        read_docx_text(damaged.getvalue())
