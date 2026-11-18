@@ -31,7 +31,7 @@ There is **no database and no sign-in**: the server stores nothing between reque
 | What the page shows | Text from files, links, and the model put on the page | Shown as text, never as HTML, so a posting can't inject code (checked: the one HTML insert is a fixed icon) |
 | Browser protections | Headers on every response | **Fixed:** added `nosniff`, `X-Frame-Options: DENY` (no framing), and a referrer policy |
 | Public API listing | FastAPI's automatic `/docs` and `/openapi.json` | **Fixed:** turned off |
-| Analytics privacy | What PostHog receives | Event names, verdicts, counts, and error codes only; never posting, resume, file name, or link text. Live site has the real PostHog token and host (checked Nov 18). [to fill in: confirm session replay masks the text boxes on the live site] |
+| Analytics privacy | What PostHog receives, including session replay | **Fixed:** replay hid what students type, but not what the page shows, so a replay would show a student's tailored resume and the posting's quotes. Now replays mask all text and clicks never send the clicked text (`app/static/posthog.js`); a browser check that unpacks the recording found shown text before the fix and none after, and a test keeps the setting. Events carry names, verdicts, counts, and error codes only; never posting, resume, file name, or link text. Checked on the live site with a phone test (Nov 18). |
 
 ## The rate limits
 

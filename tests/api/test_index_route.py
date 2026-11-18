@@ -18,3 +18,11 @@ def test_static_files_are_revalidated(client):
     r = client.get("/static/app.js")
     assert r.status_code == 200
     assert r.headers["cache-control"] == "no-cache"
+
+
+def test_replays_never_record_words(client):
+    # The page shows students' resumes and postings; replays must mask all text, not only the boxes.
+    js = client.get("/static/posthog.js").text
+    assert "maskTextSelector: '*'" in js
+    assert "maskAllInputs: true" in js
+    assert "mask_all_text: true" in js
