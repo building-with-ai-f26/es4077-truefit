@@ -107,6 +107,18 @@ input, textarea { caret-color: var(--teal); }
 label { display: block; font-weight: 600; margin: 22px 0 6px; }
 .label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .optional { font-weight: 400; color: var(--muted); }
+.file-pick { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+.file-pick .hint { margin: 0; }
+.file-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 0 0 6px; font-size: 14px; }
+.file-row[hidden] { display: none; }
+.file-error { margin: 0 0 6px; font-size: 14px; color: var(--bad); }
+.file-name { color: var(--good); font-weight: 600; overflow-wrap: anywhere; }
+textarea.locked { background: var(--ground); color: var(--ink); cursor: default; }
+.file-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.file-list li { padding: 6px 0; border-top: 1px solid var(--rule); }
+.file-list li:last-child { border-bottom: 1px solid var(--rule); }
+.file-preview { margin: 6px 0 0; padding: 10px 12px; max-height: 16em; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere;
+  font: 13px/1.45 var(--body); background: var(--ground); border: 1px solid var(--rule); border-radius: 4px; }
 .save-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; margin-top: 14px; }
 .save-row .hint { margin: 0; }
 

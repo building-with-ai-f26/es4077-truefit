@@ -39,7 +39,7 @@ Success means classmates use TrueFit instead of that mix, and say it is faster a
 
 ## Operating Context
 
-- Students paste text: a posting copied from a job board, plus a master resume and optionally other writing about their own experience (notes, past cover letters, STAR stories, application essays). Only statements of what they did count; goals and plans never support a claim.
+- Students paste text: a posting copied from a job board, plus a master resume and optionally other writing about their own experience (notes, past cover letters, STAR stories, application essays). The resume and the other writing can also come from Word (.docx) files; PDFs are pasted. Only statements of what they did count; goals and plans never support a claim.
 - Availability is an "available starting" month (default June 2027, and any later start fits), ASAP, or Flexible.
 - The finished output is pasted into Workday or iCIMS application forms.
 - The product is built for the NYU Stern course "Building with AI" (Fall 2026). Weekly builds are due at noon New York time, there is a 2-minute demo, and a sponsor memo is due Dec 14, 2026. The app runs locally through Week 4 and launches to the cloud with Build 5 on Dec 7, 2026.

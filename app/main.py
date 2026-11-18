@@ -19,6 +19,7 @@ from posthog.integrations.asgi import PosthogASGIMiddleware
 
 from app import config, start_date, tailor
 from app.docx_resume import build_docx, file_name, resume_blocks
+from app.docx_text import NotDocx, read_docx_text
 from app.errors import ApiError, ConfigError, ModelAccountProblem, ModelUnavailable
 from app.pdf_resume import build_pdf
 from app.resume_lines import split_lines
@@ -178,6 +179,26 @@ async def post_tailor(body: TailorRequest):
     check_length(body.master_resume, "master_resume", 200, 20_000)
     check_length(body.background_notes or "", "background_writing", 0, 50_000)
     return await tailor.tailor_resume(body.posting, body.master_resume, body.background_notes)
+
+
+MAX_DOCX_BYTES = 5 * 1024 * 1024
+
+
+@app.post("/api/read-docx")
+async def post_read_docx(request: Request):
+    """The text of a Word file the student chose instead of pasting. The file and text are never stored or logged."""
+    data = await request.body()
+    if len(data) > MAX_DOCX_BYTES:
+        raise ApiError(413, "file_too_large", "This file is over 5 MB. Save a copy without images, or paste the text.")
+    try:
+        text = read_docx_text(data)
+    except NotDocx:
+        raise ApiError(415, "not_docx", "TrueFit reads Word files (.docx). For a PDF, open it and paste the text.")
+    lines = len([line for line in text.splitlines() if line.strip()])
+    if not lines:
+        raise ApiError(422, "docx_empty",
+                       "TrueFit couldn't find any text in this file. Check it's the right file, or paste the text.")
+    return {"text": text, "lines": lines}
 
 
 DOCX_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
