@@ -247,3 +247,37 @@ def test_too_large(web):
 def test_public_check_runs_on_the_first_link(web):
     assert problem("https://internal.example/job") == "bad_link"
     assert web.seen == []
+
+
+# ---- From the final review ----
+
+def test_same_title_different_jobs_are_several(web):
+    web.pages["https://careers.example.com/assoc"] = ld_page(
+        {"@type": "JobPosting", "title": "Associate", "jobStartDate": "2027-01-04", "description": "<p>London team</p>"},
+        {"@type": "JobPosting", "title": "Associate", "jobStartDate": "2027-06-01", "description": "<p>New York team</p>"})
+    assert problem("https://careers.example.com/assoc") == "several_jobs"
+
+
+def test_same_job_repeated_is_one_job(web):
+    job = {"@type": "JobPosting", "title": "Associate", "description": "<p>Same</p>"}
+    web.pages["https://careers.example.com/dup"] = ld_page(job, job)
+    assert read("https://careers.example.com/dup")["text"] == "Associate\n\nSame"
+
+
+def test_workday_apply_link_reads_the_job():
+    expected = ("workday", {"host": "acme.wd5.myworkdayjobs.com", "tenant": "acme", "site": "External",
+                            "path": "job/NY/Analyst_R123"})
+    for tail in ("apply", "apply/applyManually", "apply/autofillWithResume"):
+        assert site_kind(f"https://acme.wd5.myworkdayjobs.com/en-US/External/job/NY/Analyst_R123/{tail}") == expected
+
+
+def test_start_date_on_or_before_posting_date_is_dropped(web):
+    """Some sites fill jobStartDate with the day the job was posted; that isn't when the job starts."""
+    web.pages["https://careers.example.com/s"] = ld_page({"@type": "JobPosting", "title": "Analyst",
+        "datePosted": "2026-10-01", "jobStartDate": "2026-10-01", "description": "<p>Model</p>"})
+    assert "Start date" not in read("https://careers.example.com/s")["text"]
+
+
+def test_html_to_text_skips_code_and_separates_cells():
+    html = "<style>.a{color:red}</style><script>var x=1</script><table><tr><td>Base</td><td>$100k</td></tr></table>"
+    assert html_to_text(html) == "Base $100k"

@@ -161,12 +161,12 @@ function setChecking(checking) {
 }
 
 async function checkStartDate() {
-  if (linksIn(postingInput.value)) {
-    await readPostingLink(); // a link still in the box is read first; the check uses the posting text
-    if (linksIn(postingInput.value)) return;
-  }
-  setChecking(true);
+  setChecking(true); // before reading a link too, so a double-click can't start two checks
   try {
+    if (linksIn(postingInput.value)) {
+      await readPostingLink(); // a link still in the box is read first; the check uses the posting text
+      if (linksIn(postingInput.value)) return; // the link couldn't be read; its message is showing
+    }
     const result = await api("/api/start-date", {
       posting: postingInput.value,
       availability_text: availabilityInput.value,
@@ -267,6 +267,8 @@ const postingLinkError = document.getElementById("posting-link-error");
 // moves the Check button out from under a click that's in progress.
 let lastLinkTried = null; // so the same link isn't read twice
 let linkReading = null; // the reading in progress, so Check eligibility can wait for it
+let linkFailure = null; // why the last link couldn't be read, shown again if Check is clicked
+let linkToken = 0; // a reading that finishes after Remove or the sample posting is ignored
 
 // The links in the box when it holds nothing but links, else null (a posting's text can mention links).
 function linksIn(value) {
@@ -281,6 +283,8 @@ function showPostingLinkError(message, code) {
 }
 
 function resetPostingLink() {
+  linkToken += 1;
+  linkFailure = null;
   postingInput.readOnly = false;
   postingInput.classList.remove("locked");
   postingLinkStatus.hidden = true;
@@ -294,13 +298,18 @@ async function readPostingLink() {
   postingLinkError.hidden = true;
   if (links.length > 1) return showPostingLinkError("Paste one link at a time.", "one_link");
   const [url] = links;
-  if (url === lastLinkTried) return linkReading;
+  if (url === lastLinkTried) {
+    if (linkFailure) showPostingLinkError(linkFailure.message, linkFailure.code);
+    return linkReading;
+  }
   lastLinkTried = url;
+  linkFailure = null;
   linkReading = fetchPostingLink(url);
   return linkReading;
 }
 
 async function fetchPostingLink(url) {
+  const token = ++linkToken;
   postingInput.readOnly = true;
   postingLinkName.textContent = "Reading the posting…";
   postingLinkEdit.hidden = true;
@@ -317,6 +326,7 @@ async function fetchPostingLink(url) {
       throw Object.assign(new Error("Couldn't reach TrueFit. Check that the app is running and try again."), { code: "network_error" });
     }
     const data = await response.json().catch(() => ({}));
+    if (token !== linkToken) return; // the student removed the link or chose the sample meanwhile
     if (!response.ok) {
       throw Object.assign(new Error(data?.error?.message || "Couldn't read this link. Paste the posting text."), { code: data?.error?.code });
     }
@@ -327,8 +337,10 @@ async function fetchPostingLink(url) {
     postingLinkEdit.hidden = false;
     track("posting_link_read", { site: data.site, lines: data.lines });
   } catch (err) {
+    if (token !== linkToken) return;
     postingInput.readOnly = false;
     postingLinkStatus.hidden = true;
+    linkFailure = { message: err.message, code: err.code };
     showPostingLinkError(err.message, err.code);
   }
 }

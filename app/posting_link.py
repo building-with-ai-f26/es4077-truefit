@@ -68,8 +68,11 @@ def site_kind(url: str) -> tuple[str, dict]:
     if host.endswith(".myworkdayjobs.com") and "job" in path:
         job = path.index("job")
         if job >= 1:  # the career site name sits just before "job" (after an optional locale like en-US)
+            job_path = path[job:]
+            if "apply" in job_path:  # the Apply page's link still names the job before "/apply"
+                job_path = job_path[:job_path.index("apply")]
             return "workday", {"host": host, "tenant": host.split(".")[0], "site": path[job - 1],
-                               "path": "/".join(path[job:])}
+                               "path": "/".join(job_path)}
     return "page", {}
 
 
@@ -79,22 +82,31 @@ class _TextParser(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.lines = [""]
+        self.skipping = 0  # inside <script> or <style>, whose contents are code, not posting text
 
     def _new_line(self):
         if self.lines[-1].strip():
             self.lines.append("")
 
     def handle_starttag(self, tag, attrs):
+        if tag in ("script", "style"):
+            self.skipping += 1
+        if tag in ("td", "th") and self.lines[-1].strip():
+            self.lines[-1] += " "  # table cells on one row stay apart ("Base $100k")
         if tag in self.BLOCKS:
             self._new_line()
         if tag == "li":
             self.lines[-1] = "- "
 
     def handle_endtag(self, tag):
+        if tag in ("script", "style"):
+            self.skipping = max(0, self.skipping - 1)
         if tag in self.BLOCKS:
             self._new_line()
 
     def handle_data(self, data):
+        if self.skipping:
+            return
         self.lines[-1] += re.sub(r"\s+", " ", data.replace("\xa0", " "))
 
 
@@ -206,7 +218,8 @@ def _job_data_text(page: str) -> str:
             jobs += _job_postings(json.loads(block.strip(), strict=False))
         except ValueError:
             continue
-    distinct = {(str(job.get("title", "")).strip(), str(job.get("url", "")).strip()) for job in jobs}
+    # The same job repeated counts once; two jobs that only share a title (London and New York) don't.
+    distinct = {tuple(str(job.get(k, "")).strip() for k in ("title", "url", "description")) for job in jobs}
     if not jobs:
         raise LinkProblem("no_job_data")
     if len(distinct) > 1:
@@ -219,7 +232,15 @@ def _job_data_text(page: str) -> str:
         description = html.unescape(description)  # some sites escape the HTML inside the data
     return posting_text(str(job.get("title", "")), company if isinstance(company, str) else None,
                         _job_location(job.get("jobLocation")), description,
-                        _extras(job.get("jobStartDate"), job.get("employmentType")))
+                        _extras(_start_date(job), job.get("employmentType")))
+
+
+def _start_date(job: dict):
+    """jobStartDate, unless it's on or before the day the job was posted: some sites fill it with that day."""
+    start, posted = job.get("jobStartDate"), job.get("datePosted")
+    if isinstance(start, str) and isinstance(posted, str) and start[:10] <= posted[:10]:
+        return None
+    return start
 
 
 def _job_postings(data) -> list[dict]:
