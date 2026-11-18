@@ -141,7 +141,8 @@ _public = is_public_address  # tests swap this so no real address lookups happen
 async def read_posting_link(url: str) -> dict:
     url = url.strip()
     kind, ids = site_kind(url)
-    async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS, transport=_transport, headers=HEADERS) as client:
+    # trust_env=False: a proxy set in the server's environment would route requests around the address check
+    async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS, transport=_transport, headers=HEADERS, trust_env=False) as client:
         if kind == "greenhouse":
             job = _json(await _get(client, f"https://boards-api.greenhouse.io/v1/boards/{ids['board']}/jobs/{ids['job_id']}"))
             text = posting_text(job.get("title", ""), job.get("company_name"), (job.get("location") or {}).get("name"),

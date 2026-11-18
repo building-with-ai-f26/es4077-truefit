@@ -3,7 +3,7 @@ from datetime import date
 import pytest
 from fastapi.testclient import TestClient
 
-from app import gaps, llm, start_date
+from app import gaps, llm, rate_limit, start_date
 from app.errors import ModelUnavailable
 from app.main import app
 
@@ -13,6 +13,11 @@ TODAY = date(2026, 11, 4)
 @pytest.fixture
 def client():
     return TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def fresh_rate_limits():
+    rate_limit.reset()  # each test starts with no requests counted
 
 
 @pytest.fixture(autouse=True)

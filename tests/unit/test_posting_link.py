@@ -290,3 +290,13 @@ def test_workday_details_link_reads_the_job():
     assert site_kind(url) == ("workday", {"host": "nvidia.wd5.myworkdayjobs.com", "tenant": "nvidia",
                                           "site": "NVIDIAExternalCareerSite",
                                           "path": "job/Accelerated-Computing-GPU-Product-Manager_JR2028023"})
+
+
+def test_proxy_settings_are_ignored(web, monkeypatch):
+    """A proxy set in the server's environment would send requests around the private-address check."""
+    seen_options = []
+    real_client = httpx.AsyncClient
+    monkeypatch.setattr(posting_link.httpx, "AsyncClient", lambda **options: seen_options.append(options) or real_client(**options))
+    web.pages["https://careers.example.com/p"] = ld_page({"@type": "JobPosting", "title": "A", "description": "<p>B</p>"})
+    read("https://careers.example.com/p")
+    assert seen_options and seen_options[0].get("trust_env") is False

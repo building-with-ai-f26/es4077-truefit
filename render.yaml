@@ -1,0 +1,24 @@
+# Render Blueprint: TrueFit as one free web service. No database: TrueFit stores nothing on the server.
+# Secrets are entered in the Render dashboard (sync: false), never committed.
+services:
+  - type: web
+    name: truefit
+    runtime: python
+    plan: free
+    buildCommand: pip install uv && uv sync --frozen --no-dev
+    startCommand: uv run --no-sync uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    autoDeploy: true  # each merge to main deploys
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: ENVIRONMENT
+        value: production
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        sync: false
+      - key: POSTHOG_PROJECT_TOKEN
+        sync: false
+      - key: POSTHOG_HOST
+        sync: false
