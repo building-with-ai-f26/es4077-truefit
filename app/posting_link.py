@@ -6,11 +6,17 @@ LinkedIn, Indeed, and school job boards need a login and are answered without fe
 stored or logged.
 """
 
+import asyncio
+import html
 import ipaddress
+import json
+import logging
 import re
 import socket
 from html.parser import HTMLParser
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
+
+import httpx
 
 MESSAGES = {
     "blocked_site": "TrueFit can't open LinkedIn, Indeed, or school job boards like 12twenty. "
@@ -24,6 +30,16 @@ MESSAGES = {
     "site_unreachable": "The job site didn't respond. Try again, or paste the posting text.",
 }
 BLOCKED_DOMAINS = ("linkedin.com", "indeed.com", "glassdoor.com", "joinhandshake.com", "12twenty.com")
+MAX_BYTES = 2 * 1024 * 1024
+MAX_REDIRECTS = 5
+TIMEOUT_SECONDS = 10
+HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; TrueFit job posting reader)", "Accept": "text/html,application/json"}
+_LD_JSON = re.compile(r"<script[^>]*type=[\"']application/ld\+json[\"'][^>]*>(.*?)</script>", re.I | re.S)
+
+_transport: httpx.AsyncBaseTransport | None = None  # tests swap in a fake transport
+# httpx and httpcore log every address they request; posting links must never reach the log.
+for _name in ("httpx", "httpcore"):
+    logging.getLogger(_name).setLevel(logging.WARNING)
 
 
 class LinkProblem(Exception):
@@ -105,3 +121,146 @@ def is_public_address(host: str) -> bool:
         return False
     return bool(addresses) and all(ipaddress.ip_address(a.split("%")[0]).is_global for a in addresses)
 
+
+_public = is_public_address  # tests swap this so no real address lookups happen
+
+
+async def read_posting_link(url: str) -> dict:
+    url = url.strip()
+    kind, ids = site_kind(url)
+    async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS, transport=_transport, headers=HEADERS) as client:
+        if kind == "greenhouse":
+            job = _json(await _get(client, f"https://boards-api.greenhouse.io/v1/boards/{ids['board']}/jobs/{ids['job_id']}"))
+            text = posting_text(job.get("title", ""), job.get("company_name"), (job.get("location") or {}).get("name"),
+                                html.unescape(job.get("content", "")), [])  # Greenhouse escapes its HTML once
+        elif kind == "lever":
+            job = _json(await _get(client, f"https://api.lever.co/v0/postings/{ids['company']}/{ids['posting_id']}"))
+            categories = job.get("categories") or {}
+            lists = "".join(f"<h3>{item.get('text', '')}</h3><ul>{item.get('content', '')}</ul>" for item in job.get("lists") or [])
+            text = posting_text(job.get("text", ""), None, categories.get("location"),
+                                job.get("description", "") + lists + job.get("additional", ""),
+                                _extras(None, categories.get("commitment")))
+        elif kind == "ashby":
+            board = _json(await _get(client, f"https://api.ashbyhq.com/posting-api/job-board/{ids['org']}"))
+            job = next((j for j in board.get("jobs") or [] if j.get("id") == ids["job_id"]), None)
+            if job is None:
+                raise LinkProblem("not_found")
+            text = posting_text(job.get("title", ""), None, _place(job.get("location")), job.get("descriptionHtml", ""),
+                                _extras(None, job.get("employmentType")))
+        elif kind == "workday":
+            info = _json(await _get(client, f"https://{ids['host']}/wday/cxs/{ids['tenant']}/{ids['site']}/{ids['path']}"))
+            job = info.get("jobPostingInfo") or {}
+            # Workday's "startDate" is the day the job was posted, not when it starts, so it's never used.
+            text = posting_text(job.get("title", ""), None, _place(job.get("location")), job.get("jobDescription", ""),
+                                _extras(None, job.get("timeType")))
+        else:
+            text = _job_data_text(await _get(client, url))
+    if not text.strip() or not html_to_text(text.split("\n\n", 1)[-1]).strip():
+        raise LinkProblem("no_job_data")
+    lines = len([line for line in text.splitlines() if line.strip()])
+    return {"text": text, "lines": lines, "site": "job data" if kind == "page" else kind, "host": urlsplit(url).hostname}
+
+
+async def _get(client: httpx.AsyncClient, url: str) -> str:
+    """The body of a page, following up to 5 redirects by hand so every address is checked first."""
+    try:
+        for _ in range(MAX_REDIRECTS + 1):
+            parts = urlsplit(url)
+            if parts.scheme not in ("http", "https") or not parts.hostname:
+                raise LinkProblem("bad_link")
+            if not await asyncio.to_thread(_public, parts.hostname):
+                raise LinkProblem("bad_link")
+            async with client.stream("GET", url) as response:
+                if response.is_redirect and "location" in response.headers:
+                    url = urljoin(url, response.headers["location"])
+                    continue
+                if response.status_code in (401, 403):
+                    raise LinkProblem("needs_login")
+                if response.status_code in (404, 410):
+                    raise LinkProblem("not_found")
+                if response.status_code >= 300:
+                    raise LinkProblem("site_unreachable")
+                if int(response.headers.get("content-length") or 0) > MAX_BYTES:
+                    raise LinkProblem("too_large")
+                body = bytearray()
+                async for chunk in response.aiter_bytes():
+                    body += chunk
+                    if len(body) > MAX_BYTES:
+                        raise LinkProblem("too_large")
+                return body.decode(response.encoding or "utf-8", errors="replace")
+    except httpx.HTTPError as exc:
+        raise LinkProblem("site_unreachable") from exc
+    raise LinkProblem("site_unreachable")  # redirected too many times
+
+
+def _json(body: str) -> dict:
+    try:
+        data = json.loads(body)
+    except ValueError as exc:
+        raise LinkProblem("no_job_data") from exc
+    if not isinstance(data, dict):
+        raise LinkProblem("no_job_data")
+    return data
+
+
+def _job_data_text(page: str) -> str:
+    """The page's one JobPosting (the data career sites add for Google search), and nothing else from the page."""
+    jobs = []
+    for block in _LD_JSON.findall(page):
+        try:
+            jobs += _job_postings(json.loads(block.strip(), strict=False))
+        except ValueError:
+            continue
+    distinct = {(str(job.get("title", "")).strip(), str(job.get("url", "")).strip()) for job in jobs}
+    if not jobs:
+        raise LinkProblem("no_job_data")
+    if len(distinct) > 1:
+        raise LinkProblem("several_jobs")
+    job = jobs[0]
+    company = job.get("hiringOrganization")
+    company = company.get("name") if isinstance(company, dict) else company
+    description = str(job.get("description", ""))
+    if "<" not in description and "&lt;" in description:
+        description = html.unescape(description)  # some sites escape the HTML inside the data
+    return posting_text(str(job.get("title", "")), company if isinstance(company, str) else None,
+                        _job_location(job.get("jobLocation")), description,
+                        _extras(job.get("jobStartDate"), job.get("employmentType")))
+
+
+def _job_postings(data) -> list[dict]:
+    if isinstance(data, list):
+        return [job for item in data for job in _job_postings(item)]
+    if not isinstance(data, dict):
+        return []
+    if "@graph" in data:
+        return _job_postings(data["@graph"])
+    kinds = data.get("@type")
+    kinds = kinds if isinstance(kinds, list) else [kinds]
+    return [data] if "JobPosting" in kinds else []
+
+
+def _job_location(location) -> str | None:
+    if isinstance(location, list):
+        location = location[0] if location else None
+    if not isinstance(location, dict):
+        return location if isinstance(location, str) else None
+    address = location.get("address")
+    if isinstance(address, dict):
+        return ", ".join(str(address[k]) for k in ("addressLocality", "addressRegion") if address.get(k)) or None
+    return address if isinstance(address, str) else None
+
+
+def _place(location) -> str | None:
+    if isinstance(location, dict):
+        return location.get("name") or location.get("descriptor")
+    return location if isinstance(location, str) else None
+
+
+def _extras(start_date, employment_type) -> list[str]:
+    """Only what the site gives as its own field; nothing is worked out from the text."""
+    extras = [f"Start date: {start_date}"] if isinstance(start_date, str) and start_date.strip() else []
+    if isinstance(employment_type, list):
+        employment_type = ", ".join(str(t) for t in employment_type if t)
+    if isinstance(employment_type, str) and employment_type.strip():
+        extras.append(f"Employment type: {employment_type.strip()}")
+    return extras

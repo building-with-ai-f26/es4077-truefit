@@ -86,3 +86,153 @@ def test_private_addresses(host):
 
 def test_unresolvable_host_is_not_public():
     assert not is_public_address("no-such-host.invalid")
+
+
+# ---- Reading each kind of site (fake responses; tests never use the network) ----
+
+import asyncio  # noqa: E402
+import json  # noqa: E402
+from types import SimpleNamespace  # noqa: E402
+
+import httpx  # noqa: E402
+
+from app import posting_link  # noqa: E402
+from app.posting_link import read_posting_link  # noqa: E402
+
+
+@pytest.fixture
+def web(monkeypatch):
+    """Answers requests from a dict of URL -> response; records every URL asked for."""
+    pages, seen = {}, []
+
+    def handler(request):
+        url = str(request.url)
+        seen.append(url)
+        reply = pages.get(url)
+        if reply is None:
+            return httpx.Response(404)
+        if isinstance(reply, Exception):
+            raise reply
+        return reply
+
+    monkeypatch.setattr(posting_link, "_transport", httpx.MockTransport(handler))
+    monkeypatch.setattr(posting_link, "_public", lambda host: host != "internal.example")
+    return SimpleNamespace(pages=pages, seen=seen)
+
+
+def read(url):
+    return asyncio.run(read_posting_link(url))
+
+
+def problem(url):
+    with pytest.raises(LinkProblem) as caught:
+        read(url)
+    return caught.value.code
+
+
+def ld_page(*objects):
+    scripts = "".join(f'<script type="application/ld+json">{json.dumps(o)}</script>' for o in objects)
+    return httpx.Response(200, text=f"<html><head>{scripts}</head><body><nav>Menu</nav></body></html>",
+                          headers={"Content-Type": "text/html"})
+
+
+def test_greenhouse_posting(web):
+    web.pages["https://boards-api.greenhouse.io/v1/boards/acme/jobs/1"] = httpx.Response(200, json={
+        "title": "Analyst", "company_name": "Acme", "location": {"name": "New York, NY"},
+        "content": "&lt;p&gt;Build models&lt;/p&gt;&lt;ul&gt;&lt;li&gt;SQL&lt;/li&gt;&lt;/ul&gt;"})
+    result = read("https://boards.greenhouse.io/acme/jobs/1")
+    assert result["text"] == "Analyst\nAcme · New York, NY\n\nBuild models\n- SQL"
+    assert result["site"] == "greenhouse" and result["host"] == "boards.greenhouse.io" and result["lines"] == 4
+    assert "&lt;" not in result["text"] and "<p>" not in result["text"]
+
+
+def test_lever_posting(web):
+    web.pages["https://api.lever.co/v0/postings/acme/abc"] = httpx.Response(200, json={
+        "text": "Associate", "categories": {"location": "Remote", "commitment": "Full-time"},
+        "description": "<p>About the role</p>", "lists": [{"text": "Requirements", "content": "<li>MBA</li>"}],
+        "additional": "<p>Benefits</p>"})
+    text = read("https://jobs.lever.co/acme/abc")["text"]
+    assert text == "Associate\nRemote\nEmployment type: Full-time\n\nAbout the role\nRequirements\n- MBA\nBenefits"
+
+
+def test_ashby_posting(web):
+    web.pages["https://api.ashbyhq.com/posting-api/job-board/acme"] = httpx.Response(200, json={"jobs": [
+        {"id": "other", "title": "Other", "descriptionHtml": "<p>No</p>"},
+        {"id": "j1", "title": "PM", "location": "NYC", "employmentType": "FullTime", "descriptionHtml": "<p>Ship</p>"}]})
+    assert read("https://jobs.ashbyhq.com/acme/j1")["text"] == "PM\nNYC\nEmployment type: FullTime\n\nShip"
+
+
+def test_ashby_job_missing(web):
+    web.pages["https://api.ashbyhq.com/posting-api/job-board/acme"] = httpx.Response(200, json={"jobs": []})
+    assert problem("https://jobs.ashbyhq.com/acme/j1") == "not_found"
+
+
+def test_workday_posting(web):
+    web.pages["https://acme.wd5.myworkdayjobs.com/wday/cxs/acme/External/job/NYC/Analyst_R1"] = httpx.Response(200, json={
+        "jobPostingInfo": {"title": "Analyst", "location": "New York", "timeType": "Full time",
+                           "startDate": "2026-11-01", "jobDescription": "<p>Model</p>"}})
+    text = read("https://acme.wd5.myworkdayjobs.com/en-US/External/job/NYC/Analyst_R1")["text"]
+    assert text == "Analyst\nNew York\nEmployment type: Full time\n\nModel"
+    assert "2026-11-01" not in text  # Workday's startDate is the day it was posted, not the job's start
+
+
+def test_page_with_job_data(web):
+    web.pages["https://careers.example.com/jobs/7"] = ld_page({"@context": "https://schema.org", "@graph": [
+        {"@type": "Organization", "name": "Example"},
+        {"@type": "JobPosting", "title": "Strategy Associate", "hiringOrganization": {"name": "Example Co"},
+         "jobLocation": [{"address": {"addressLocality": "Chicago", "addressRegion": "IL"}}],
+         "employmentType": ["FULL_TIME"], "jobStartDate": "2027-06-01", "description": "<p>Lead projects</p>"}]})
+    result = read("https://careers.example.com/jobs/7")
+    assert result["text"] == ("Strategy Associate\nExample Co · Chicago, IL\nStart date: 2027-06-01\n"
+                              "Employment type: FULL_TIME\n\nLead projects")
+    assert result["site"] == "job data"
+
+
+def test_company_page_without_job_data(web):
+    web.pages["https://acme.com/careers?gh_jid=123"] = httpx.Response(200, text="<nav>Menu</nav><p>Join us</p>")
+    assert problem("https://acme.com/careers?gh_jid=123") == "no_job_data"
+
+
+def test_several_jobs_on_a_page(web):
+    web.pages["https://careers.example.com/all"] = ld_page(
+        [{"@type": "JobPosting", "title": "A", "description": "x"}, {"@type": "JobPosting", "title": "B", "description": "y"}])
+    assert problem("https://careers.example.com/all") == "several_jobs"
+
+
+def test_redirect_to_private_address_refused(web):
+    web.pages["https://short.example/x"] = httpx.Response(302, headers={"Location": "https://internal.example/x"})
+    assert problem("https://short.example/x") == "bad_link"
+    assert not any("internal.example" in url for url in web.seen)
+
+
+def test_redirect_to_login_page_has_no_job_data(web):
+    web.pages["https://careers.example.com/9"] = httpx.Response(302, headers={"Location": "https://login.example.com/"})
+    web.pages["https://login.example.com/"] = httpx.Response(200, text="<form>Sign in</form>")
+    assert problem("https://careers.example.com/9") == "no_job_data"
+
+
+def test_too_many_redirects(web):
+    web.pages["https://loop.example/a"] = httpx.Response(302, headers={"Location": "https://loop.example/a"})
+    assert problem("https://loop.example/a") == "site_unreachable"
+
+
+@pytest.mark.parametrize("status,code", [(401, "needs_login"), (403, "needs_login"), (404, "not_found"),
+                                         (410, "not_found"), (500, "site_unreachable")])
+def test_http_errors(web, status, code):
+    web.pages["https://careers.example.com/1"] = httpx.Response(status)
+    assert problem("https://careers.example.com/1") == code
+
+
+def test_timeout(web):
+    web.pages["https://careers.example.com/slow"] = httpx.ReadTimeout("slow")
+    assert problem("https://careers.example.com/slow") == "site_unreachable"
+
+
+def test_too_large(web):
+    web.pages["https://careers.example.com/big"] = httpx.Response(200, content=b"x" * (2 * 1024 * 1024 + 1))
+    assert problem("https://careers.example.com/big") == "too_large"
+
+
+def test_public_check_runs_on_the_first_link(web):
+    assert problem("https://internal.example/job") == "bad_link"
+    assert web.seen == []
