@@ -256,21 +256,21 @@
     <section id="live-demo">
       <h2>Product Showcase (Prototype / Live App / 2-Min Video)</h2>
       <p>
-        <strong>Current Status:</strong> Build 2: smallest local version with analytics<br />
-        <strong>Demo:</strong> Screenshots below; live cloud app URL coming in Build 5.
+        <strong>Current Status:</strong> Build 3: live on the web, with rate limits and a security audit<br />
+        <strong>Live app:</strong> <a href="https://es4077-truefit.onrender.com">es4077-truefit.onrender.com</a> (free hosting; the first visit after a quiet spell can take 30–60 seconds to wake up). Screenshots below.
       </p>
       <figure>
-        <img src="images/app-build2-eligibility.png" width="1440" height="760" loading="lazy"
-             alt="TrueFit's eligibility exhibit for a made-up posting, Strategy Manager at Litware Retail. Action title: 'You meet both requirements this posting states.' Rows: Start date, In window, quoting 'Start date: September 2027'; Degree, Meets, quoting 'an MBA or equivalent graduate degree'; Work authorization, shown for information as 'Authorization required', quoting 'must be legally authorized to work in the United States' with a note to ask the recruiter about sponsorship; Years of experience, shown for information as '4+ years required', quoting '4 years of professional experience'." />
+        <img src="images/app-build3-eligibility.png" width="1440" height="805" loading="lazy"
+             alt="TrueFit's eligibility check for the app's sample posting, Associate, Corporate Strategy at a made-up company, Acme Consumer Brands. Action title: 'You meet both requirements this posting states.' Rows: Start date, In window, quoting 'Start date: July 13, 2027'; Degree, Meets, quoting 'MBA expected by May 2027'; Years of experience, Not stated. There is no Sponsorship row because the posting doesn't mention sponsorship." />
         <figcaption class="meta">
-          Eligibility check (Nov 13, 2026), real model output for a made-up posting from the eval set. Start date and degree get a verdict; work authorization and years of experience are shown for information, each with the line it came from.
+          Eligibility check (Nov 18, 2026), real model output for the app's sample posting. Start date and degree get a verdict, each with the line it came from. The Sponsorship row now appears only when a posting mentions sponsorship, so it isn't shown here.
         </figcaption>
       </figure>
       <figure>
-        <img src="images/app-build2-tailored.png" width="1440" height="1332" loading="lazy"
-             alt="TrueFit's tailored resume exhibit for a made-up student, Jordan Lee, applying to the same Litware Retail posting. Action title: '7 of 7 bullets trace back to your own writing.' Each bullet is marked Traced and shows the master resume line it came from, with Remove and Edit links. The resume is grouped by Education (NYU Stern MBA), Experience (Northwind Retail and Contoso Consulting, each with company and location on one line and title and dates on the next), and Skills." />
+        <img src="images/app-build3-tailored.png" width="1440" height="1400" loading="lazy"
+             alt="TrueFit's tailored resume for a made-up sample resume read from a Word file, shown as 'sample-resume.docx · 11 lines read' with Edit text and Remove links. Action title: '4 of 4 bullets trace back to your own writing.' A jump bar reads 'No unverified bullets', 'Gaps (1)', 'Copy &amp; download', and 'Only unverified'. Education lists NYU Stern and the University of Michigan; Experience lists Senior Consultant at Larkspur Advisory with four bullets, each marked Traced. Below, the gap list under 'What the posting asks for that your resume doesn't show' has one Preferred gap, SQL, quoting 'SQL a plus'. At the bottom are Download Word, Download PDF, and Copy buttons above the copy-ready text." />
         <figcaption class="meta">
-          Tailored resume (Nov 17, 2026), real model output for the same posting and a made-up sample resume. All 7 bullets traced back to a line in the resume, shown under each one. The copy-ready plain text for Workday or iCIMS appears below it in the app.
+          Tailored resume (Nov 18, 2026), real model output for the same posting and a made-up resume uploaded as a Word file. All 4 bullets traced back to a line in the resume. The gap list shows the one thing the posting asks for that the resume doesn't show (SQL), and the resume can be copied or downloaded as a one-page Word or PDF file.
         </figcaption>
       </figure>
     </section>
