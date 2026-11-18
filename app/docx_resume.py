@@ -31,8 +31,13 @@ HEADING_PT = 12  # at full size; see heading_pt()
 MIN_BODY_PT, MIN_NAME_PT = 8, 11  # the student's floors: no text below 8 pt, the name no smaller than 11 pt
 PAGE_WIDTH_IN, PAGE_HEIGHT_IN = 8.5, 11  # US Letter
 BULLET_INDENT_IN = 0.25
-# Tried in order until the estimate fits one page: (body font pt, margin inches).
-LAYOUTS = [(11, 0.75), (10.5, 0.6), (10, 0.5), (9.5, 0.5), (9, 0.5), (8.5, 0.5), (8, 0.5)]
+# Tried in order until it fits one page: (body font pt, margin inches). Word's standard 1-inch margins while the
+# text is 10 pt or larger; a longer resume narrows the margins before the text goes below 10 pt.
+LAYOUTS = [(11, 1.0), (10.5, 1.0), (10, 1.0), (10, 0.9), (10, 0.8), (10, 0.7), (10, 0.6), (10, 0.5),
+           (9.5, 0.5), (9, 0.5), (8.5, 0.5), (8, 0.5)]  # small margin steps keep margins as close to 1 inch as fits
+# Space above each section heading, each school or job after the first in its section, and the first one (pt).
+# Spare space on the page is shared out as extra_pt, the same for every section and entry gap, up to one line.
+SECTION_GAP_PT, ENTRY_GAP_PT, FIRST_ENTRY_GAP_PT = 12, 8, 4
 AVG_CHAR_EM = 0.5  # average Calibri character width as a share of the font size; rounded up to stay safe
 
 
@@ -53,6 +58,23 @@ class Layout:
     margin_in: float
     fits_one_page: bool
     remove_bullets: int  # about how many bullets to remove if it doesn't fit; 0 if it does
+    extra_pt: float = 0  # added to every section and entry gap so the resume reaches the bottom margin
+
+
+def gap_kinds(blocks: list[tuple]) -> list[str | None]:
+    """For each block, the space above it: "section" (a heading), "entry" (a school or job after the first in its
+    section), "first_entry", or None. Only "section" and "entry" gaps grow to fill the page."""
+    kinds, seen_entry = [], False
+    for block in blocks:
+        if block[0] == "heading":
+            kinds.append("section")
+            seen_entry = False
+        elif block[0] == "header" and block[3]:
+            kinds.append("entry" if seen_entry else "first_entry")
+            seen_entry = True
+        else:
+            kinds.append(None)
+    return kinds
 
 
 def build_docx(raw_sections, lines: list[ResumeLine]) -> tuple[bytes, Layout]:

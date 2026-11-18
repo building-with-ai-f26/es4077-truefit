@@ -110,7 +110,7 @@ def test_all_text_shrinks_together_down_to_the_floors():
 
 
 def test_sizes_step_down_together():
-    assert [(body, name_pt(body), heading_pt(body)) for body, _ in LAYOUTS] == [
+    assert [(body, name_pt(body), heading_pt(body)) for body in dict.fromkeys(body for body, _ in LAYOUTS)] == [
         (11, 16, 12), (10.5, 15, 11.5), (10, 14.5, 11), (9.5, 13.5, 10.5), (9, 12.5, 10), (8.5, 12, 9.5), (8, 11, 9)]
 
 

@@ -18,18 +18,40 @@ from reportlab.lib.units import inch
 from reportlab.platypus import BaseDocTemplate, Frame, HRFlowable, PageTemplate, Paragraph, Spacer, Table, TableStyle
 from xml.sax.saxutils import escape
 
-from app.docx_resume import BULLET_INDENT_IN, LAYOUTS, Layout, heading_pt, name_pt
+from app.docx_resume import (BULLET_INDENT_IN, ENTRY_GAP_PT, FIRST_ENTRY_GAP_PT, LAYOUTS, SECTION_GAP_PT, Layout, gap_kinds,
+                              heading_pt, name_pt)
 
 FONT, BOLD = "Helvetica", "Helvetica-Bold"
 RIGHT_SHARE = 0.4  # the right column (location, dates) gets up to 40% of the line
+
+
+FILL_ROUNDS = 8  # binary search steps for the extra space; about 0.05 pt at 11 pt text
 
 
 def build_pdf(blocks: list[tuple]) -> tuple[bytes, Layout]:
     for body_pt, margin_in in LAYOUTS:
         content, pages = _render(blocks, body_pt, margin_in)
         if pages == 1:
-            return content, Layout(body_pt, margin_in, True, 0)
+            extra, content = _fill_page(blocks, body_pt, margin_in, content)
+            return content, Layout(body_pt, margin_in, True, 0, extra)
     return content, Layout(body_pt, margin_in, False, _bullets_to_remove(blocks, body_pt, margin_in))
+
+
+def _fill_page(blocks: list[tuple], body_pt: float, margin_in: float, content: bytes) -> tuple[float, bytes]:
+    """The most extra space per gap (up to one line) that still fits one page, so the resume reaches the bottom."""
+    low, high = 0.0, body_pt * 1.2
+    best = content
+    capped, pages = _render(blocks, body_pt, margin_in, high)
+    if pages == 1:
+        return high, capped
+    for _ in range(FILL_ROUNDS):
+        middle = (low + high) / 2
+        trial, pages = _render(blocks, body_pt, margin_in, middle)
+        if pages == 1:
+            low, best = middle, trial
+        else:
+            high = middle
+    return low, best
 
 
 def _bullets_to_remove(blocks: list[tuple], body_pt: float, margin_in: float) -> int:
@@ -46,7 +68,7 @@ def _bullets_to_remove(blocks: list[tuple], body_pt: float, margin_in: float) ->
     return max(1, low)
 
 
-def _render(blocks: list[tuple], body_pt: float, margin_in: float) -> tuple[bytes, int]:
+def _render(blocks: list[tuple], body_pt: float, margin_in: float, extra_pt: float = 0) -> tuple[bytes, int]:
     out = io.BytesIO()
     margin = margin_in * inch
     width, height = LETTER[0] - 2 * margin, LETTER[1] - 2 * margin
@@ -62,16 +84,19 @@ def _render(blocks: list[tuple], body_pt: float, margin_in: float) -> tuple[byte
                                alignment=TA_CENTER),
         "details": ParagraphStyle("details", parent=body, alignment=TA_CENTER),
         "heading": ParagraphStyle("heading", parent=body, fontName=BOLD, fontSize=heading_pt(body_pt),
-                                  leading=heading_pt(body_pt) * 1.2, spaceBefore=10),
+                                  leading=heading_pt(body_pt) * 1.2),
         "left": body,
         "left_bold": ParagraphStyle("left_bold", parent=body, fontName=BOLD),
         "right": ParagraphStyle("right", parent=body, alignment=TA_RIGHT),
         "bullet": ParagraphStyle("bullet", parent=body, leftIndent=BULLET_INDENT_IN * inch, bulletIndent=0.08 * inch),
     }
 
+    gaps = {"section": SECTION_GAP_PT + extra_pt, "entry": ENTRY_GAP_PT + extra_pt, "first_entry": FIRST_ENTRY_GAP_PT}
     story = []
-    for block in blocks:
+    for block, gap in zip(blocks, gap_kinds(blocks)):
         kind, text = block[0], escape(block[1])
+        if gap:
+            story.append(Spacer(1, gaps[gap]))
         if kind in ("name", "details"):
             story.append(Paragraph(text, styles[kind]))
         elif kind == "heading":
@@ -79,8 +104,6 @@ def _render(blocks: list[tuple], body_pt: float, margin_in: float) -> tuple[byte
             story.append(HRFlowable(width="100%", thickness=0.5, color=HexColor("#808080"), spaceBefore=1, spaceAfter=3))
         elif kind == "header":
             _, left, right, first = block
-            if first:
-                story.append(Spacer(1, 5))
             left_par = Paragraph(escape(left), styles["left_bold" if first else "left"])
             if not right:
                 story.append(left_par)
