@@ -20,7 +20,7 @@
   (real model calls — costs money; ask before running)
 
 ## 3. Project Structure
-- `app/main.py` — FastAPI app: serves the page, the `/api/start-date` (start date + eligibility), `/api/tailor`, `/api/verify-bullet`, and `/api/read-docx` routes, error handlers, and the PostHog server client.
+- `app/main.py` — FastAPI app: serves the page, the `/api/start-date` (start date + eligibility), `/api/tailor`, `/api/verify-bullet`, `/api/read-docx`, and `/api/posting-link` routes, error handlers, and the PostHog server client.
 - `app/start_date.py` — Start-date check. The model only finds and quotes start-date text; Python checks the quote and decides the verdict.
 - `app/llm.py` — The one place TrueFit calls the model (OpenRouter). Prompts and responses are never logged.
 - `app/eligibility.py` — Degree, sponsorship (internal key `work_authorization`), and years of experience, quoted in the start-date call. Python confirms each quote; degree gets a verdict, the other two are information only.
@@ -34,6 +34,7 @@
 - `app/docx_resume.py` — One-page Word download from the same header rows and kept bullets; right-aligned tab stops for location and dates; 1-inch margins while the text is 10 pt or larger, then narrower margins (to 0.5 in), then all text shrinks together (body no smaller than 8 pt, name no smaller than 11 pt), never cuts bullets. A resume that fits fills the page: extra space between sections and entries, then between bullets (`gap_kinds`, `Layout.extra_pt`). Word's layout is estimated with Calibri's real widths (`app/calibri_widths.py`) and measured line heights, checked against Microsoft Word; the PDF is measured exactly. Route: `/api/resume-docx`.
 - `app/pdf_resume.py` — The same blocks as a text-based one-page PDF (reportlab); measures pages exactly to fit or to say how many bullets to remove. Route: `/api/resume-pdf`.
 - `app/docx_text.py` — Text of an uploaded Word file (list items as "- " bullets, table rows as one line, header text first, text boxes once); nothing stored or logged. Route: `/api/read-docx` (5 MB limit).
+- `app/posting_link.py` — A job posting from a link: Greenhouse, Lever, and Workday public job data; Ashby and other pages through their JobPosting data only (never the rest of the page). LinkedIn, Indeed, Glassdoor, Handshake, and 12twenty answered without fetching. Every redirect checked for private addresses; 10 s timeout; 2 MB limit; links and text never logged (httpx request logging is turned down). Route: `/api/posting-link`.
 - `app/config.py`, `app/errors.py` — Reads `.env`; shared error types.
 - `app/static/` — Plain HTML/CSS/JS frontend (`index.html`, `styles.css`, `app.js`, `posthog.js`).
 - `docs/index.html` — Public Product Page, living PRD, and weekly build log (GitHub Pages from `main` → `/docs`).

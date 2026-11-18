@@ -22,6 +22,7 @@ from app.docx_resume import build_docx, file_name, resume_blocks
 from app.docx_text import NotDocx, read_docx_text
 from app.errors import ApiError, ConfigError, ModelAccountProblem, ModelUnavailable
 from app.pdf_resume import build_pdf
+from app.posting_link import LinkProblem, read_posting_link
 from app.resume_lines import split_lines
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -199,6 +200,21 @@ async def post_read_docx(request: Request):
         raise ApiError(422, "docx_empty",
                        "TrueFit couldn't find any text in this file. Check it's the right file, or paste the text.")
     return {"text": text, "lines": lines}
+
+
+class PostingLinkRequest(BaseModel):
+    url: str
+
+
+@app.post("/api/posting-link")
+async def post_posting_link(body: PostingLinkRequest):
+    """The text of a job posting the student linked to. The link and text are never stored or logged."""
+    try:
+        if len(body.url) > 2_000:
+            raise LinkProblem("bad_link")
+        return await read_posting_link(body.url)
+    except LinkProblem as problem:
+        raise ApiError(422, problem.code, problem.message)
 
 
 DOCX_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
