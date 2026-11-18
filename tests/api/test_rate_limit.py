@@ -82,3 +82,14 @@ def test_visitor_is_the_address_the_host_added(client, clock):
     for i in range(10):
         ai_call(client, ip=f"10.0.0.{i}, 203.0.113.50")
     assert ai_call(client, ip="10.0.0.99, 203.0.113.50").status_code == 429
+
+
+def test_cloudflare_address_is_the_visitor(client, clock):
+    """Live on Render (Nov 18), the last X-Forwarded-For entry was one of several relay servers, so 30 calls let
+    25 through. Cloudflare, in front of Render, sets CF-Connecting-IP to the real visitor and visitors can't fake it."""
+    for i in range(10):
+        client.post("/api/start-date", json=SHORT,
+                    headers={"CF-Connecting-IP": "203.0.113.70", "X-Forwarded-For": f"203.0.113.70, 10.0.0.{i}"})
+    refused = client.post("/api/start-date", json=SHORT,
+                          headers={"CF-Connecting-IP": "203.0.113.70", "X-Forwarded-For": "203.0.113.70, 10.0.0.99"})
+    assert refused.status_code == 429

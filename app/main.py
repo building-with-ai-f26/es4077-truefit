@@ -108,7 +108,8 @@ async def limit_request_size(request: Request, call_next):
 @app.middleware("http")
 async def limit_requests(request: Request, call_next):
     """Refuse API calls over the per-visitor and site-wide limits before they reach a route (see app/rate_limit.py)."""
-    who = rate_limit.visitor(request.headers.get("x-forwarded-for"), request.client.host if request.client else None)
+    who = rate_limit.visitor(request.headers.get("cf-connecting-ip"), request.headers.get("x-forwarded-for"),
+                             request.client.host if request.client else None)
     refused = rate_limit.check(request.url.path, who)
     if refused:
         return JSONResponse(status_code=429, content={"error": {"code": refused, "message": rate_limit.MESSAGES[refused]}})

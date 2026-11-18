@@ -35,7 +35,7 @@
 - `app/pdf_resume.py` — The same blocks as a text-based one-page PDF (reportlab); measures pages exactly to fit or to say how many bullets to remove. Route: `/api/resume-pdf`.
 - `app/docx_text.py` — Text of an uploaded Word file (list items as "- " bullets, table rows as one line, header text first, text boxes once); nothing stored or logged. Route: `/api/read-docx` (5 MB limit).
 - `app/posting_link.py` — A job posting from a link: Greenhouse, Lever, and Workday public job data; Ashby and other pages through their JobPosting data only (never the rest of the page). LinkedIn, Indeed, Glassdoor, Handshake, and 12twenty answered without fetching. Every redirect checked for private addresses; 10 s timeout; 2 MB limit; links and text never logged (httpx request logging is turned down). Route: `/api/posting-link`.
-- `app/rate_limit.py` — Limits for the live site, checked in `main.py` before any route: AI routes (start-date, tailor, verify-bullet) 10 a minute and 50 a day per visitor, 200 a day for the whole site; other API routes 30 a minute per visitor. In memory; resets on restart. The visitor is the last address in `X-Forwarded-For` (added by the host).
+- `app/rate_limit.py` — Limits for the live site, checked in `main.py` before any route: AI routes (start-date, tailor, verify-bullet) 10 a minute and 50 a day per visitor, 200 a day for the whole site; other API routes 30 a minute per visitor. In memory; resets on restart. The visitor is `CF-Connecting-IP` (set by Cloudflare in front of Render), else the last `X-Forwarded-For` address.
 - `render.yaml` — Render web service (free plan, no database); secrets entered in the Render dashboard.
 - `app/config.py`, `app/errors.py` — Reads `.env`; shared error types.
 - `app/static/` — Plain HTML/CSS/JS frontend (`index.html`, `styles.css`, `app.js`, `posthog.js`).
@@ -54,7 +54,7 @@
 8. **Respect a site's limits and blocks** *(from a real mistake, Nov 18)*: when Workday answered "too many requests," I retried with browser-like settings to get around it, and the permission check stopped me. If a site rate-limits or blocks TrueFit, stop and ask; test with one real link the student gives instead.
 
 ## 5. Shipping
-- **Live site:** Render web service `truefit` (free plan, no database), deployed from the public repo address. [to fill in: live URL]
+- **Live site:** Render web service `truefit` (free plan, no database), deployed from the public repo address. https://es4077-truefit.onrender.com
 - **How a change ships:** branch → pull request → `uv run pytest` passes → the student approves the merge → in Render, **Manual Deploy → Deploy latest commit** (the class organization hasn't approved Render's GitHub access, so merges don't deploy on their own).
 - **After a deploy:** open the live URL, run a sample posting through "Check eligibility," and confirm the event in PostHog.
 - **Secrets:** `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `POSTHOG_PROJECT_TOKEN`, `POSTHOG_HOST`, `PYTHON_VERSION`, `ENVIRONMENT=production` live in Render's environment settings, never in the repo. `render.yaml` lists them without values.

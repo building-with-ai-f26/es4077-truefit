@@ -2,7 +2,7 @@
 
 Build 3 · Nov 18, 2026 · Lane: Beginner (live at a public URL on Render, free plan)
 
-**Live site:** [to fill in: Render address]
+**Live site:** https://es4077-truefit.onrender.com
 
 ## What TrueFit holds, and where
 
@@ -31,7 +31,7 @@ There is **no database and no sign-in**: the server stores nothing between reque
 | What the page shows | Text from files, links, and the model put on the page | Shown as text, never as HTML, so a posting can't inject code (checked: the one HTML insert is a fixed icon) |
 | Browser protections | Headers on every response | **Fixed:** added `nosniff`, `X-Frame-Options: DENY` (no framing), and a referrer policy |
 | Public API listing | FastAPI's automatic `/docs` and `/openapi.json` | **Fixed:** turned off |
-| Analytics privacy | What PostHog receives | Event names, verdicts, counts, and error codes only; never posting, resume, file name, or link text. [to fill in: confirm session replay masks the text boxes on the live site] |
+| Analytics privacy | What PostHog receives | Event names, verdicts, counts, and error codes only; never posting, resume, file name, or link text. Live site has the real PostHog token and host (checked Nov 18). [to fill in: confirm session replay masks the text boxes on the live site] |
 
 ## The rate limits
 
@@ -48,8 +48,9 @@ Checked before any route runs (`app/rate_limit.py`):
 
 ## Left, and why
 
+- **Rejected requests still count.** A request that's refused for being too short still counts toward the visitor's and the site's AI limits, so someone could use up the 200-a-day cap with junk requests: the site would stop checking for the day, but no credit is spent.
 - **Limits are kept in memory.** They reset when the server restarts (Render's free plan sleeps after 15 minutes idle). Someone could wait for a restart to get a fresh 50; the 200-a-day site cap and the OpenRouter credit limit still bound the cost.
-- **The visitor is identified by network address**, taken from the last `X-Forwarded-For` entry that Render adds. People behind one network (a school's Wi-Fi) share a limit. [to fill in: confirm on the live site that a phone on cellular gets its own limit]
+- **The visitor is identified by network address**: the `CF-Connecting-IP` header that Cloudflare (in front of Render) sets and visitors can't fake. People behind one network (a school's Wi-Fi) share a limit. *Found live, Nov 18:* the first version used the last `X-Forwarded-For` entry, which on Render is one of several relay servers, so the first live 30-call test let 25 through; fixed with a test. [to fill in: confirm the live 30-call test after the fix]
 - **A domain that changes its address between the check and the fetch** (DNS rebinding) could still reach a private address. The fetch is a blind read of job data from the server's own network, and Render's network has nothing private of mine on it; fixing this fully needs a custom network layer.
 - **No Content-Security-Policy yet.** PostHog loads scripts from its own domain; a strict policy needs testing so it doesn't break analytics.
 - **The model sees what students paste.** It goes to OpenRouter for each check, under OpenRouter's terms. The page doesn't say this yet.

@@ -28,8 +28,12 @@ def reset() -> None:
     _site_ai.clear()
 
 
-def visitor(forwarded_for: str | None, direct: str | None) -> str:
-    """The visitor's address: the last one in X-Forwarded-For, which the host adds; earlier ones can be faked."""
+def visitor(cloudflare: str | None, forwarded_for: str | None, direct: str | None) -> str:
+    """The visitor's address. On Render, Cloudflare sets CF-Connecting-IP to the real visitor (visitors can't fake
+    it); the last X-Forwarded-For entry there is one of several relay servers. Elsewhere, that last entry is the
+    one the host adds; earlier ones can be faked."""
+    if cloudflare:
+        return cloudflare.strip()
     if forwarded_for:
         return forwarded_for.split(",")[-1].strip()
     return direct or "unknown"
