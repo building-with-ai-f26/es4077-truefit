@@ -161,8 +161,12 @@ function setChecking(checking) {
 }
 
 async function checkStartDate() {
-  setChecking(true);
+  setChecking(true); // before reading a link too, so a double-click can't start two checks
   try {
+    if (linksIn(postingInput.value)) {
+      await readPostingLink(); // a link still in the box is read first; the check uses the posting text
+      if (linksIn(postingInput.value)) return; // the link couldn't be read; its message is showing
+    }
     const result = await api("/api/start-date", {
       posting: postingInput.value,
       availability_text: availabilityInput.value,
@@ -253,8 +257,114 @@ function renderStartDate(result) {
   if (!noDate) startDateResult.append(el("p", { class: "exhibit-foot" }, `Start date: ${display.text}${result.note ? ` ${result.note.replace(/\.?$/, ".")}` : ""}`));
 }
 
+// A link instead of the posting text: the server reads Greenhouse, Lever, Ashby, Workday, or a page's job data.
+
+const postingLinkStatus = document.getElementById("posting-link-status");
+const postingLinkName = postingLinkStatus.querySelector(".file-name");
+const postingLinkEdit = document.getElementById("posting-link-edit");
+const postingLinkError = document.getElementById("posting-link-error");
+// Read on paste, or when Check eligibility is clicked. Not on leaving the box: the status row appearing then
+// moves the Check button out from under a click that's in progress.
+let lastLinkTried = null; // so the same link isn't read twice
+let linkReading = null; // the reading in progress, so Check eligibility can wait for it
+let linkFailure = null; // why the last link couldn't be read, shown again if Check is clicked
+let linkToken = 0; // a reading that finishes after Remove or the sample posting is ignored
+
+// The links in the box when it holds nothing but links, else null (a posting's text can mention links).
+function linksIn(value) {
+  const parts = value.trim().split(/\s+/);
+  return value.trim() && parts.every((part) => /^https?:\/\/\S+$/i.test(part)) ? parts : null;
+}
+
+function showPostingLinkError(message, code) {
+  postingLinkError.textContent = message;
+  postingLinkError.hidden = false;
+  track("posting_link_failed", { error_code: code || "unknown" });
+}
+
+function resetPostingLink() {
+  linkToken += 1;
+  linkFailure = null;
+  postingInput.readOnly = false;
+  postingInput.classList.remove("locked");
+  postingLinkStatus.hidden = true;
+  postingLinkError.hidden = true;
+  lastLinkTried = null;
+}
+
+async function readPostingLink() {
+  const links = linksIn(postingInput.value);
+  if (!links) return;
+  postingLinkError.hidden = true;
+  if (links.length > 1) return showPostingLinkError("Paste one link at a time.", "one_link");
+  const [url] = links;
+  if (url === lastLinkTried) {
+    if (linkFailure) showPostingLinkError(linkFailure.message, linkFailure.code);
+    return linkReading;
+  }
+  lastLinkTried = url;
+  linkFailure = null;
+  linkReading = fetchPostingLink(url);
+  return linkReading;
+}
+
+async function fetchPostingLink(url) {
+  const token = ++linkToken;
+  postingInput.readOnly = true;
+  postingLinkName.textContent = "Reading the posting…";
+  postingLinkEdit.hidden = true;
+  postingLinkStatus.hidden = false;
+  try {
+    let response;
+    try {
+      response = await fetch("/api/posting-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+    } catch (_) {
+      throw Object.assign(new Error("Couldn't reach TrueFit. Check that the app is running and try again."), { code: "network_error" });
+    }
+    const data = await response.json().catch(() => ({}));
+    if (token !== linkToken) return; // the student removed the link or chose the sample meanwhile
+    if (!response.ok) {
+      throw Object.assign(new Error(data?.error?.message || "Couldn't read this link. Paste the posting text."), { code: data?.error?.code });
+    }
+    postingInput.value = data.text;
+    postingInput.classList.add("locked"); // locked like a resume read from Word; Edit text unlocks it
+    postingLinkName.textContent = `✓ Read from ${data.host} · ${data.lines} ${data.lines === 1 ? "line" : "lines"}`;
+    postingLinkName.dataset.host = data.host;
+    postingLinkEdit.hidden = false;
+    track("posting_link_read", { site: data.site, lines: data.lines });
+  } catch (err) {
+    if (token !== linkToken) return;
+    postingInput.readOnly = false;
+    postingLinkStatus.hidden = true;
+    linkFailure = { message: err.message, code: err.code };
+    showPostingLinkError(err.message, err.code);
+  }
+}
+
+postingInput.addEventListener("paste", () => {
+  lastLinkTried = null; // pasting the same link again tries again
+  setTimeout(readPostingLink); // the pasted text is in the box after this event
+});
+postingLinkEdit.addEventListener("click", () => {
+  postingInput.readOnly = false;
+  postingInput.classList.remove("locked");
+  postingLinkName.textContent = `From ${postingLinkName.dataset.host}`;
+  postingLinkEdit.hidden = true;
+  postingInput.focus();
+});
+document.getElementById("posting-link-remove").addEventListener("click", () => {
+  resetPostingLink();
+  postingInput.value = "";
+  postingInput.focus();
+});
+
 checkButton.addEventListener("click", checkStartDate);
 document.getElementById("sample-posting").addEventListener("click", () => {
+  resetPostingLink();
   postingInput.value = SAMPLE_POSTING;
   track("sample_posting_used");
   postingInput.focus();
