@@ -73,7 +73,8 @@ async def lifespan(_app: FastAPI):
             logger.warning("PostHog flush failed during shutdown", exc_info=True)
 
 
-app = FastAPI(title="TrueFit", lifespan=lifespan)
+# No /docs, /redoc, or /openapi.json: they'd list every route for anyone, and the page doesn't use them.
+app = FastAPI(title="TrueFit", lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
 if posthog_client is not None:
     app.add_middleware(PosthogASGIMiddleware, client=posthog_client)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -88,10 +89,27 @@ async def revalidate_static(request: Request, call_next):
     return response
 
 
+MAX_REQUEST_BYTES = 6 * 1024 * 1024  # the largest real request is a 5 MB Word file
+
+
+@app.middleware("http")
+async def limit_request_size(request: Request, call_next):
+    """Refuse an oversized request from its declared size, before reading the body."""
+    try:
+        size = int(request.headers.get("content-length") or 0)
+    except ValueError:
+        size = 0
+    if size > MAX_REQUEST_BYTES:
+        return JSONResponse(status_code=413, content={"error": {"code": "request_too_large",
+                                                                "message": "That's too large to send. Paste less text."}})
+    return await call_next(request)
+
+
 @app.middleware("http")
 async def limit_requests(request: Request, call_next):
     """Refuse API calls over the per-visitor and site-wide limits before they reach a route (see app/rate_limit.py)."""
-    who = rate_limit.visitor(request.headers.get("x-forwarded-for"), request.client.host if request.client else None)
+    who = rate_limit.visitor(request.headers.get("cf-connecting-ip"), request.headers.get("x-forwarded-for"),
+                             request.client.host if request.client else None)
     refused = rate_limit.check(request.url.path, who)
     if refused:
         return JSONResponse(status_code=429, content={"error": {"code": refused, "message": rate_limit.MESSAGES[refused]}})
@@ -106,6 +124,21 @@ async def log_requests(request: Request, call_next):
     duration_ms = round((time.perf_counter() - started) * 1000)
     model = os.environ.get("OPENROUTER_MODEL", "-") if request.url.path.startswith("/api/") else "-"
     logger.info("%s %s %s %dms model=%s", request.method, request.url.path, response.status_code, duration_ms, model)
+    return response
+
+
+SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",  # browsers use the declared file type, never a guessed one
+    "X-Frame-Options": "DENY",  # no other site can show TrueFit inside a frame (clickjacking)
+    "Referrer-Policy": "strict-origin-when-cross-origin",  # other sites see only truefit's address, never a full path
+}
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    """Added last, so it wraps every response, including refusals from the limits above."""
+    response = await call_next(request)
+    response.headers.update(SECURITY_HEADERS)
     return response
 
 
