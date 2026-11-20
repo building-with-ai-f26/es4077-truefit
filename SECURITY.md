@@ -21,8 +21,9 @@ There is **no database and no sign-in**: the server stores nothing between reque
 | Area | What I checked | Result |
 |---|---|---|
 | Secrets in the repo | `.env` is in `.gitignore`; searched the whole Git history for OpenRouter and PostHog keys | `.env` never committed; no OpenRouter key anywhere. Only the PostHog project token appears, which is public by design |
+| Secrets on the live site | Downloaded the live page and every script and stylesheet it loads (`index.html`, `app.js`, `posthog.js`, `styles.css`) and searched them for `sb_secret_`, `service_role`, `sk-or-`, `sk-ant-`, `sk-proj-`, and `sk_live_` (Nov 20) | None found. The only key in them is the PostHog project token (`phc_`), which is public by design |
 | Secrets on the host | Keys entered in Render's dashboard, not in `render.yaml` or code | ✓ (`render.yaml` marks them `sync: false`) |
-| Spending my credit | Every AI route, per visitor and site-wide | **Fixed:** rate limits (below), plus a $10 credit limit on the OpenRouter key |
+| Spending my credit | Every AI route, per visitor and site-wide | **Fixed:** rate limits (below), plus a hard $10 limit on the OpenRouter key. The limit is lifetime and never resets, which is stricter than a monthly cap: once the key has spent $10 in total, OpenRouter refuses its calls (checked Nov 20: $4.37 used so far) |
 | Libraries | `pip-audit` on every production dependency (Nov 18) | No known vulnerabilities |
 | Logs | Route logs, the model call, and the libraries that fetch web pages | **Fixed:** the web-page library wrote every link it fetched into the log; now off. Tests check that resume text, posting text, and links never appear in logs |
 | Posting links (server fetching a page) | Private and local addresses, redirects, proxies, slow and huge pages | Every address checked before every hop (redirects too); local and private networks refused; proxy settings ignored; 10 s timeout; 2 MB limit |
@@ -32,6 +33,18 @@ There is **no database and no sign-in**: the server stores nothing between reque
 | Browser protections | Headers on every response | **Fixed:** added `nosniff`, `X-Frame-Options: DENY` (no framing), and a referrer policy |
 | Public API listing | FastAPI's automatic `/docs` and `/openapi.json` | **Fixed:** turned off |
 | Analytics privacy | What PostHog receives, including session replay | **Fixed:** replay hid what students type, but not what the page shows, so a replay would show a student's tailored resume and the posting's quotes. Now replays mask all text and clicks never send the clicked text (`app/static/posthog.js`); a browser check that unpacks the recording found shown text before the fix and none after, and a test keeps the setting. Events carry names, verdicts, counts, and error codes only; never posting, resume, file name, or link text. Checked on the live site with a phone test (Nov 18). |
+
+## How the audit was done
+
+My coding agent (Claude Code) did the review: I asked it to look for vulnerabilities and to try to break the app, first in the code and then on the live site. It reported each problem to me and fixed it on a branch with a test, and I approved each fix before it merged (pull requests #46, #47, and #54). What it tried on the live site:
+
+- **30 quick calls to an AI route.** The first try let 25 of 30 through, because TrueFit read the visitor from a relay server's address. After the fix, calls 11–30 were refused with `429` (Nov 18, re-run Nov 19 for the submission screenshot).
+- **Opening the automatic API listing** (`/docs`): returns 404.
+- **Checking the browser protection headers** on live responses: `nosniff` and `X-Frame-Options: DENY` are there.
+- **A phone session with session replay on:** the recording showed the page's text, including the tailored resume. Replays now mask all text.
+- **Searching the live page and its scripts for secret keys** (Nov 20): none found.
+
+The other rows in the table above came from its review of the code, and each fix there has a test.
 
 ## The rate limits
 
