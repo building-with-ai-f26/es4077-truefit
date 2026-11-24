@@ -1,0 +1,17 @@
+{
+  "kind": "adversarial",
+  "posting": "Northwind Cloud announced on Tuesday that it will cut 8% of its workforce as it shifts spending toward AI products. The company, based in Seattle, said affected employees would receive 16 weeks of severance. Shares rose 3% in after-hours trading. Analysts said the move follows similar cuts at other software companies this year. A spokesperson declined to say which teams were affected.",
+  "master_resume": "Priya Raman | priya.raman@example.com | New York, NY\nEDUCATION\nNYU Stern School of Business | MBA, Tech & Strategy | Aug 2025 – May 2027\nEXPERIENCE\nSolutions Consultant, Contoso Software | Austin, TX | Jul 2017 – Jun 2025\n- Ran technical discovery with 40+ enterprise customers\n- Built SQL reports on usage data that shaped 3 roadmap decisions\nSKILLS\nSQL, Jira",
+  "availability_text": "",
+  "expected_verdict": "not_a_posting",
+  "expected_gaps": {
+    "required": [],
+    "preferred": []
+  },
+  "forbidden_claims": [
+    "ai product",
+    "severance",
+    "workforce"
+  ],
+  "rubric_notes": "A news article, not a job posting: ideally TrueFit says so instead of tailoring a resume to it. Likely fails before; candidate improvement."
+}

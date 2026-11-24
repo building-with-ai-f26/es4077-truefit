@@ -1,0 +1,15 @@
+{
+  "kind": "normal",
+  "posting": "Product Marketing Manager, Generative AI. Fabrikam AI, San Francisco (hybrid). Start: Summer 2027. Lead positioning, messaging, and launch plans for our AI writing assistant. Partner with product, sales, and customer research. Requirements: MBA; 3+ years in marketing, brand management, or consulting; strong storytelling and customer research skills. Preferred: B2B SaaS experience; experience launching AI products.",
+  "master_resume": "Marcus Bell | marcus.bell@example.com\nEDUCATION\nNYU Stern School of Business | MBA, Tech & Strategy | Aug 2025 – May 2027\nUniversity of Georgia | BBA, Marketing | Aug 2012 – May 2016\nEXPERIENCE\nAssociate Brand Manager, Tailspin Foods | Atlanta, GA | Jul 2016 – Jul 2025\n- Led the relaunch of a $45M snack brand, including new positioning and packaging\n- Ran 12 consumer focus groups and 2 segmentation studies to pick target customers\n- Wrote launch messaging used by a 60-person sales team\n- Grew household penetration 2.1 points in 18 months\nSKILLS\nNielsen, Qualtrics, Excel, PowerPoint",
+  "availability_text": "",
+  "expected_verdict": "likely_in_window_vague",
+  "expected_gaps": {
+    "required": [],
+    "preferred": [
+      "B2B SaaS",
+      "AI products"
+    ]
+  },
+  "rubric_notes": "Positioning/research/launch bullets first; must not claim SaaS or AI."
+}

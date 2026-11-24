@@ -1,0 +1,15 @@
+{
+  "kind": "messy",
+  "posting": "Technical Program Manager, MBA. Margie's Travel Tech, Austin, TX. Start date: June 1, 2027. Drive cross-team programs from planning to launch, track risks, and keep engineering, design, and operations aligned. Requirements: MBA or 4+ years of program management; experience working with engineering teams. Preferred: Agile/Scrum certification.",
+  "master_resume": "TAYLOR NGUYEN\ntaylor.nguyen@example.com • (555) 010-2222\nE D U C A T I O N\nNYU Stern School of Business\nMBA, Tech & Strategy Aug 2025 –\nMay 2027\nTexas A&M University BS Industrial\nEngineering 2012–2016\nE X P E R I E N C E\nProgram Manager , Proseware Inc. Dallas TX 2016 – 2025\n▪ Coordinated launch of a new warehouse system across 6 sites with\nengineering and operations teams, finishing 2 weeks early\n▪ Ran weekly risk reviews for a 30-person program\n▪ Cut defect backlog by 35%\nS K I L L S Jira · Confluence · MS Project",
+  "availability_text": "",
+  "expected_verdict": "in_window",
+  "expected_gaps": {
+    "required": [],
+    "preferred": [
+      "Agile",
+      "Scrum"
+    ]
+  },
+  "rubric_notes": "Broken PDF line breaks and spaced-out headings; must keep 6 sites, 2 weeks, 30-person, 35%."
+}
