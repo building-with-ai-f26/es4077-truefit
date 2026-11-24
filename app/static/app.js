@@ -93,6 +93,20 @@ const checkButton = document.getElementById("check-start-date");
 const startDateResult = document.getElementById("start-date-result");
 
 let lastStartDate = null; // the tailoring step waits for this (FR-008)
+let checkedPosting = null; // the posting text that result belongs to
+
+// Tailoring uses the posting in the box, so it must be the posting that was checked. If the student
+// changes it after a check (e.g. pastes a different posting), Tailor locks until they check again.
+function postingIsChecked() {
+  return lastStartDate !== null && postingInput.value === checkedPosting;
+}
+function syncTailorLock() {
+  if (lastStartDate === null || tailorButton.classList.contains("busy")) return;
+  const ok = postingIsChecked();
+  tailorButton.disabled = !ok;
+  tailorHint.textContent = ok ? "" : "The posting changed. Check eligibility again before tailoring.";
+  tailorHint.hidden = ok;
+}
 
 const SAMPLE_POSTING = `Associate, Corporate Strategy — Summer 2027 Start
 Acme Consumer Brands · New York, NY
@@ -173,6 +187,7 @@ async function checkStartDate() {
       availability_text: availabilityInput.value,
     });
     lastStartDate = result;
+    checkedPosting = postingInput.value;
     saveProfile({ availabilityText: availabilityInput.value.trim() });
     renderStartDate(result);
     tailorButton.disabled = false; // tailoring waits for a start-date result (FR-008)
@@ -336,6 +351,7 @@ async function fetchPostingLink(url) {
       throw Object.assign(new Error(data?.error?.message || "Couldn't read this link. Paste the posting text."), { code: data?.error?.code });
     }
     postingInput.value = data.text;
+    syncTailorLock();
     postingInput.classList.add("locked"); // locked like a resume read from Word; Edit text unlocks it
     postingLinkName.textContent = `✓ Read from ${data.host} · ${data.lines} ${data.lines === 1 ? "line" : "lines"}`;
     postingLinkName.dataset.host = data.host;
@@ -350,6 +366,7 @@ async function fetchPostingLink(url) {
   }
 }
 
+postingInput.addEventListener("input", syncTailorLock);
 postingInput.addEventListener("paste", () => {
   lastLinkTried = null; // pasting the same link again tries again
   setTimeout(readPostingLink); // the pasted text is in the box after this event
@@ -364,6 +381,7 @@ postingLinkEdit.addEventListener("click", () => {
 document.getElementById("posting-link-remove").addEventListener("click", () => {
   resetPostingLink();
   postingInput.value = "";
+  syncTailorLock();
   postingInput.focus();
 });
 
@@ -371,6 +389,7 @@ checkButton.addEventListener("click", checkStartDate);
 document.getElementById("sample-posting").addEventListener("click", () => {
   resetPostingLink();
   postingInput.value = SAMPLE_POSTING;
+  syncTailorLock();
   track("sample_posting_used");
   postingInput.focus();
 });
@@ -549,7 +568,8 @@ const copyStatus = document.getElementById("copy-status");
 let tailorState = null; // { request, linesById, sections }
 
 function setTailoring(busy) {
-  tailorButton.disabled = busy;
+  tailorButton.classList.toggle("busy", busy);
+  tailorButton.disabled = busy || !postingIsChecked();
   tailorButton.replaceChildren();
   if (busy) tailorButton.append(el("span", { class: "spinner", "aria-hidden": "true" }), "Tailoring…");
   else tailorButton.append("Tailor resume");
