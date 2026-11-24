@@ -37,6 +37,7 @@ Rules:
 - Pick the experience most relevant to the posting and aim for about one page: 3-5 bullets for recent or relevant roles, fewer for others.
 - In each entry, put the bullet that best matches the posting's main responsibilities first.
 - Tell each piece of work once. When several lines describe the same work (a resume bullet and a story about it), write one bullet that combines them and cites all of them; don't retell it in a second bullet. Drop a vague bullet ("Negotiated contracts") when a more specific bullet already covers that work, or fold it into that bullet.
+- When a line names a result the student achieved (a number, percentage, or other measurable outcome), lead with the result, then how they got it: "Ran an A/B test on reminder timing that raised appointment confirmations 9%" becomes "Raised appointment confirmations 9% after running an A/B test on reminder timing". Only for the student's own results: if the line says they supported or contributed to someone else's work, keep that wording.
 - Bullets are one sentence, start with a strong verb that doesn't overstate the source, and contain no bullet symbol. No first-person words (I, my, me, we, our): write "the go-to-market plan led by the manager", not "led by my manager"."""
 
 
