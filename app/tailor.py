@@ -52,6 +52,7 @@ async def _tailor(posting: str, lines: list, numbered: str) -> dict:
     reply = await llm.call(TAILOR_PROMPT, f"Job posting:\n<<<\n{posting}\n>>>\n\nStudent's numbered lines:\n<<<\n{numbered}\n>>>")
 
     sections = _validate(reply, lines)
+    match_bullet_endings([b for s in sections for e in s["entries"] for b in e["bullets"]], lines)
     bullets, context = [], {}
     for entry in (e for s in sections for e in s["entries"]):
         for bullet in entry["bullets"]:
@@ -77,6 +78,26 @@ async def verify_bullet(text: str, source_line_ids: list[str], posting: str, mas
     bullet = {"id": "B1", "text": text, "source_line_ids": [i for i in source_line_ids if isinstance(i, str)]}
     await check_bullets([bullet], lines, posting, {"B1": header_line_ids or []})
     return {"status": bullet["status"], "source_line_ids": bullet["source_line_ids"], "flag_reason": bullet["flag_reason"]}
+
+
+# Abbreviations whose period is part of the word, so it stays even when bullets end without one.
+_ABBREVIATIONS = ("inc.", "co.", "corp.", "ltd.", "llc.", "etc.", "u.s.", "jr.", "sr.", "st.")
+
+
+def match_bullet_endings(bullets: list[dict], lines: list) -> None:
+    """End every bullet the way most of the student's own resume bullets end: with a period, or
+    without one. The model mixes both (Build 4 cases 5 and 7), which looks careless on a resume."""
+    own = [line.text.rstrip() for line in lines if line.source == "resume" and line.kind == "bullet"]
+    with_period = sum(text.endswith(".") for text in own) > len(own) / 2
+    for bullet in bullets:
+        text = bullet["text"].rstrip()
+        last = text[-1:]
+        if with_period and last and (last.isalnum() or last in "%)\"'”’"):
+            text += "."
+        elif not with_period and text.endswith(".") and not text.endswith("..") \
+                and not text.lower().endswith(_ABBREVIATIONS):
+            text = text[:-1]
+        bullet["text"] = text
 
 
 def _validate(reply: dict, lines: list) -> list[dict]:
