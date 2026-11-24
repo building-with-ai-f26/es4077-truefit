@@ -24,14 +24,15 @@ Each of the 10 cases is scored on four rules, pass (1) or fail (0), for a score 
 | 7 | Messy | Resume pasted from a PDF: broken lines, spaced-out headings |
 | 8 | Messy | Vague two-line posting and a thin two-bullet resume |
 | 9 | Adversarial | Posting tells the AI to add Python, Kubernetes, "Led 40 engineers" |
-| 10 | Adversarial | A news article, not a job posting |
+| 10 | Adversarial | A news article, not a job posting — the eligibility check already says so and Tailor stays locked, so the runner stops there too (corrected Nov 24 after the before run) |
 
 The postings are realistic composites with made-up company names, not copies of real listings.
 
 ## Steps
 
 1. Score before: run all 10 through the start-date check and tailoring (real model, costs credit — ask first). Save every output so rule 3 can be scored by hand and before/after examples can be quoted.
-   Command: `uv run python tests/eval/run_eval.py --suite build4 --label before` (use `--label after` for step 3). It writes `tests/eval/results/build4/<label>/`: one JSON per case (full output, scores, notes) and `scorecard.md`, a table with rules 1, 2 and 4 filled in by the script and blanks to score by hand (rule 3 for every case; rules 1 and 4 when the script can't decide, e.g. cases 9 and 10).
+   Command: `uv run python tests/eval/run_eval.py --suite build4 --label before` (use `--label after` for step 3). It writes `tests/eval/results/build4/<label>/`: one JSON per case (full output, scores, notes) and `scorecard.md`, a table with rules 1, 2 and 4 filled in by the script and blanks to score by hand (rule 3 for every case; rules 1 and 4 when the script can't decide, e.g. case 9). Like the app, the runner doesn't tailor when the check refuses the input; if the refusal is the expected answer (case 10), the case passes all four rules.
+   To finish scoring: type hand scores (0 or 1) into each case JSON's `"scores"`, then run the same command with `--rescore` (free, no model calls) to rebuild `scorecard.md` with totals. Re-running some cases with `--cases` merges them into the same scorecard.
 2. Read the failures and pick improvements (prompt changes need the student's OK, per AGENTS.md).
 3. Score after on the exact same 10 cases.
 4. Outside check: at least one target user outside class reviews the improved outputs.
@@ -39,3 +40,20 @@ The postings are realistic composites with made-up company names, not copies of 
 6. Submit: Product Page URL; note with Track A, live URL, repo, 2–3 sentences; screenshot of the scorecard.
 
 Also: commits on at least two separate days outside class.
+
+## Before run (Nov 24): 38/40
+
+Spent $0.33 in all: $0.29 for the full run, plus $0.04 to re-run case 5 alone after its tailoring failed. The scorecard is `tests/eval/results/build4/before/scorecard.md`. Rule 3 scores (and rules 1 and 4 for case 9) were suggested by Claude and confirmed by the student, case by case, on a review page.
+
+- **Case 5 (3/4), rule 3:** two bullets retell the same reseller story, "Negotiated contracts as a Business Development Manager" is filler that should have been folded into the bullet above it, and the cloud-integration bullet (the best match for the posting) comes last.
+- **Case 5, reliability:** on the first run, the model's reply was unreadable on all three tries, so a student would have seen an error. A re-run of that case alone needed two tries. The score uses the re-run; the failed first run is kept in `before/failed-first-run/`.
+- **Case 7 (3/4), rule 3:** in the resume pasted from a PDF, half a bullet ("with engineering and operations teams, finishing 2 weeks early") was pulled into the job title line, so the bullet lost its result and the posting's key requirement. Skills were dropped, and spaced-out headings ("E D U C A T I O N") were kept as written.
+- **Case 10:** the eligibility check already answers "That doesn't look like a job posting" and keeps Tailor locked. The first version of the runner tailored anyway and scored it as a fail; that was a runner bug, fixed before scoring.
+- **Observation (case 1, student's note):** TrueFit reordered the jobs but kept every bullet word for word. This was true of almost every case, so bullets rarely pick up the posting's wording.
+
+Improvement candidates (prompt changes need the student's OK):
+1. Pasted PDF resumes: rejoin broken lines and fix spaced-out headings before tailoring (case 7).
+2. Unreadable model replies on case 5.
+3. Merge filler or duplicate bullets, and put the best match first (case 5).
+4. Tailor stays unlocked if the posting is changed after a check.
+5. Maybe: let bullets echo the posting's wording when the student's line supports it.

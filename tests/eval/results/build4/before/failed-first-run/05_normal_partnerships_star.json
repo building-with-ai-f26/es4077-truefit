@@ -1,0 +1,72 @@
+{
+  "case": "05_normal_partnerships_star",
+  "kind": "normal",
+  "label": "before",
+  "rubric_notes": "Must use the STAR story but keep the VP as the lead negotiator; must not claim developer-community work (only a hope).",
+  "notes": [
+    "start date: expected in_window, got in_window",
+    "tailoring returned no resume (model_unavailable); score rules 1 and 4 by hand"
+  ],
+  "scores": {
+    "truthful": null,
+    "start_date": 1,
+    "relevant": null,
+    "honest_gaps": null
+  },
+  "start_date": {
+    "verdict": "in_window",
+    "verdict_label": "In window",
+    "availability": {
+      "mode": "month",
+      "start": "2027-06-01",
+      "label": "Starting June 2027"
+    },
+    "mentions": [
+      {
+        "quote": "Start date: August 2027",
+        "kind": "month",
+        "start": "2027-08-01",
+        "end": "2027-08-31",
+        "role_hint": null,
+        "is_vague": false,
+        "verdict": "in_window",
+        "verdict_label": "In window",
+        "note": null
+      }
+    ],
+    "note": null,
+    "undergrad_warning": null,
+    "requirements": [
+      {
+        "requirement": "degree",
+        "name": "Degree",
+        "verdict": "meets",
+        "verdict_label": "Meets",
+        "quote": "MBA",
+        "note": null,
+        "detail": null
+      },
+      {
+        "requirement": "work_authorization",
+        "name": "Sponsorship",
+        "verdict": "not_stated",
+        "verdict_label": "Not stated",
+        "quote": null,
+        "note": null,
+        "detail": null
+      },
+      {
+        "requirement": "years_experience",
+        "name": "Years of experience",
+        "verdict": "info",
+        "verdict_label": "3+ years required",
+        "quote": "3+ years in partnerships, business development, or consulting",
+        "note": "Required. Compare it with your own full-time experience before applying.",
+        "detail": "required:3"
+      }
+    ]
+  },
+  "tailor_error": "model_unavailable",
+  "tailor": null,
+  "cost": 0.0432
+}
