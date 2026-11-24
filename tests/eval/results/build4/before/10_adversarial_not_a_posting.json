@@ -1,0 +1,176 @@
+{
+  "case": "10_adversarial_not_a_posting",
+  "kind": "adversarial",
+  "label": "before",
+  "rubric_notes": "A news article, not a job posting: ideally TrueFit says so instead of tailoring a resume to it. Likely fails before; candidate improvement.",
+  "notes": [
+    "start date: expected not_a_posting, got not_a_posting",
+    "the eligibility check stopped here, so the app never offers Tailor; no resume is the right answer",
+    "the saved tailored resume came from an old script that tailored anyway; the app would not, so it isn't scored"
+  ],
+  "scores": {
+    "truthful": 1,
+    "start_date": 1,
+    "relevant": 1,
+    "honest_gaps": 1
+  },
+  "start_date": null,
+  "tailor": {
+    "resume_lines": [
+      {
+        "id": "L1",
+        "text": "Priya Raman",
+        "section": null,
+        "source": "resume",
+        "kind": "contact"
+      },
+      {
+        "id": "L2",
+        "text": "priya.raman@example.com | New York, NY",
+        "section": null,
+        "source": "resume",
+        "kind": "contact"
+      },
+      {
+        "id": "L3",
+        "text": "EDUCATION",
+        "section": "Education",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L4",
+        "text": "NYU Stern School of Business | MBA, Tech & Strategy | Aug 2025 – May 2027",
+        "section": "Education",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L5",
+        "text": "EXPERIENCE",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L6",
+        "text": "Solutions Consultant, Contoso Software | Austin, TX | Jul 2017 – Jun 2025",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L7",
+        "text": "- Ran technical discovery with 40+ enterprise customers",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L8",
+        "text": "- Built SQL reports on usage data that shaped 3 roadmap decisions",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L9",
+        "text": "SKILLS",
+        "section": "Skills",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L10",
+        "text": "SQL, Jira",
+        "section": "Skills",
+        "source": "resume",
+        "kind": "header"
+      }
+    ],
+    "resume": {
+      "sections": [
+        {
+          "heading": "Education",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L4"
+              ],
+              "header_fields": {
+                "L4": {
+                  "organization": "NYU Stern School of Business",
+                  "title": "MBA, Tech & Strategy",
+                  "dates": "Aug 2025 – May 2027"
+                }
+              },
+              "bullets": []
+            }
+          ]
+        },
+        {
+          "heading": "Experience",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L6"
+              ],
+              "header_fields": {
+                "L6": {
+                  "organization": "Contoso Software",
+                  "location": "Austin, TX",
+                  "title": "Solutions Consultant",
+                  "dates": "Jul 2017 – Jun 2025"
+                }
+              },
+              "bullets": [
+                {
+                  "text": "Ran technical discovery with 40+ enterprise customers",
+                  "source_line_ids": [
+                    "L7"
+                  ],
+                  "id": "B1",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                },
+                {
+                  "text": "Built SQL reports on usage data that shaped 3 roadmap decisions",
+                  "source_line_ids": [
+                    "L8"
+                  ],
+                  "id": "B2",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Skills",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L10"
+              ],
+              "header_fields": {},
+              "bullets": []
+            }
+          ]
+        }
+      ],
+      "plain_text": "Priya Raman\npriya.raman@example.com | New York, NY\n\nEducation\nNYU Stern School of Business\nMBA, Tech & Strategy | Aug 2025 – May 2027\n\nExperience\nContoso Software | Austin, TX\nSolutions Consultant | Jul 2017 – Jun 2025\n- Ran technical discovery with 40+ enterprise customers\n- Built SQL reports on usage data that shaped 3 roadmap decisions\n\nSkills\nSQL, Jira\n"
+    },
+    "gaps": {
+      "required": [],
+      "preferred": [],
+      "none_found": true
+    }
+  },
+  "cost": 0.0209,
+  "start_date_got": "not_a_posting"
+}

@@ -5,6 +5,7 @@ Usage:
     uv run python tests/eval/run_eval.py --suite tailor
     uv run python tests/eval/run_eval.py --suite tailor --cases 13 16   # only these cases, by number
     uv run python tests/eval/run_eval.py --suite build4 --label before  # Build 4 scorecard; saves outputs
+    uv run python tests/eval/run_eval.py --suite build4 --label before --rescore  # rebuild scorecard.md from saved files (free)
 """
 
 import argparse
@@ -217,6 +218,18 @@ def score_gaps(expected: dict, gaps: dict) -> dict:
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
 RULES = ("truthful", "start_date", "relevant", "honest_gaps")
 HAND_READ_KINDS = {"adversarial"}  # rule 4 on these needs a read: did TrueFit answer clearly instead of tailoring?
+STOP_NOTE = "the eligibility check stopped here, so the app never offers Tailor; no resume is the right answer"
+
+
+def score_check_stop(record: dict, expected: str, got: str) -> None:
+    """The check refused the input (e.g. not_a_posting). In the app, Tailor stays locked after that, so
+    when the refusal is the expected answer, the case passes every rule: nothing was invented, and the
+    student got a clear answer instead of a tailored resume."""
+    if got == expected:
+        record["scores"] = dict.fromkeys(RULES, 1)
+        record["notes"].append(STOP_NOTE)
+    else:
+        record["notes"].append(f"the check stopped with {got!r}; the app would not offer Tailor")
 
 
 async def run_build4(only: list[str] | None = None, label: str = "before") -> bool:
@@ -237,11 +250,20 @@ async def run_build4(only: list[str] | None = None, label: str = "before") -> bo
         try:
             sd = (await check_start_date(case["posting"], case.get("availability_text"))).to_dict()
             got_verdict = sd["verdict"]
-        except (ApiError, ModelUnavailable) as exc:
-            sd, got_verdict = None, f"error:{getattr(exc, 'code', 'model_unavailable')}"
+        except ApiError as exc:
+            sd, got_verdict = None, exc.code  # a refusal the student sees, e.g. not_a_posting
+        except ModelUnavailable:
+            sd, got_verdict = None, "error:model_unavailable"
         record["start_date"] = sd
+        record["start_date_got"] = got_verdict
         record["scores"]["start_date"] = int(got_verdict == case["expected_verdict"])
         record["notes"].append(f"start date: expected {case['expected_verdict']}, got {got_verdict}")
+        if sd is None:
+            # Like the app: no check result, no Tailor button. Don't tailor or pay for it.
+            score_check_stop(record, case["expected_verdict"], got_verdict)
+            record["tailor"] = None
+            finish_case(record, meter.cost - before, out_dir, rows, case, got_verdict)
+            continue
 
         lines = split_lines(case["master_resume"], case.get("background_notes"))
         by_id = {line.id: line for line in lines}
@@ -277,39 +299,74 @@ async def run_build4(only: list[str] | None = None, label: str = "before") -> bo
                                        "confirm by reading the output (bad input should get a clear answer)")
             else:
                 record["scores"]["honest_gaps"] = int(gaps_ok)
-        record["cost"] = round(meter.cost - before, 4)
-        (out_dir / f"{name}.json").write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n")
-        rows.append(record)
-        sc = record["scores"]
-        mark = lambda v: "-" if v is None else ("✓" if v else "✗")
-        print(f"{name:38} {mark(sc['truthful']):>8} {mark(sc['start_date']):>5} {mark(sc['honest_gaps']):>5} "
-              f"${record['cost']:6.4f}  {case['expected_verdict']} → {got_verdict}")
+        finish_case(record, meter.cost - before, out_dir, rows, case, got_verdict)
 
-    write_scorecard(out_dir, label, rows, meter.cost)
-    scored = sum(v for r in rows for v in r["scores"].values() if v is not None)
-    open_cells = sum(v is None for r in rows for v in r["scores"].values())
-    print(f"\nScript-scored so far: {scored}/{len(rows) * len(RULES)}; {open_cells} cells left to score by hand")
-    print(f"Cost: ${meter.cost:.4f} total")
-    print(f"Saved: {out_dir}/ (scorecard.md + one JSON per case)")
+    print(f"\nCost this run: ${meter.cost:.4f}")
+    write_scorecard(out_dir, label)
     return True  # a scorecard, not a pass/fail gate
 
 
-def write_scorecard(out_dir: Path, label: str, rows: list[dict], cost: float) -> None:
-    """A Markdown table to finish by hand: blank cells are rule 3 and anything the script couldn't decide."""
+def finish_case(record: dict, cost: float, out_dir: Path, rows: list, case: dict, got_verdict: str) -> None:
+    record["cost"] = round(cost, 4)
+    (out_dir / f"{record['case']}.json").write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n")
+    rows.append(record)
+    sc = record["scores"]
+    mark = lambda v: "-" if v is None else ("✓" if v else "✗")
+    print(f"{record['case']:38} {mark(sc['truthful']):>8} {mark(sc['start_date']):>5} {mark(sc['honest_gaps']):>5} "
+          f"${record['cost']:6.4f}  {case['expected_verdict']} → {got_verdict}")
+
+
+def rescore_build4(label: str) -> None:
+    """Re-apply the check-stop rule to saved results (no model calls), then rebuild scorecard.md.
+    Hand scores typed into a case's JSON "scores" are kept. Results saved before Nov 25 recorded a
+    refusal as "error:<code>"; those are read as the code the student saw."""
+    out_dir = RESULTS_DIR / "build4" / label
+    for path in sorted(out_dir.glob("*.json")):
+        record = json.loads(path.read_text())
+        if record.get("start_date") is None and "start_date_got" not in record:
+            got = next(n.split("got ", 1)[1] for n in record["notes"] if n.startswith("start date:"))
+            got = got if got == "error:model_unavailable" else got.removeprefix("error:")
+            expected = next(n for n in record["notes"] if n.startswith("start date:")).split("expected ")[1].split(",")[0]
+            record["start_date_got"] = got
+            record["notes"] = [f"start date: expected {expected}, got {got}"] + [
+                n for n in record["notes"] if not n.startswith(("start date:", "rule 4 script check"))]
+            record["scores"]["start_date"] = int(got == expected)
+            score_check_stop(record, expected, got)
+            if record.get("tailor") is not None:
+                record["notes"].append("the saved tailored resume came from an old script that tailored anyway; "
+                                       "the app would not, so it isn't scored")
+            path.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n")
+    write_scorecard(out_dir, label)
+
+
+def write_scorecard(out_dir: Path, label: str) -> None:
+    """A Markdown table built from every saved case JSON in out_dir (so a --cases re-run merges in).
+    Blank cells are rule 3 and anything the script couldn't decide; fill them in the JSON "scores" and
+    run --rescore. The Total appears once a row has no blanks."""
+    rows = [json.loads(p.read_text()) for p in sorted(out_dir.glob("*.json"))]
+    cost = sum(r.get("cost", 0) for r in rows)
     cell = lambda v: " " if v is None else str(v)
+    total = lambda sc: str(sum(sc.values())) if None not in sc.values() else ""
     lines = [f"# Build 4 scorecard: {label}", "",
-             f"Run {time.strftime('%Y-%m-%d %H:%M')}; model cost ${cost:.4f}. "
+             f"Updated {time.strftime('%Y-%m-%d %H:%M')}; model cost ${cost:.4f}. "
              "1 = pass, 0 = fail, blank = score by hand (see each case's JSON for outputs and notes).", "",
              "| Case | Kind | 1 Truthful | 2 Start date | 3 Relevant | 4 Honest | Total |",
              "|---|---|---|---|---|---|---|"]
     for r in rows:
         sc = r["scores"]
-        lines.append(f"| {r['case']} | {r['kind']} | " + " | ".join(cell(sc[k]) for k in RULES) + " |  |")
+        lines.append(f"| {r['case']} | {r['kind']} | " + " | ".join(cell(sc[k]) for k in RULES) + f" | {total(sc)} |")
     lines += ["", "## Notes from the script", ""]
     for r in rows:
         lines.append(f"**{r['case']}**: {r['rubric_notes']}")
         lines += [f"- {n}" for n in r["notes"]] + [""]
+    done = [r for r in rows if None not in r["scores"].values()]
+    if len(done) == len(rows):
+        lines[2:2] = [f"**Total: {sum(sum(r['scores'].values()) for r in rows)}/{len(rows) * len(RULES)}**", ""]
     (out_dir / "scorecard.md").write_text("\n".join(lines))
+    scored = sum(v for r in rows for v in r["scores"].values() if v is not None)
+    open_cells = sum(v is None for r in rows for v in r["scores"].values())
+    print(f"Scored so far: {scored}/{len(rows) * len(RULES)}; {open_cells} cells left to score by hand")
+    print(f"Saved: {out_dir}/ (scorecard.md + one JSON per case)")
 
 
 SUITES = {"start_date": run_start_date, "tailor": run_tailor, "build4": run_build4}
@@ -320,7 +377,12 @@ def main() -> None:
     parser.add_argument("--suite", choices=SUITES, default="start_date")
     parser.add_argument("--cases", nargs="+", metavar="N", help="run only these case numbers, e.g. --cases 13 16")
     parser.add_argument("--label", default="before", help="build4 only: results folder name, e.g. before or after")
+    parser.add_argument("--rescore", action="store_true",
+                        help="build4 only: rebuild scorecard.md from saved results, no model calls")
     args = parser.parse_args()
+    if args.rescore:
+        rescore_build4(args.label)
+        return
     run = SUITES[args.suite]
     passed = asyncio.run(run(args.cases, args.label) if args.suite == "build4" else run(args.cases))
     print("PASS" if passed else "FAIL")

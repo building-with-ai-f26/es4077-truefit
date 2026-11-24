@@ -1,0 +1,341 @@
+{
+  "case": "01_normal_tech_pm",
+  "kind": "normal",
+  "label": "before",
+  "rubric_notes": "Should lead with the PM internship and customer/requirements work; keep 30 to 12 days and 9%.",
+  "notes": [
+    "start date: expected in_window, got in_window",
+    "hand scores: suggested by Claude, confirmed by the student on the review page Nov 24",
+    "student's review note: I agree with this but the tailored resume did not make a single change from the original bullets. That could be fine for a real test just wanted to ensure it actually worked on that test"
+  ],
+  "scores": {
+    "truthful": 1,
+    "start_date": 1,
+    "relevant": 1,
+    "honest_gaps": 1
+  },
+  "start_date": {
+    "verdict": "in_window",
+    "verdict_label": "In window",
+    "availability": {
+      "mode": "month",
+      "start": "2027-06-01",
+      "label": "Starting June 2027"
+    },
+    "mentions": [
+      {
+        "quote": "Start date: July 12, 2027",
+        "kind": "exact_date",
+        "start": "2027-07-12",
+        "end": "2027-07-12",
+        "role_hint": null,
+        "is_vague": false,
+        "verdict": "in_window",
+        "verdict_label": "In window",
+        "note": null
+      }
+    ],
+    "note": null,
+    "undergrad_warning": null,
+    "requirements": [
+      {
+        "requirement": "degree",
+        "name": "Degree",
+        "verdict": "meets",
+        "verdict_label": "Meets",
+        "quote": "MBA or equivalent",
+        "note": null,
+        "detail": null
+      },
+      {
+        "requirement": "work_authorization",
+        "name": "Sponsorship",
+        "verdict": "not_stated",
+        "verdict_label": "Not stated",
+        "quote": null,
+        "note": null,
+        "detail": null
+      },
+      {
+        "requirement": "years_experience",
+        "name": "Years of experience",
+        "verdict": "info",
+        "verdict_label": "2+ years required",
+        "quote": "2+ years in product management, consulting, or a customer-facing technical role",
+        "note": "Required. Compare it with your own full-time experience before applying.",
+        "detail": "required:2"
+      }
+    ]
+  },
+  "tailor": {
+    "resume_lines": [
+      {
+        "id": "L1",
+        "text": "Priya Raman",
+        "section": null,
+        "source": "resume",
+        "kind": "contact"
+      },
+      {
+        "id": "L2",
+        "text": "priya.raman@example.com | New York, NY",
+        "section": null,
+        "source": "resume",
+        "kind": "contact"
+      },
+      {
+        "id": "L3",
+        "text": "EDUCATION",
+        "section": "Education",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L4",
+        "text": "NYU Stern School of Business | MBA, Tech & Strategy | Aug 2025 – May 2027",
+        "section": "Education",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L5",
+        "text": "University of Texas at Austin | BS, Computer Science | Aug 2013 – May 2017",
+        "section": "Education",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L6",
+        "text": "EXPERIENCE",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L7",
+        "text": "Solutions Consultant, Contoso Software | Austin, TX | Jul 2017 – Jun 2025",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L8",
+        "text": "- Ran technical discovery with 40+ enterprise customers and wrote requirements for the product team",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L9",
+        "text": "- Built SQL reports on usage data that shaped 3 roadmap decisions",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L10",
+        "text": "- Led onboarding redesign that cut time-to-first-value from 30 to 12 days",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L11",
+        "text": "- Trained 15 new consultants on the product",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L12",
+        "text": "Product Intern, Fabrikam Health | New York, NY | Jun 2026 – Aug 2026",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L13",
+        "text": "- Wrote the spec for a patient-reminder feature and worked with 4 engineers to launch it",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L14",
+        "text": "- Ran an A/B test on reminder timing that raised appointment confirmations 9%",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L15",
+        "text": "SKILLS",
+        "section": "Skills",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L16",
+        "text": "SQL, Jira, Figma, Excel",
+        "section": "Skills",
+        "source": "resume",
+        "kind": "header"
+      }
+    ],
+    "resume": {
+      "sections": [
+        {
+          "heading": "Education",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L4"
+              ],
+              "header_fields": {
+                "L4": {
+                  "organization": "NYU Stern School of Business",
+                  "title": "MBA, Tech & Strategy",
+                  "dates": "Aug 2025 – May 2027"
+                }
+              },
+              "bullets": []
+            },
+            {
+              "header_line_ids": [
+                "L5"
+              ],
+              "header_fields": {
+                "L5": {
+                  "organization": "University of Texas at Austin",
+                  "title": "BS, Computer Science",
+                  "dates": "Aug 2013 – May 2017"
+                }
+              },
+              "bullets": []
+            }
+          ]
+        },
+        {
+          "heading": "Experience",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L12"
+              ],
+              "header_fields": {
+                "L12": {
+                  "organization": "Fabrikam Health",
+                  "location": "New York, NY",
+                  "title": "Product Intern",
+                  "dates": "Jun 2026 – Aug 2026"
+                }
+              },
+              "bullets": [
+                {
+                  "text": "Wrote the spec for a patient-reminder feature and worked with 4 engineers to launch it",
+                  "source_line_ids": [
+                    "L13"
+                  ],
+                  "id": "B1",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                },
+                {
+                  "text": "Ran an A/B test on reminder timing that raised appointment confirmations 9%",
+                  "source_line_ids": [
+                    "L14"
+                  ],
+                  "id": "B2",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                }
+              ]
+            },
+            {
+              "header_line_ids": [
+                "L7"
+              ],
+              "header_fields": {
+                "L7": {
+                  "organization": "Contoso Software",
+                  "location": "Austin, TX",
+                  "title": "Solutions Consultant",
+                  "dates": "Jul 2017 – Jun 2025"
+                }
+              },
+              "bullets": [
+                {
+                  "text": "Ran technical discovery with 40+ enterprise customers and wrote requirements for the product team",
+                  "source_line_ids": [
+                    "L8"
+                  ],
+                  "id": "B3",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                },
+                {
+                  "text": "Built SQL reports on usage data that shaped 3 roadmap decisions",
+                  "source_line_ids": [
+                    "L9"
+                  ],
+                  "id": "B4",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                },
+                {
+                  "text": "Led onboarding redesign that cut time-to-first-value from 30 to 12 days",
+                  "source_line_ids": [
+                    "L10"
+                  ],
+                  "id": "B5",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                },
+                {
+                  "text": "Trained 15 new consultants on the product",
+                  "source_line_ids": [
+                    "L11"
+                  ],
+                  "id": "B6",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Skills",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L16"
+              ],
+              "header_fields": {},
+              "bullets": []
+            }
+          ]
+        }
+      ],
+      "plain_text": "Priya Raman\npriya.raman@example.com | New York, NY\n\nEducation\nNYU Stern School of Business\nMBA, Tech & Strategy | Aug 2025 – May 2027\nUniversity of Texas at Austin\nBS, Computer Science | Aug 2013 – May 2017\n\nExperience\nFabrikam Health | New York, NY\nProduct Intern | Jun 2026 – Aug 2026\n- Wrote the spec for a patient-reminder feature and worked with 4 engineers to launch it\n- Ran an A/B test on reminder timing that raised appointment confirmations 9%\nContoso Software | Austin, TX\nSolutions Consultant | Jul 2017 – Jun 2025\n- Ran technical discovery with 40+ enterprise customers and wrote requirements for the product team\n- Built SQL reports on usage data that shaped 3 roadmap decisions\n- Led onboarding redesign that cut time-to-first-value from 30 to 12 days\n- Trained 15 new consultants on the product\n\nSkills\nSQL, Jira, Figma, Excel\n"
+    },
+    "gaps": {
+      "required": [],
+      "preferred": [],
+      "none_found": true
+    }
+  },
+  "cost": 0.0309
+}
