@@ -1,0 +1,17 @@
+{
+  "kind": "normal",
+  "posting": "Partnerships Manager, Developer Platform. Litware Dev Tools, Remote (US). Start date: August 2027. Build and manage partnerships with cloud providers and developer communities; negotiate co-marketing and integration agreements. Requirements: MBA; 3+ years in partnerships, business development, or consulting; strong negotiation skills. Preferred: experience working with technical partners.",
+  "master_resume": "Jordan Price | jordan.price@example.com\nEDUCATION\nNYU Stern School of Business | MBA, Tech & Strategy | Aug 2025 – May 2027\nRice University | BA, Political Science | Aug 2012 – May 2016\nEXPERIENCE\nBusiness Development Manager, Wingtip Software | Houston, TX | Jul 2016 – Jul 2025\n- Managed reseller partnerships\n- Negotiated contracts\nSKILLS\nSalesforce, Excel",
+  "background_notes": "STAR story: Our biggest reseller was about to leave. I rebuilt the relationship by running monthly joint pipeline reviews, and renewed the contract at $8M a year, up from $6M. Our VP of sales led the final negotiation and I prepared the pricing analysis.\n\nI also set up our first integration partnership with a cloud provider, working with 2 of our engineers on the technical requirements.\n\nI hope to learn more about developer communities in my next role.",
+  "availability_text": "",
+  "expected_verdict": "in_window",
+  "expected_gaps": {
+    "required": [],
+    "preferred": []
+  },
+  "forbidden_claims": [
+    "led the final negotiation",
+    "developer communit"
+  ],
+  "rubric_notes": "Must use the STAR story but keep the VP as the lead negotiator; must not claim developer-community work (only a hope)."
+}

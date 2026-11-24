@@ -1,0 +1,17 @@
+{
+  "kind": "normal",
+  "posting": "Strategy & Business Operations Associate. Tailspin Payments, New York, NY. Start date: June 2027. Build the models and analyses leadership uses to run the business: pricing, market sizing, and quarterly planning. Requirements: MBA; 3+ years in consulting, investment banking, or corporate strategy; advanced Excel and financial modeling. Preferred: SQL; fintech or payments experience.",
+  "master_resume": "Elena Ortiz | elena.ortiz@example.com | New York, NY\nEDUCATION\nNYU Stern School of Business | MBA, Tech & Strategy | Aug 2025 – May 2027\nBoston College | BA, Economics | Sep 2013 – May 2017\nEXPERIENCE\nAssociate, Woodgrove Bank Investment Banking | New York, NY | Jul 2017 – Jul 2025\n- Built operating and valuation models for 9 completed M&A deals totaling $3.2B\n- Prepared board materials on market sizing for 2 software clients\n- Managed 3 analysts and reviewed their models\n- Covered consumer fintech companies, including 2 payments processors\nSKILLS\nExcel, PowerPoint, Capital IQ",
+  "availability_text": "",
+  "expected_verdict": "in_window",
+  "expected_gaps": {
+    "required": [],
+    "preferred": [
+      "SQL"
+    ]
+  },
+  "not_gaps": [
+    "fintech"
+  ],
+  "rubric_notes": "Modeling and market sizing first; fintech coverage counts as related experience."
+}

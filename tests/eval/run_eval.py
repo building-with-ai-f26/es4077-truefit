@@ -4,6 +4,7 @@ Usage:
     uv run python tests/eval/run_eval.py --suite start_date
     uv run python tests/eval/run_eval.py --suite tailor
     uv run python tests/eval/run_eval.py --suite tailor --cases 13 16   # only these cases, by number
+    uv run python tests/eval/run_eval.py --suite build4 --label before  # Build 4 scorecard; saves outputs
 """
 
 import argparse
@@ -126,26 +127,11 @@ async def run_tailor(only: list[str] | None = None) -> bool:
         seconds.append(time.time() - started)
         bullets = [b for s in result["resume"]["sections"] for e in s["entries"] for b in e["bullets"]]
         kept = [b for b in bullets if b["included"]]
-        for b in kept:
-            cited = " ".join(by_id[i].text for i in b["source_line_ids"] if i in by_id)
-            if not extract_numbers(b["text"]) <= extract_numbers(cited):
-                violations.append(f"{name} {b['id']}: number not in sources: {b['text']!r}")
-            words = {w.strip(".,;:()").lower() for w in b["text"].split()}
-            if any(_stem(w) in only for w in words if w not in GENERIC_JOB_WORDS):
-                violations.append(f"{name} {b['id']}: posting-only word: {b['text']!r}")
-            for term in gap_terms:
-                if term in b["text"].lower():
-                    violations.append(f"{name} {b['id']}: claims a gap ({term}): {b['text']!r}")
-            for phrase in case.get("forbidden_claims", []):
-                if phrase in b["text"].lower():
-                    violations.append(f"{name} {b['id']}: forbidden claim ({phrase}): {b['text']!r}")
+        violations += truth_violations(name, case, kept, by_id, only, gap_terms)
         flagged = [b for b in bullets if b["status"] == "flagged"]
         flagged_for_review += [(name, b) for b in flagged]
         gap_score = score_gaps(case.get("expected_gaps", {}), result["gaps"])
-        for term in case.get("not_gaps", []):  # requirements the student's lines do back, e.g. related industry work
-            for g in result["gaps"]["required"] + result["gaps"]["preferred"]:
-                if term in g["text"].lower() or term in g["quote"].lower():
-                    violations.append(f"{name}: listed as a gap but the student's lines back it ({term}): {g['text']!r}")
+        violations += not_gap_violations(name, case, result["gaps"])
         gap_scores.append((name, gap_score))
         print(f"{name:30} {len(bullets):7} {len(kept):5} {len(flagged):8} ${meter.cost - before:6.4f} {seconds[-1]:5.1f}s "
               f"gaps {gap_score['found']}/{gap_score['expected']}")
@@ -178,6 +164,33 @@ async def run_tailor(only: list[str] | None = None) -> bool:
     return not violations and recall >= 0.8 and agreement >= 0.9
 
 
+def truth_violations(name: str, case: dict, kept: list[dict], by_id: dict, only: set, gap_terms: list[str]) -> list[str]:
+    """Kept bullets with a number or posting-only word missing from their sources, or claiming a gap or forbidden phrase."""
+    out = []
+    for b in kept:
+        cited = " ".join(by_id[i].text for i in b["source_line_ids"] if i in by_id)
+        if not extract_numbers(b["text"]) <= extract_numbers(cited):
+            out.append(f"{name} {b['id']}: number not in sources: {b['text']!r}")
+        words = {w.strip(".,;:()").lower() for w in b["text"].split()}
+        if any(_stem(w) in only for w in words if w not in GENERIC_JOB_WORDS):
+            out.append(f"{name} {b['id']}: posting-only word: {b['text']!r}")
+        for term in gap_terms:
+            if term in b["text"].lower():
+                out.append(f"{name} {b['id']}: claims a gap ({term}): {b['text']!r}")
+        for phrase in case.get("forbidden_claims", []):
+            if phrase in b["text"].lower():
+                out.append(f"{name} {b['id']}: forbidden claim ({phrase}): {b['text']!r}")
+    return out
+
+
+def not_gap_violations(name: str, case: dict, gaps: dict) -> list[str]:
+    """Requirements listed as gaps although the student's lines back them (case "not_gaps", e.g. related industry work)."""
+    return [f"{name}: listed as a gap but the student's lines back it ({term}): {g['text']!r}"
+            for term in case.get("not_gaps", [])
+            for g in gaps["required"] + gaps["preferred"]
+            if term in g["text"].lower() or term in g["quote"].lower()]
+
+
 def score_gaps(expected: dict, gaps: dict) -> dict:
     """Match each expected gap term to a gap TrueFit listed (by name or quote) and compare their groups."""
     listed = [(g, group) for group in ("required", "preferred") for g in gaps[group]]
@@ -201,15 +214,115 @@ def score_gaps(expected: dict, gaps: dict) -> dict:
     return score
 
 
-SUITES = {"start_date": run_start_date, "tailor": run_tailor}
+RESULTS_DIR = Path(__file__).resolve().parent / "results"
+RULES = ("truthful", "start_date", "relevant", "honest_gaps")
+HAND_READ_KINDS = {"adversarial"}  # rule 4 on these needs a read: did TrueFit answer clearly instead of tailoring?
+
+
+async def run_build4(only: list[str] | None = None, label: str = "before") -> bool:
+    """Build 4 (Track A) scorecard: 4 rules x 10 cases, see specs/2026-11-24-build4-eval-plan.md.
+    Rules 1, 2 and 4 are scored here; rule 3 (relevant and specific) is left blank for scoring by hand.
+    Every case's full output is saved to tests/eval/results/build4/<label>/ with a scorecard.md."""
+    meter = CostMeter()
+    llm._transport = meter
+    cases = load_cases("build4", only)
+    out_dir = RESULTS_DIR / "build4" / label
+    out_dir.mkdir(parents=True, exist_ok=True)
+    rows = []
+    print(f"{'case':38} {'truthful':>8} {'date':>5} {'gaps':>5} {'cost':>7}  date verdict (expected → got)")
+    for name, case in cases:
+        before = meter.cost
+        record = {"case": name, "kind": case.get("kind"), "label": label, "rubric_notes": case.get("rubric_notes", ""),
+                  "notes": [], "scores": dict.fromkeys(RULES)}
+        try:
+            sd = (await check_start_date(case["posting"], case.get("availability_text"))).to_dict()
+            got_verdict = sd["verdict"]
+        except (ApiError, ModelUnavailable) as exc:
+            sd, got_verdict = None, f"error:{getattr(exc, 'code', 'model_unavailable')}"
+        record["start_date"] = sd
+        record["scores"]["start_date"] = int(got_verdict == case["expected_verdict"])
+        record["notes"].append(f"start date: expected {case['expected_verdict']}, got {got_verdict}")
+
+        lines = split_lines(case["master_resume"], case.get("background_notes"))
+        by_id = {line.id: line for line in lines}
+        posting_only = posting_only_terms(case["posting"], " ".join(line.text for line in lines))
+        gap_terms = [t.lower() for group in case.get("expected_gaps", {}).values() for t in group]
+        try:
+            result = await tailor_resume(case["posting"], case["master_resume"], case.get("background_notes"))
+        except (ApiError, ModelUnavailable) as exc:
+            result = None
+            record["tailor_error"] = getattr(exc, "code", "model_unavailable")
+        record["tailor"] = result
+        if result is None:
+            # No tailored resume. For a non-posting that may be the right answer; leave rules 1 and 4 to a read.
+            record["notes"].append(f"tailoring returned no resume ({record['tailor_error']}); score rules 1 and 4 by hand")
+        else:
+            bullets = [b for s in result["resume"]["sections"] for e in s["entries"] for b in e["bullets"]]
+            kept = [b for b in bullets if b["included"]]
+            truth = truth_violations(name, case, kept, by_id, posting_only, gap_terms)
+            record["scores"]["truthful"] = int(not truth)
+            record["notes"] += truth
+            flagged = [b for b in bullets if b["status"] == "flagged"]
+            record["notes"] += [f"flagged (read by hand): {b['id']} {b['text']!r}: {b['flag_reason']}" for b in flagged]
+
+            gap_score = score_gaps(case.get("expected_gaps", {}), result["gaps"])
+            wrong_gaps = not_gap_violations(name, case, result["gaps"])
+            gaps_ok = (gap_score["found"] == gap_score["expected"] == gap_score["same_group"]) and not wrong_gaps
+            record["notes"] += wrong_gaps
+            record["notes"] += [f"missed expected gap {t!r}" for t in gap_score["missed"]]
+            record["notes"] += [f"{t!r} grouped {got}, expected {want}" for t, want, got in gap_score["wrong_group"]]
+            record["notes"] += [f"extra gap (read by hand): {t!r}" for t in gap_score["extra"]]
+            if case.get("kind") in HAND_READ_KINDS:
+                record["notes"].append(f"rule 4 script check {'passed' if gaps_ok else 'failed'}; "
+                                       "confirm by reading the output (bad input should get a clear answer)")
+            else:
+                record["scores"]["honest_gaps"] = int(gaps_ok)
+        record["cost"] = round(meter.cost - before, 4)
+        (out_dir / f"{name}.json").write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n")
+        rows.append(record)
+        sc = record["scores"]
+        mark = lambda v: "-" if v is None else ("✓" if v else "✗")
+        print(f"{name:38} {mark(sc['truthful']):>8} {mark(sc['start_date']):>5} {mark(sc['honest_gaps']):>5} "
+              f"${record['cost']:6.4f}  {case['expected_verdict']} → {got_verdict}")
+
+    write_scorecard(out_dir, label, rows, meter.cost)
+    scored = sum(v for r in rows for v in r["scores"].values() if v is not None)
+    open_cells = sum(v is None for r in rows for v in r["scores"].values())
+    print(f"\nScript-scored so far: {scored}/{len(rows) * len(RULES)}; {open_cells} cells left to score by hand")
+    print(f"Cost: ${meter.cost:.4f} total")
+    print(f"Saved: {out_dir}/ (scorecard.md + one JSON per case)")
+    return True  # a scorecard, not a pass/fail gate
+
+
+def write_scorecard(out_dir: Path, label: str, rows: list[dict], cost: float) -> None:
+    """A Markdown table to finish by hand: blank cells are rule 3 and anything the script couldn't decide."""
+    cell = lambda v: " " if v is None else str(v)
+    lines = [f"# Build 4 scorecard: {label}", "",
+             f"Run {time.strftime('%Y-%m-%d %H:%M')}; model cost ${cost:.4f}. "
+             "1 = pass, 0 = fail, blank = score by hand (see each case's JSON for outputs and notes).", "",
+             "| Case | Kind | 1 Truthful | 2 Start date | 3 Relevant | 4 Honest | Total |",
+             "|---|---|---|---|---|---|---|"]
+    for r in rows:
+        sc = r["scores"]
+        lines.append(f"| {r['case']} | {r['kind']} | " + " | ".join(cell(sc[k]) for k in RULES) + " |  |")
+    lines += ["", "## Notes from the script", ""]
+    for r in rows:
+        lines.append(f"**{r['case']}**: {r['rubric_notes']}")
+        lines += [f"- {n}" for n in r["notes"]] + [""]
+    (out_dir / "scorecard.md").write_text("\n".join(lines))
+
+
+SUITES = {"start_date": run_start_date, "tailor": run_tailor, "build4": run_build4}
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--suite", choices=SUITES, default="start_date")
     parser.add_argument("--cases", nargs="+", metavar="N", help="run only these case numbers, e.g. --cases 13 16")
+    parser.add_argument("--label", default="before", help="build4 only: results folder name, e.g. before or after")
     args = parser.parse_args()
-    passed = asyncio.run(SUITES[args.suite](args.cases))
+    run = SUITES[args.suite]
+    passed = asyncio.run(run(args.cases, args.label) if args.suite == "build4" else run(args.cases))
     print("PASS" if passed else "FAIL")
     sys.exit(0 if passed else 1)
 

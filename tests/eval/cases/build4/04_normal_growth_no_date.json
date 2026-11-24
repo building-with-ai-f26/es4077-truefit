@@ -1,0 +1,14 @@
+{
+  "kind": "normal",
+  "posting": "Growth Manager. Adventure Works is a consumer app for booking outdoor trips. Own a funnel from sign-up to first booking, design experiments, and work with design and engineering to ship them. Requirements: 2+ years in growth, marketing analytics, or consulting; hands-on with experiment design and analytics tools. Preferred: SQL; mobile app experience.",
+  "master_resume": "Sam Kim | sam.kim@example.com\nEDUCATION\nNYU Stern School of Business | MBA, Tech & Strategy | Aug 2025 – May 2027\nUniversity of Washington | BA, Psychology | Sep 2014 – Jun 2018\nEXPERIENCE\nMarketing Analytics Manager, Coho Retail | Seattle, WA | Aug 2018 – Jul 2025\n- Designed and analyzed 25 email and checkout experiments\n- Raised checkout conversion 6% by testing a one-page checkout\n- Built a Looker dashboard used weekly by the marketing leadership team\nSKILLS\nSQL, Looker, Google Analytics, Excel",
+  "availability_text": "",
+  "expected_verdict": "likely_too_early",
+  "expected_gaps": {
+    "required": [],
+    "preferred": [
+      "mobile app"
+    ]
+  },
+  "rubric_notes": "No start date in posting: verdict must say so, not invent one."
+}

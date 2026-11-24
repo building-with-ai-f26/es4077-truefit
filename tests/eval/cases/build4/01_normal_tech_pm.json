@@ -1,0 +1,12 @@
+{
+  "kind": "normal",
+  "posting": "Product Manager, MBA (2027). Northwind Cloud, Seattle, WA. Start date: July 12, 2027. Northwind Cloud builds data-storage software for mid-size businesses. You will own a product area end to end: talk to customers, write specs, prioritize the roadmap with engineering, and measure launches. Requirements: MBA or equivalent; 2+ years in product management, consulting, or a customer-facing technical role; comfort with data (SQL a plus). Preferred: experience with B2B SaaS; experience with A/B testing.",
+  "master_resume": "Priya Raman | priya.raman@example.com | New York, NY\nEDUCATION\nNYU Stern School of Business | MBA, Tech & Strategy | Aug 2025 – May 2027\nUniversity of Texas at Austin | BS, Computer Science | Aug 2013 – May 2017\nEXPERIENCE\nSolutions Consultant, Contoso Software | Austin, TX | Jul 2017 – Jun 2025\n- Ran technical discovery with 40+ enterprise customers and wrote requirements for the product team\n- Built SQL reports on usage data that shaped 3 roadmap decisions\n- Led onboarding redesign that cut time-to-first-value from 30 to 12 days\n- Trained 15 new consultants on the product\nProduct Intern, Fabrikam Health | New York, NY | Jun 2026 – Aug 2026\n- Wrote the spec for a patient-reminder feature and worked with 4 engineers to launch it\n- Ran an A/B test on reminder timing that raised appointment confirmations 9%\nSKILLS\nSQL, Jira, Figma, Excel",
+  "availability_text": "",
+  "expected_verdict": "in_window",
+  "expected_gaps": {
+    "required": [],
+    "preferred": []
+  },
+  "rubric_notes": "Should lead with the PM internship and customer/requirements work; keep 30 to 12 days and 9%."
+}
