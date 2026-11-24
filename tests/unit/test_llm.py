@@ -111,3 +111,23 @@ def test_other_400_is_unavailable_without_retry(monkeypatch):
     with pytest.raises(ModelUnavailable):
         run()
     assert len(seen) == 1
+
+
+def test_corrected_json_after_the_first_is_used(monkeypatch):
+    """Build 4 case 5: the model wrote its JSON, then a correction and a second, corrected object."""
+    reply = '{"sections": [{"heading": "Old"}]}\n\nWait, I must correct errors in that output. Here is the corrected JSON:\n\n{"sections": [{"heading": "New"}]}'
+    seen = use_responses(monkeypatch, ok(reply))
+    assert run() == {"sections": [{"heading": "New"}]}
+    assert len(seen) == 1  # no retry needed
+
+
+def test_prose_after_the_json_is_ignored(monkeypatch):
+    reply = '{"sections": []}\n\nCorrection: the Rice dates must be copied exactly from L5, e.g. {L5}.'
+    use_responses(monkeypatch, ok(reply))
+    assert run() == {"sections": []}
+
+
+def test_a_small_object_in_trailing_prose_does_not_replace_the_answer(monkeypatch):
+    reply = '{"sections": [], "x": 1}\n\nNote: {"L5": "Aug 2012"} was copied exactly.'
+    use_responses(monkeypatch, ok(reply))
+    assert run() == {"sections": [], "x": 1}
