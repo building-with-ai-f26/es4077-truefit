@@ -23,9 +23,23 @@ def test_reads_a_resume(client):
 
 
 def test_too_large(client):
-    response = read(client, b"x" * (5 * 1024 * 1024 + 1))
+    response = read(client, b"x" * (20 * 1024 * 1024 + 1))
     assert response.status_code == 413
     assert response.json()["error"]["code"] == "file_too_large"
+    assert "Embed fonts" in response.json()["error"]["message"]
+
+
+def test_resume_with_embedded_fonts_over_5_mb_is_read(client):
+    """The outside reviewer's text-only resume was refused as over 5 MB on Nov 24; embedded fonts are the
+    likely cause. 8 MB of incompressible font data, like a real font file."""
+    import os
+    from tests.unit.test_docx_text import with_extra_part
+    data = with_extra_part(docx_bytes(lambda d: [d.add_paragraph(line) for line in RESUME]),
+                           "word/fonts/font1.odttf", os.urandom(8 * 1024 * 1024), stored=True)
+    assert len(data) > 5 * 1024 * 1024
+    response = read(client, data)
+    assert response.status_code == 200
+    assert response.json()["text"].startswith("Jane Doe")
 
 
 def test_renamed_pdf_is_rejected(client):
@@ -54,6 +68,6 @@ def test_file_that_unpacks_huge_is_refused(client):
     out = io.BytesIO()
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
         z.writestr("word/document.xml", b"0" * (60 * 1024 * 1024))
-    assert len(out.getvalue()) < 5 * 1024 * 1024  # small enough to pass the upload limit
+    assert len(out.getvalue()) < 20 * 1024 * 1024  # small enough to pass the upload limit
     response = read(client, out.getvalue())
     assert response.status_code == 413 and response.json()["error"]["code"] == "file_too_large"
