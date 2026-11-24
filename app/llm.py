@@ -57,10 +57,35 @@ async def _try_once(client: httpx.AsyncClient, payload: dict, headers: dict) -> 
         return f"HTTP {response.status_code}"
     try:
         content = response.json()["choices"][0]["message"]["content"]
-        parsed = json.loads(_strip_code_fence(content))
+        parsed = _parse_reply(_strip_code_fence(content))
     except (KeyError, IndexError, TypeError, ValueError):
         return "reply was not valid JSON"
     return parsed if isinstance(parsed, dict) else "reply was not a JSON object"
+
+
+def _parse_reply(text: str):
+    """Parse the model's JSON reply. Sometimes the model writes its JSON, then text after it, such as
+    "Wait, I must correct errors in that output. Here is the corrected JSON: {...}" (Build 4, case 5:
+    2 of 4 tries). Use the last complete object with the same top-level keys as the first, so a
+    corrected answer wins; plain prose after the JSON is ignored. Python still checks every bullet."""
+    try:
+        return json.loads(text)
+    except ValueError:
+        pass
+    decoder, objects, pos = json.JSONDecoder(), [], 0
+    while (start := text.find("{", pos)) != -1:
+        try:
+            obj, end = decoder.raw_decode(text, start)
+        except ValueError:
+            pos = start + 1
+            continue
+        if isinstance(obj, dict):
+            objects.append(obj)
+        pos = end
+    if not objects:
+        raise ValueError("no JSON object in reply")
+    same_shape = [o for o in objects if set(objects[0]) <= set(o)]
+    return same_shape[-1]
 
 
 def _raise_if_account_problem(response: httpx.Response) -> None:
