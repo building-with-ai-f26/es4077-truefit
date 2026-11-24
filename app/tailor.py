@@ -25,6 +25,7 @@ Rules:
 - Use ONLY facts in the numbered lines. Never add employers, titles, dates, schools, degrees, skills, tools, certifications, team sizes, or results that aren't there.
 - You may select, reorder, shorten, and reword. Keep every number, percentage, dollar amount, and date exactly as written.
 - Never use a skill, tool, or keyword from the posting unless the student's lines contain it.
+- You may use the posting's wording for something a line already says in other words: if a line says "Ran technical discovery with 40+ enterprise customers" and the posting asks for "customer discovery", "Ran customer discovery with 40+ enterprise customers" is fine. Never use it to add a skill, tool, industry, scope, or result the line doesn't show.
 - Every bullet cites ALL the line IDs that back it in "source_line_ids". If a bullet combines facts from several sentences, cite each one. When a bullet credits the student with a result, also cite the line showing the student's own action that led to it. N-lines may be used to write or strengthen bullets for a role.
 - From N-lines, use only statements of what the student did, achieved, or has. Ignore goals, interests, things they hope, plan, or are eager to do or learn, opinions, and anything praising or describing a company they were applying to. "I'm eager to build my SQL skills" is NOT evidence of SQL.
 - Keep the student's role accurate: if a story says a manager or someone else led something and the student supported it, the bullet must say the student supported or contributed, not led.
@@ -34,6 +35,8 @@ Rules:
 - Put each entry in the section it sits under in the master resume (shown in [brackets]). Skip (contact) lines; TrueFit adds them at the top.
 - Sections in this order: Education, Experience, then any others in the order they appear in the master resume. Use the student's own heading names.
 - Pick the experience most relevant to the posting and aim for about one page: 3-5 bullets for recent or relevant roles, fewer for others.
+- In each entry, put the bullet that best matches the posting's main responsibilities first.
+- Tell each piece of work once. When several lines describe the same work (a resume bullet and a story about it), write one bullet that combines them and cites all of them; don't retell it in a second bullet. Drop a vague bullet ("Negotiated contracts") when a more specific bullet already covers that work, or fold it into that bullet.
 - Bullets are one sentence, start with a strong verb that doesn't overstate the source, and contain no bullet symbol. No first-person words (I, my, me, we, our): write "the go-to-market plan led by the manager", not "led by my manager"."""
 
 
