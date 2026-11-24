@@ -133,16 +133,40 @@ def _split_after_dates(line: str) -> list[str]:
     return [line]
 
 
+# Letter-spaced headings from PDF templates: "E D U C A T I O N" → "EDUCATION".
+_SPACED_LETTERS = re.compile(r"(?<!\S)(?:[A-Z] ){3,}[A-Z](?!\S)")
+# A date range broken across lines: "MBA, Tech & Strategy Aug 2025 –" / "May 2027".
+_DANGLING_DASH = re.compile(r"[–—-]$")
+_DATE_START = re.compile(rf"^(?:{_MONTH}\s+)?(?:(?:19|20)\d{{2}}|present|current)\b", re.IGNORECASE)
+
+
+def _rejoin_wrapped(lines: list[str]) -> list[str]:
+    """Undo line wraps from a PDF: a bullet's second line (starts lowercase, no bullet symbol) and a
+    date range split after its dash go back onto the line above."""
+    out: list[str] = []
+    for line in lines:
+        if out and not _BULLET_PREFIX.match(line):
+            prev = out[-1]
+            wrapped_bullet = _BULLET_PREFIX.match(prev) and line[:1].islower()
+            split_dates = _DANGLING_DASH.search(prev) and _DATE_START.match(line)
+            if wrapped_bullet or split_dates:
+                out[-1] = f"{prev} {line}"
+                continue
+        out.append(line)
+    return out
+
+
 def restore_line_breaks(master_resume: str) -> list[str]:
-    """Put bullets, headings, and job headers back on their own lines."""
-    text = _INLINE_BULLET.sub(lambda m: f"\n{m.group(1)} ", master_resume)
+    """Put bullets, headings, and job headers back on their own lines, and wrapped lines back together."""
+    text = _SPACED_LETTERS.sub(lambda m: m.group(0).replace(" ", ""), master_resume)
+    text = _INLINE_BULLET.sub(lambda m: f"\n{m.group(1)} ", text)
     text = _INLINE_HEADING.sub(lambda m: f"\n{m.group(1)}\n", text)
     lines = []
     for raw in text.splitlines():
         for part in _split_glued(raw.strip()):
             for piece in _split_spaced_header(part):
                 lines.extend(_split_after_dates(piece))
-    return [line.strip() for line in lines if line.strip()]
+    return _rejoin_wrapped([line.strip() for line in lines if line.strip()])
 
 
 def split_lines(master_resume: str, background_notes: str | None = None) -> list[ResumeLine]:

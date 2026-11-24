@@ -98,3 +98,41 @@ NORTHWIND Seattle, WA Product Intern June 2026 - Aug. 2026
         ("bullet", "● Prototyped an AI prompt tool with five interns, leading to better outputs"),
         ("header", "AMERICAN EXPRESS New York, NY Marketing Manager June 2022 - Aug. 2025"),
     ]
+
+
+def test_pdf_wraps_and_letter_spaced_headings_are_repaired():
+    """Build 4 case 7: a resume pasted from a PDF with spaced-out headings, a wrapped bullet, and a
+    date range broken across two lines."""
+    resume = """TAYLOR NGUYEN
+taylor.nguyen@example.com
+E D U C A T I O N
+NYU Stern School of Business
+MBA, Tech & Strategy Aug 2025 –
+May 2027
+E X P E R I E N C E
+Program Manager , Proseware Inc. Dallas TX 2016 – 2025
+▪ Coordinated launch of a new warehouse system across 6 sites with
+engineering and operations teams, finishing 2 weeks early
+▪ Cut defect backlog by 35%
+S K I L L S Jira · Confluence"""
+    got = [(line.kind, line.section, line.text) for line in split_lines(resume)]
+    assert got == [
+        ("contact", None, "TAYLOR NGUYEN"),
+        ("contact", None, "taylor.nguyen@example.com"),
+        ("heading", "Education", "EDUCATION"),
+        ("header", "Education", "NYU Stern School of Business"),
+        ("header", "Education", "MBA, Tech & Strategy Aug 2025 – May 2027"),
+        ("heading", "Experience", "EXPERIENCE"),
+        ("header", "Experience", "Program Manager , Proseware Inc. Dallas TX 2016 – 2025"),
+        ("bullet", "Experience", "▪ Coordinated launch of a new warehouse system across 6 sites with "
+                                 "engineering and operations teams, finishing 2 weeks early"),
+        ("bullet", "Experience", "▪ Cut defect backlog by 35%"),
+        ("heading", "Skills", "SKILLS"),
+        ("header", "Skills", "Jira · Confluence"),
+    ]
+
+
+def test_capitalized_line_after_a_bullet_is_not_joined():
+    resume = "EXPERIENCE\nAnalyst, Contoso | 2019 – 2025\n- Built models\nManager, Fabrikam | 2025 – Present\n- Led reviews"
+    texts = [line.text for line in split_lines(resume)]
+    assert "Manager, Fabrikam | 2025 – Present" in texts and "- Built models" in texts
