@@ -89,7 +89,7 @@ async def revalidate_static(request: Request, call_next):
     return response
 
 
-MAX_REQUEST_BYTES = 6 * 1024 * 1024  # the largest real request is a 5 MB Word file
+MAX_REQUEST_BYTES = 21 * 1024 * 1024  # the largest real request is a 20 MB Word file
 
 
 @app.middleware("http")
@@ -225,15 +225,18 @@ async def post_tailor(body: TailorRequest):
     return await tailor.tailor_resume(body.posting, body.master_resume, body.background_notes)
 
 
-MAX_DOCX_BYTES = 5 * 1024 * 1024
+MAX_DOCX_BYTES = 20 * 1024 * 1024  # text-only resumes reach 5-20 MB when Word embeds fonts
 
 
 @app.post("/api/read-docx")
 async def post_read_docx(request: Request):
     """The text of a Word file the student chose instead of pasting. The file and text are never stored or logged."""
     data = await request.body()
-    if len(data) > MAX_DOCX_BYTES or unpacks_too_large(data):
-        raise ApiError(413, "file_too_large", "This file is over 5 MB. Save a copy without images, or paste the text.")
+    if len(data) > MAX_DOCX_BYTES:
+        raise ApiError(413, "file_too_large", "This file is over 20 MB. In Word, turn off \"Embed fonts in the file\" "
+                                              "(Word settings, Save) and save a copy, or paste the text.")
+    if unpacks_too_large(data):
+        raise ApiError(413, "file_too_large", "This file's text is too large to read. Paste the text instead.")
     try:
         text = read_docx_text(data)
     except NotDocx:

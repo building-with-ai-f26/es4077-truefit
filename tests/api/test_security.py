@@ -15,7 +15,7 @@ def test_security_headers_on_every_response(client):
 
 
 def test_oversized_request_refused_before_reading(client):
-    response = client.post("/api/tailor", content=b"x", headers={"Content-Length": str(7 * 1024 * 1024),
+    response = client.post("/api/tailor", content=b"x", headers={"Content-Length": str(22 * 1024 * 1024),
                                                                    "Content-Type": "application/json"})
     assert response.status_code == 413
     assert response.json()["error"]["code"] == "request_too_large"

@@ -27,8 +27,8 @@ There is **no database and no sign-in**: the server stores nothing between reque
 | Libraries | `pip-audit` on every production dependency (Nov 18) | No known vulnerabilities |
 | Logs | Route logs, the model call, and the libraries that fetch web pages | **Fixed:** the web-page library wrote every link it fetched into the log; now off. Tests check that resume text, posting text, and links never appear in logs |
 | Posting links (server fetching a page) | Private and local addresses, redirects, proxies, slow and huge pages | Every address checked before every hop (redirects too); local and private networks refused; proxy settings ignored; 10 s timeout; 2 MB limit |
-| Word uploads | Size, damaged files, files that unpack huge ("zip bombs") | 5 MB upload limit; files that would unpack past 50 MB refused unopened; damaged files get a plain message, not a crash |
-| Oversized requests | Requests larger than any real one | **Fixed:** refused from their declared size (over 6 MB) before reading |
+| Word uploads | Size, damaged files, files that unpack huge ("zip bombs") | 20 MB upload limit (raised from 5 MB on Nov 24: a text-only resume with embedded fonts was refused); only the document's text parts are ever unpacked, and if those would pass 50 MB the file is refused unopened; embedded fonts, images and other non-text parts are never unpacked; damaged files get a plain message, not a crash |
+| Oversized requests | Requests larger than any real one | **Fixed:** refused from their declared size (over 21 MB, just above the Word upload limit) before reading |
 | What the page shows | Text from files, links, and the model put on the page | Shown as text, never as HTML, so a posting can't inject code (checked: the one HTML insert is a fixed icon) |
 | Browser protections | Headers on every response | **Fixed:** added `nosniff`, `X-Frame-Options: DENY` (no framing), and a referrer policy |
 | Public API listing | FastAPI's automatic `/docs` and `/openapi.json` | **Fixed:** turned off |

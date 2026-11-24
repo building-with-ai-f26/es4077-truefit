@@ -28,21 +28,39 @@ class NotDocx(Exception):
     """The bytes aren't a Word (.docx) file TrueFit can open."""
 
 
-MAX_UNPACKED_BYTES = 50 * 1024 * 1024  # a real resume unpacks to well under 1 MB; a "zip bomb" to gigabytes
+MAX_UNPACKED_BYTES = 50 * 1024 * 1024  # a real resume's text unpacks to well under 1 MB; a "zip bomb" to gigabytes
+
+
+def _is_text_part(name: str) -> bool:
+    """The parts TrueFit reads: the document's XML and its relationship lists. Everything else (embedded
+    fonts, images, embedded objects, thumbnails, saved style galleries) holds no resume text."""
+    return name.endswith((".xml", ".rels")) and not name.startswith("word/glossary/")
 
 
 def unpacks_too_large(data: bytes) -> bool:
-    """True when the file's contents would unpack to more than MAX_UNPACKED_BYTES (checked without unpacking)."""
+    """True when the parts TrueFit reads would unpack to more than MAX_UNPACKED_BYTES (checked without
+    unpacking). Fonts and images don't count: they're never unpacked (see _text_parts_only)."""
     try:
         with zipfile.ZipFile(BytesIO(data)) as archive:
-            return sum(item.file_size for item in archive.infolist()) > MAX_UNPACKED_BYTES
+            return sum(i.file_size for i in archive.infolist() if _is_text_part(i.filename)) > MAX_UNPACKED_BYTES
     except (zipfile.BadZipFile, ValueError):
         return False  # not a zip at all; reading it reports not_docx
 
 
+def _text_parts_only(data: bytes) -> bytes:
+    """A copy of the file with every non-text part emptied, so a resume saved with embedded fonts (often
+    5-20 MB of invisible font files) opens without unpacking them. The parts stay, empty, so Word's
+    internal links still resolve."""
+    out = BytesIO()
+    with zipfile.ZipFile(BytesIO(data)) as source, zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as copy:
+        for item in source.infolist():
+            copy.writestr(item.filename, source.read(item) if _is_text_part(item.filename) else b"")
+    return out.getvalue()
+
+
 def read_docx_text(data: bytes) -> str:
     try:
-        document = Document(BytesIO(data))
+        document = Document(BytesIO(_text_parts_only(data)))
         style_names = {style.style_id: style.name for style in document.styles}
         lines = _header_lines(document.sections[0], style_names)
         lines += _block_lines(document.element.body, style_names)

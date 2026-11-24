@@ -174,3 +174,30 @@ def test_typed_bullet_in_a_list_item_is_not_doubled():
 def test_leading_minus_sign_is_kept():
     data = docx_bytes(lambda d: d.add_paragraph("-15% cost per order after re-slotting", style="List Bullet"))
     assert read_docx_text(data) == "- -15% cost per order after re-slotting"
+
+
+def with_extra_part(data: bytes, name: str, blob: bytes, stored: bool = False) -> bytes:
+    """Add a part to a .docx, the way Word adds an embedded font file."""
+    import zipfile
+    out = BytesIO()
+    with zipfile.ZipFile(BytesIO(data)) as source, zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as copy:
+        for item in source.infolist():
+            copy.writestr(item, source.read(item))
+        copy.writestr(name, blob, compress_type=zipfile.ZIP_STORED if stored else zipfile.ZIP_DEFLATED)
+    return out.getvalue()
+
+
+def test_embedded_fonts_are_ignored():
+    """A text-only resume saved with "Embed fonts in the file" carries megabytes of font files."""
+    from app.docx_text import unpacks_too_large
+    data = with_extra_part(docx_bytes(lambda d: d.add_paragraph("Jane Doe")), "word/fonts/font1.odttf",
+                           b"\0" * (60 * 1024 * 1024))
+    assert not unpacks_too_large(data)  # fonts don't count toward the zip-bomb limit
+    assert read_docx_text(data) == "Jane Doe"
+
+
+def test_a_document_with_a_picture_still_reads():
+    import base64
+    png = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==")
+    data = docx_bytes(lambda d: (d.add_paragraph("Jane Doe"), d.add_picture(BytesIO(png)), d.add_paragraph("EDUCATION")))
+    assert read_docx_text(data).split("\n")[0] == "Jane Doe" and "EDUCATION" in read_docx_text(data)
