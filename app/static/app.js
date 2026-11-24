@@ -97,8 +97,10 @@ let checkedPosting = null; // the posting text that result belongs to
 
 // Tailoring uses the posting in the box, so it must be the posting that was checked. If the student
 // changes it after a check (e.g. pastes a different posting), Tailor locks until they check again.
+// Spaces and line breaks don't count as a change: deleting an added word often leaves its space behind.
+const sameText = (a, b) => a.replace(/\s+/g, " ").trim() === b.replace(/\s+/g, " ").trim();
 function postingIsChecked() {
-  return lastStartDate !== null && postingInput.value === checkedPosting;
+  return lastStartDate !== null && checkedPosting !== null && sameText(postingInput.value, checkedPosting);
 }
 function syncTailorLock() {
   if (lastStartDate === null || tailorButton.classList.contains("busy")) return;
