@@ -196,6 +196,9 @@ One authored moment: when an exhibit fills, a highlighter swipe draws across eac
 ### Top bar
 Deck Navy, 64px tall, wordmark then three tabs ("1 Start date", "2 Your experience", "3 Tailored resume"). The current step's tab has `aria-current="step"`, full white text, and a 3px highlighter underline.
 
+### Skip link
+"Skip to the posting," hidden above the top bar until a keyboard user tabs to it, then shown in Deck Navy on Highlighter at the top left.
+
 ### Exhibit (signature)
 Exhibit number in teal caps, then the action title, then a Muted sub-line ("Checked against your availability: …") over a 2px navy rule. Below, a table: Requirement | Status | What the posting says. The empty state shows the same table with one "Not checked yet" row and a grey bar where the quote will go.
 
