@@ -19,6 +19,7 @@
 - **Run model evals:** `uv run python tests/eval/run_eval.py --suite start_date` (add `--cases 13 16` to run only some cases)
 - **Run the Build 4 scorecard:** `uv run python tests/eval/run_eval.py --suite build4 --label before` (or `--label after`; always all 10 cases; writes `tests/eval/results/build4/<label>/`)
   (real model calls — costs money; ask before running)
+- **Restore the design skills:** `npx skills install` (reads `skills-lock.json`). `web-design-guidelines` is committed; `design-taste-frontend` is git-ignored (39 MB) and adds a Stop hook while it's in use.
 
 ## 3. Project Structure
 - `app/main.py` — FastAPI app: serves the page, the `/api/start-date` (start date + eligibility), `/api/tailor`, `/api/verify-bullet`, `/api/read-docx`, and `/api/posting-link` routes, error handlers, and the PostHog server client.
