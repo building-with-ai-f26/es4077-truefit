@@ -1047,3 +1047,23 @@ function el(tag, attrs = {}, ...children) {
   }
   return node;
 }
+
+// ---- Leaving the page ------------------------------------------------------
+// The browser asks "Leave site?" only when work would be lost: a tailored resume on screen, or a
+// resume or notes that differ from what's saved on this device. A pasted posting alone doesn't count.
+function hasUnsavedWork() {
+  if (tailorState) return true;
+  const saved = loadProfile();
+  const texts = (files) => JSON.stringify(files.map((f) => f.text));
+  return Boolean(
+    (masterResumeInput.value.trim() && masterResumeInput.value !== saved.masterResume) ||
+    (notesInput.value.trim() && notesInput.value !== saved.backgroundNotes) ||
+    (noteFiles.length && texts(noteFiles) !== texts(saved.noteFiles))
+  );
+}
+
+window.addEventListener("beforeunload", (event) => {
+  if (!hasUnsavedWork()) return;
+  event.preventDefault();
+  event.returnValue = ""; // older browsers need this to show their own "Leave site?" message
+});
