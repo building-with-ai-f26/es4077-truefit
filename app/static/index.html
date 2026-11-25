@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#14213d" />
   <title>TrueFit</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,8 +15,9 @@
   <script src="/static/posthog.js"></script>
 </head>
 <body>
+  <a class="skip-link" href="#step-posting">Skip to the posting</a>
   <header class="topbar">
-    <span class="brand">TrueFit</span>
+    <h1 class="brand">TrueFit</h1>
     <nav class="steps" aria-label="Steps">
       <a href="#step-posting" aria-current="step"><b>1</b> Eligibility</a>
       <a href="#step-resume"><b>2</b> <span class="full">Your experience</span><span class="short">Experience</span></a>
@@ -29,7 +31,7 @@
     <!-- 1. Availability + posting, with the start-date exhibit beside it -->
     <div class="band">
       <section id="step-posting" class="inputs" aria-labelledby="posting-heading">
-        <h2 id="posting-heading" class="panel-title">1 · The posting</h2>
+        <h2 id="posting-heading" class="panel-title"><span class="step-no">1</span>The posting</h2>
 
         <label for="availability">Available starting</label>
         <input id="availability" type="text" autocomplete="off"
@@ -71,7 +73,7 @@
     <!-- 2. Master resume + background notes, with the tailored resume beside it -->
     <div class="band">
       <section id="step-resume" class="inputs" aria-labelledby="resume-heading">
-        <h2 id="resume-heading" class="panel-title">2 · Your experience</h2>
+        <h2 id="resume-heading" class="panel-title"><span class="step-no">2</span>Your experience</h2>
 
         <div class="label-row">
           <label for="master-resume">Master resume</label>

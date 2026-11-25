@@ -46,7 +46,20 @@ input, textarea { caret-color: var(--teal); }
   background: var(--navy);
   color: #fff;
 }
-.brand { align-self: center; font: 800 24px var(--display); letter-spacing: -0.01em; }
+.brand { align-self: center; margin: 0; font: 800 24px var(--display); letter-spacing: -0.01em; }
+
+/* Keyboard users can jump past the step tabs; hidden until focused */
+.skip-link {
+  position: absolute; left: 16px; top: -64px; z-index: 20;
+  padding: 10px 16px; border-radius: 4px;
+  font: 700 16px var(--display); color: var(--navy); background: var(--highlight-solid);
+}
+.skip-link:focus { top: 12px; }
+
+/* Phones: no double-tap zoom delay, and a teal tap flash instead of the default grey */
+a, button, label, summary { touch-action: manipulation; }
+html { -webkit-tap-highlight-color: rgba(15, 124, 122, 0.15); }
+input[type="checkbox"] { accent-color: var(--teal); }
 .steps { display: flex; gap: 4px; }
 .steps a {
   display: flex;
@@ -70,6 +83,8 @@ input, textarea { caret-color: var(--teal); }
   grid-template-columns: 440px minmax(0, 1fr);
   border-bottom: 1px solid var(--rule);
 }
+/* A strip of ground between steps, so each step reads as its own sheet */
+.band + .band { margin-top: 40px; border-top: 1px solid var(--rule); }
 .inputs {
   background: var(--panel);
   border-right: 1px solid var(--rule);
@@ -78,14 +93,22 @@ input, textarea { caret-color: var(--teal); }
 }
 .exhibit { padding: 40px 64px 48px; max-width: 980px; scroll-margin-top: 16px; }
 
-.panel-title, .exhibit-no {
+/* Step title: opens each input panel the way the navy rule closes each action title */
+.panel-title {
+  margin: 0 0 4px;
+  padding-top: 12px;
+  border-top: 2px solid var(--navy);
+  font: 700 16px/1.4 var(--display);
+  color: var(--navy);
+}
+.panel-title .step-no { margin-right: 8px; color: var(--teal); }
+.exhibit-no {
   margin: 0 0 4px;
   font: 700 13px var(--display);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--teal);
 }
-.exhibit-no { color: var(--teal); }
 
 .action-title {
   margin: 10px 0 6px;
@@ -263,7 +286,7 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
 .entry { margin: 10px 0 18px; }
 .entry-header { display: flex; justify-content: space-between; gap: 16px; font: 600 16px var(--body); color: var(--ink); }
 .entry-header.org { font: 700 16px var(--display); color: var(--navy); }
-.entry-header-right { flex: none; text-align: right; color: var(--muted); font-weight: 400; }
+.entry-header-right { flex: none; text-align: right; color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
 .bullets { list-style: none; margin: 6px 0 0; padding: 0; }
 .bullet {
   display: grid;
@@ -355,6 +378,7 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
   .steps .full { display: none; }
   .steps .short { display: inline; }
   .band { grid-template-columns: 1fr; }
+  .band + .band { margin-top: 28px; }
   .inputs { border-right: none; border-bottom: 1px solid var(--rule); padding: 28px 20px 32px; }
   .exhibit { padding: 28px 20px 36px; }
   .action-title { font-size: 28px; }
@@ -369,4 +393,9 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
   .bullet { grid-template-columns: 1fr; gap: 4px; }
   .copy-row { flex-wrap: wrap; }
   .copy-row label { width: 100%; }
+  /* Word and PDF side by side, then Copy across the full width (same order as on desktop) */
+  .copy-actions { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+  .copy-actions .secondary { justify-content: center; }
+  #copy-resume { grid-column: 1 / -1; justify-content: center; }
+  .only-unverified { margin-left: 0; }
 }

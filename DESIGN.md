@@ -167,7 +167,8 @@ Restrained: deck navy owns the shell, teal owns the one action per step, highlig
 - **Wordmark** (800, 24px): "TrueFit" in the top bar.
 - **Tab** (500, 16px; numbers at 700): step tabs in the top bar, 78% white, full white when hovered or current.
 - **Row label** (700, 16px): requirement names, resume entry headers, primary button text.
-- **Caps label** (700, 13px, 0.06–0.08em, uppercase): panel titles, exhibit numbers, table headers, resume section headings.
+- **Step title** (700, 16px, Deck Navy, over a 2px navy rule): opens each input panel, with the step number in Teal ("1 The posting").
+- **Caps label** (700, 13px, 0.06–0.08em, uppercase): exhibit numbers, table headers, resume section headings.
 - **Body** (400, 16px, 1.55): everything else.
 - **Footnote** (400, 13px): hints, sources, flag reasons, link buttons (at 600).
 
@@ -178,7 +179,7 @@ Restrained: deck navy owns the shell, teal owns the one action per step, highlig
 
 ## Layout
 
-A band per step: `grid-template-columns: 440px 1fr`. The input panel is white with a 1px right rule and 36px × 40px padding. The exhibit pads 40px × 64px and caps at 980px. Bands are separated by a 1px rule. Under 900px, bands stack, padding drops to 28px × 20px, tabs shorten to "Experience" and "Resume", and exhibit table rows become label + status on one line with the quote below.
+A band per step: `grid-template-columns: 440px 1fr`. The input panel is white with a 1px right rule and 36px × 40px padding. The exhibit pads 40px × 64px and caps at 980px. Bands are separated by a 40px strip of Ground between 1px rules (28px under 900px), so each step reads as its own sheet. Under 900px, bands stack, padding drops to 28px × 20px, tabs shorten to "Experience" and "Resume", and exhibit table rows become label + status on one line with the quote below.
 
 Field groups are 22px apart; hints sit 6px under their field; a primary button sits 22px under the last field.
 
@@ -194,6 +195,9 @@ One authored moment: when an exhibit fills, a highlighter swipe draws across eac
 
 ### Top bar
 Deck Navy, 64px tall, wordmark then three tabs ("1 Start date", "2 Your experience", "3 Tailored resume"). The current step's tab has `aria-current="step"`, full white text, and a 3px highlighter underline.
+
+### Skip link
+"Skip to the posting," hidden above the top bar until a keyboard user tabs to it, then shown in Deck Navy on Highlighter at the top left.
 
 ### Exhibit (signature)
 Exhibit number in teal caps, then the action title, then a Muted sub-line ("Checked against your availability: …") over a 2px navy rule. Below, a table: Requirement | Status | What the posting says. The empty state shows the same table with one "Not checked yet" row and a grey bar where the quote will go.
