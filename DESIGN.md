@@ -179,7 +179,7 @@ Restrained: deck navy owns the shell, teal owns the one action per step, highlig
 
 ## Layout
 
-A band per step: `grid-template-columns: 440px 1fr`. The input panel is white with a 1px right rule and 36px × 40px padding. The exhibit pads 40px × 64px and caps at 980px. Bands are separated by a 40px strip of Ground between 1px rules (28px under 900px), so each step reads as its own sheet. Under 900px, bands stack, padding drops to 28px × 20px, tabs shorten to "Experience" and "Resume", and exhibit table rows become label + status on one line with the quote below.
+A band per step: `grid-template-columns: 440px 1fr`. The input panel is white with a 1px right rule and 36px × 40px padding. The exhibit pads 40px × 64px and caps at 980px. Bands are separated by a 1px rule; each step's title and its 2px navy rule mark where the step starts. Under 900px, bands stack, padding drops to 28px × 20px, tabs shorten to "Experience" and "Resume", and exhibit table rows become label + status on one line with the quote below.
 
 Field groups are 22px apart; hints sit 6px under their field; a primary button sits 22px under the last field.
 

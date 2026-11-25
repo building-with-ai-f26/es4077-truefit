@@ -83,8 +83,6 @@ input[type="checkbox"] { accent-color: var(--teal); }
   grid-template-columns: 440px minmax(0, 1fr);
   border-bottom: 1px solid var(--rule);
 }
-/* A strip of ground between steps, so each step reads as its own sheet */
-.band + .band { margin-top: 40px; border-top: 1px solid var(--rule); }
 .inputs {
   background: var(--panel);
   border-right: 1px solid var(--rule);
@@ -378,7 +376,6 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
   .steps .full { display: none; }
   .steps .short { display: inline; }
   .band { grid-template-columns: 1fr; }
-  .band + .band { margin-top: 28px; }
   .inputs { border-right: none; border-bottom: 1px solid var(--rule); padding: 28px 20px 32px; }
   .exhibit { padding: 28px 20px 36px; }
   .action-title { font-size: 28px; }
