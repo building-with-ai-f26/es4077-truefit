@@ -90,6 +90,9 @@ input[type="checkbox"] { accent-color: var(--teal); }
   scroll-margin-top: 16px;
 }
 .exhibit { padding: 40px 64px 48px; max-width: 980px; scroll-margin-top: 16px; }
+/* Long links and unbroken words wrap instead of pushing the page sideways */
+.inputs, .exhibit { overflow-wrap: break-word; }
+.exhibit-table td:last-child, .quote { overflow-wrap: anywhere; }
 
 /* Step title: opens each input panel the way the navy rule closes each action title */
 .panel-title {
@@ -377,19 +380,19 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
   .steps a { padding: 10px 10px 12px; gap: 6px; white-space: nowrap; }
   .steps .full { display: none; }
   .steps .short { display: inline; }
-  .band { grid-template-columns: 1fr; }
+  .band { grid-template-columns: minmax(0, 1fr); }
   .inputs { border-right: none; border-bottom: 1px solid var(--rule); padding: 28px 20px 32px; }
   .exhibit { padding: 28px 20px 36px; }
   .action-title { font-size: 28px; }
   .error { margin: 16px 20px 0; }
   .exhibit-table thead { display: none; }
   /* Each row stacks: name, then status (left-aligned so the icons line up), then the quote */
-  .exhibit-table tr { display: grid; grid-template-columns: 1fr; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+  .exhibit-table tr { display: grid; grid-template-columns: minmax(0, 1fr); padding: 14px 0; border-bottom: 1px solid var(--rule); }
   .exhibit-table td { padding: 0; border: none; }
   .exhibit-table .req, .exhibit-table .status { width: auto; }
   .exhibit-table .status { margin-top: 6px; }
   .exhibit-table td:last-child { margin-top: 8px; }
-  .bullet { grid-template-columns: 1fr; gap: 4px; }
+  .bullet { grid-template-columns: minmax(0, 1fr); gap: 4px; }
   .copy-row { flex-wrap: wrap; }
   .copy-row label { width: 100%; }
   /* Word and PDF side by side, then Copy across the full width (same order as on desktop) */
