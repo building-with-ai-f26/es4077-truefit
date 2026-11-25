@@ -30,3 +30,8 @@ out/
 .DS_Store
 *.log
 *.egg-info/
+
+# design-taste-frontend skill: 39 MB of images, so only skills-lock.json is committed.
+# Restore it with `npx skills install`.
+.agents/skills/design-taste-frontend/
+.claude/skills/design-taste-frontend
