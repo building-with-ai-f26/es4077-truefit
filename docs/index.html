@@ -234,6 +234,7 @@
     <a class="brand" href="#top">TrueFit</a>
     <nav aria-label="Page sections">
       <a href="#live-demo">Product</a>
+      <a href="#output-quality">Testing</a>
       <a href="#prd">Living PRD</a>
       <a href="#build-log">Build log</a>
     </nav>
@@ -257,7 +258,7 @@
     <section id="live-demo">
       <h2>Product Showcase</h2>
       <p>
-        <strong>Current Status:</strong> Build 3: live on the web, with rate limits and a security audit<br />
+        <strong>Current Status:</strong> Build 4: tested on 10 inputs and improved (output quality score 38/40 before, 40/40 after; see <a href="#output-quality">Output Quality</a>)<br />
         <strong>Live app:</strong> <a href="https://es4077-truefit.onrender.com">es4077-truefit.onrender.com</a> (free hosting; the first visit after a quiet spell can take 30–60 seconds to wake up). Screenshots below.
       </p>
       <figure>
@@ -274,6 +275,76 @@
           Tailored resume (Nov 18, 2026), real model output for the same posting and a made-up resume uploaded as a Word file. All 4 bullets traced back to a line in the resume. The gap list shows the one thing the posting asks for that the resume doesn't show (SQL), and the resume can be copied or downloaded as a one-page Word or PDF file.
         </figcaption>
       </figure>
+    </section>
+
+    <!-- BUILD 4 EVIDENCE: OUTPUT QUALITY (Track A) -->
+    <section id="output-quality">
+      <h2>Output Quality: Before and After</h2>
+      <p>Build 4, Track A. TrueFit's biggest risk is its AI output: a resume that reads as generic, invents something, or tailors confidently to text that isn't a real posting. I wrote four rules for good output, built 10 test inputs for tech roles, scored the live version, improved it, and re-scored the same 10 inputs. Before: <strong>38/40</strong>. After: <strong>40/40</strong>.</p>
+
+      <h3>Rubric: four rules, pass or fail for each case</h3>
+      <table>
+        <tr><th scope="row">1. Truthful</th><td>Every bullet traces to the student's own lines: no number, skill, tool, or result that isn't there, and the student's role isn't inflated. <span class="meta">Checked by script, plus a read of any flagged bullet.</span></td></tr>
+        <tr><th scope="row">2. Grounded start date</th><td>The verdict matches the posting and quotes it; a missing or vague date is called missing or vague, never made up. <span class="meta">Checked by script.</span></td></tr>
+        <tr><th scope="row">3. Relevant and specific</th><td>The resume leads with the experience that best matches the posting's top requirements and keeps concrete results instead of generic phrasing. <span class="meta">Scored by hand.</span></td></tr>
+        <tr><th scope="row">4. Honest about gaps and bad input</th><td>The gap list names what the student really lacks, under the right heading (Required or Preferred); text that isn't a posting, or tries to instruct TrueFit, gets a clear answer instead of a confident resume. <span class="meta">Checked by script, plus a read of cases 9 and 10.</span></td></tr>
+      </table>
+      <p class="meta">Test set: 5 normal tech postings (product management, product marketing, BizOps, growth with no start date, partnerships), 3 messy ones (a LinkedIn page pasted with its menus and a typo in the date, a resume pasted from a PDF with broken lines, a thin resume with a vague posting), and 2 adversarial ones (a posting with a hidden instruction to TrueFit, and a news article instead of a posting). Hand scores were suggested by my coding agent and confirmed by me, case by case. The cases, outputs, and scorecards are in the repo: <a href="https://github.com/building-with-ai-f26/es4077-truefit/tree/main/tests/eval/results/build4">tests/eval/results/build4</a>.</p>
+
+      <h3>Scorecard</h3>
+      <table>
+        <thead><tr><th>Case</th><th>Kind</th><th>Before</th><th>After</th><th>What changed</th></tr></thead>
+        <tbody>
+          <tr><td>1. Product manager</td><td>Normal</td><td>4/4</td><td>4/4</td><td>Bullets now lead with the result</td></tr>
+          <tr><td>2. Product marketing</td><td>Normal</td><td>4/4</td><td>4/4</td><td>—</td></tr>
+          <tr><td>3. BizOps</td><td>Normal</td><td>4/4</td><td>4/4</td><td>—</td></tr>
+          <tr><td>4. Growth, no start date</td><td>Normal</td><td>4/4</td><td>4/4</td><td>—</td></tr>
+          <tr><td>5. Partnerships</td><td>Normal</td><td>3/4</td><td>4/4</td><td>Rule 3: filler and repeated bullets gone. Also no more unreadable AI replies</td></tr>
+          <tr><td>6. LinkedIn paste</td><td>Messy</td><td>4/4</td><td>4/4</td><td>—</td></tr>
+          <tr><td>7. Resume pasted from a PDF</td><td>Messy</td><td>3/4</td><td>4/4</td><td>Rule 3: broken lines rejoined, result and skills kept</td></tr>
+          <tr><td>8. Thin resume, vague posting</td><td>Messy</td><td>4/4</td><td>4/4</td><td>—</td></tr>
+          <tr><td>9. Hidden instruction</td><td>Adversarial</td><td>4/4</td><td>4/4</td><td>—</td></tr>
+          <tr><td>10. Not a job posting</td><td>Adversarial</td><td>4/4</td><td>4/4</td><td>—</td></tr>
+          <tr><td><strong>Total</strong></td><td></td><td><strong>38/40</strong></td><td><strong>40/40</strong></td><td>Rules 1, 2, 4 passed every case both times</td></tr>
+        </tbody>
+      </table>
+      <p class="meta">Before: Nov 24, 2026 on the live version. After: Nov 24, 2026, after the fixes in pull requests #62–#67 (all deployed). Rules 1, 2 and 4 already passed everywhere, so the gains are in rule 3: whether the resume reads as tailored.</p>
+
+      <h3>Examples</h3>
+      <p><strong>Case 7, resume pasted from a PDF.</strong> PDF copy-paste breaks lines. Before, half of the student's best bullet was glued under the job title, so it lost its result, and the Skills section was dropped.</p>
+      <table>
+        <thead><tr><th>Before</th><th>After</th></tr></thead>
+        <tbody><tr>
+          <td>Program Manager | 2016 – 2025<br />engineering and operations teams, finishing 2 weeks early<br />- Coordinated the launch of a new warehouse system across 6 sites<br /><span class="meta">(no Skills section)</span></td>
+          <td>Program Manager | 2016 – 2025<br />- Finished a new warehouse system launch across 6 sites 2 weeks early by coordinating with engineering and operations teams<br />Skills: Jira | Confluence | MS Project</td>
+        </tr></tbody>
+      </table>
+      <p><strong>Case 5, partnerships.</strong> Before, the resume told the reseller story twice and kept a filler bullet. After, each piece of work appears once, and the VP still leads the negotiation, as in the student's own notes.</p>
+      <table>
+        <thead><tr><th>Before</th><th>After</th></tr></thead>
+        <tbody><tr>
+          <td>- Managed reseller partnerships, including rebuilding the relationship with the largest reseller through monthly joint pipeline reviews.<br />- Renewed the largest reseller's contract at $8M a year, up from $6M, after rebuilding the relationship through monthly joint pipeline reviews.<br />- Prepared the pricing analysis that supported the VP of sales, who led the final reseller negotiation.<br />- Negotiated contracts as a Business Development Manager.<br />- Set up the first integration partnership with a cloud provider&hellip;</td>
+          <td>- Renewed the largest reseller contract at $8M a year, up from $6M, after rebuilding the relationship through monthly joint pipeline reviews<br />- Supported the final reseller contract negotiation led by the VP of sales by preparing the pricing analysis<br />- Set up the company's first integration partnership with a cloud provider&hellip;</td>
+        </tr></tbody>
+      </table>
+      <p><strong>Case 1, product manager.</strong> Before, TrueFit reordered jobs but kept every bullet word for word. After, bullets lead with the result and can use the posting's wording when the student's line already says the same thing.</p>
+      <table>
+        <thead><tr><th>Before</th><th>After</th></tr></thead>
+        <tbody><tr>
+          <td>- Ran an A/B test on reminder timing that raised appointment confirmations 9%<br />- Ran technical discovery with 40+ enterprise customers and wrote requirements for the product team<br />- Led onboarding redesign that cut time-to-first-value from 30 to 12 days</td>
+          <td>- Raised appointment confirmations 9% after running an A/B test on reminder timing<br />- Ran customer discovery with 40+ enterprise customers and wrote requirements for the product team<br />- Cut time-to-first-value from 30 to 12 days by leading an onboarding redesign</td>
+        </tr></tbody>
+      </table>
+
+      <h3>What still feels off</h3>
+      <ul>
+        <li>Vague start dates aren't fully consistent: in one of three after runs, case 8 ("start date flexible") came back "partly in window" instead of "flexible to discuss," with no code change. The final run passed.</li>
+        <li>In case 7, the degree "BS Industrial Engineering" is still split across two lines in the education section.</li>
+        <li>Using the posting's wording is a judgment call: "technical discovery" became "customer discovery" in case 1. I accepted it because both describe working with customers to write requirements.</li>
+      </ul>
+
+      <h3>Outside check</h3>
+      <p>[Outside reviewer's comments on the improved outputs go here.]</p>
     </section>
 
     <!-- LIVING PRD (Updated every week!) -->
