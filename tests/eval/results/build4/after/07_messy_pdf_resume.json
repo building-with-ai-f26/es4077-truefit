@@ -1,0 +1,295 @@
+{
+  "case": "07_messy_pdf_resume",
+  "kind": "messy",
+  "label": "after",
+  "rubric_notes": "Broken PDF line breaks and spaced-out headings; must keep 6 sites, 2 weeks, 30-person, 35%.",
+  "notes": [
+    "start date: expected in_window, got in_window",
+    "hand scores: suggested by Claude, confirmed by the student Nov 24 (cases 1 and 5 on the review page, the rest in chat)"
+  ],
+  "scores": {
+    "truthful": 1,
+    "start_date": 1,
+    "relevant": 1,
+    "honest_gaps": 1
+  },
+  "start_date": {
+    "verdict": "in_window",
+    "verdict_label": "In window",
+    "availability": {
+      "mode": "month",
+      "start": "2027-06-01",
+      "label": "Starting June 2027"
+    },
+    "mentions": [
+      {
+        "quote": "Start date: June 1, 2027.",
+        "kind": "exact_date",
+        "start": "2027-06-01",
+        "end": "2027-06-01",
+        "role_hint": null,
+        "is_vague": false,
+        "verdict": "in_window",
+        "verdict_label": "In window",
+        "note": null
+      }
+    ],
+    "note": null,
+    "undergrad_warning": null,
+    "requirements": [
+      {
+        "requirement": "degree",
+        "name": "Degree",
+        "verdict": "meets",
+        "verdict_label": "Meets",
+        "quote": "MBA or 4+ years of program management",
+        "note": null,
+        "detail": null
+      },
+      {
+        "requirement": "work_authorization",
+        "name": "Sponsorship",
+        "verdict": "not_stated",
+        "verdict_label": "Not stated",
+        "quote": null,
+        "note": null,
+        "detail": null
+      },
+      {
+        "requirement": "years_experience",
+        "name": "Years of experience",
+        "verdict": "info",
+        "verdict_label": "4+ years required",
+        "quote": "MBA or 4+ years of program management",
+        "note": "Required. Compare it with your own full-time experience before applying.",
+        "detail": "required:4"
+      }
+    ]
+  },
+  "start_date_got": "in_window",
+  "tailor": {
+    "resume_lines": [
+      {
+        "id": "L1",
+        "text": "TAYLOR NGUYEN",
+        "section": null,
+        "source": "resume",
+        "kind": "contact"
+      },
+      {
+        "id": "L2",
+        "text": "taylor.nguyen@example.com • (555) 010-2222",
+        "section": null,
+        "source": "resume",
+        "kind": "contact"
+      },
+      {
+        "id": "L3",
+        "text": "EDUCATION",
+        "section": "Education",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L4",
+        "text": "NYU Stern School of Business",
+        "section": "Education",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L5",
+        "text": "MBA, Tech & Strategy Aug 2025 – May 2027",
+        "section": "Education",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L6",
+        "text": "Texas A&M University BS Industrial",
+        "section": "Education",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L7",
+        "text": "Engineering 2012–2016",
+        "section": "Education",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L8",
+        "text": "EXPERIENCE",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L9",
+        "text": "Program Manager , Proseware Inc. Dallas TX 2016 – 2025",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L10",
+        "text": "▪ Coordinated launch of a new warehouse system across 6 sites with engineering and operations teams, finishing 2 weeks early",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L11",
+        "text": "▪ Ran weekly risk reviews for a 30-person program",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L12",
+        "text": "▪ Cut defect backlog by 35%",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L13",
+        "text": "SKILLS",
+        "section": "Skills",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L14",
+        "text": "Jira · Confluence · MS Project",
+        "section": "Skills",
+        "source": "resume",
+        "kind": "header"
+      }
+    ],
+    "resume": {
+      "sections": [
+        {
+          "heading": "Education",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L4",
+                "L5"
+              ],
+              "header_fields": {
+                "L4": {
+                  "organization": "NYU Stern School of Business"
+                },
+                "L5": {
+                  "title": "MBA, Tech & Strategy",
+                  "dates": "Aug 2025 – May 2027"
+                }
+              },
+              "bullets": []
+            },
+            {
+              "header_line_ids": [
+                "L6",
+                "L7"
+              ],
+              "header_fields": {
+                "L6": {
+                  "organization": "Texas A&M University",
+                  "title": "BS Industrial"
+                },
+                "L7": {
+                  "title": "Engineering",
+                  "dates": "2012–2016"
+                }
+              },
+              "bullets": []
+            }
+          ]
+        },
+        {
+          "heading": "Experience",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L9"
+              ],
+              "header_fields": {
+                "L9": {
+                  "title": "Program Manager",
+                  "organization": "Proseware Inc.",
+                  "location": "Dallas TX",
+                  "dates": "2016 – 2025"
+                }
+              },
+              "bullets": [
+                {
+                  "text": "Finished a new warehouse system launch across 6 sites 2 weeks early by coordinating with engineering and operations teams",
+                  "source_line_ids": [
+                    "L10"
+                  ],
+                  "id": "B1",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                },
+                {
+                  "text": "Ran weekly risk reviews for a 30-person program",
+                  "source_line_ids": [
+                    "L11"
+                  ],
+                  "id": "B2",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                },
+                {
+                  "text": "Cut defect backlog by 35%",
+                  "source_line_ids": [
+                    "L12"
+                  ],
+                  "id": "B3",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Skills",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L14"
+              ],
+              "header_fields": {},
+              "bullets": []
+            }
+          ]
+        }
+      ],
+      "plain_text": "TAYLOR NGUYEN\ntaylor.nguyen@example.com | (555) 010-2222\n\nEducation\nNYU Stern School of Business\nMBA, Tech & Strategy | Aug 2025 – May 2027\nTexas A&M University\nBS Industrial\nEngineering | 2012 – 2016\n\nExperience\nProseware Inc. | Dallas TX\nProgram Manager | 2016 – 2025\n- Finished a new warehouse system launch across 6 sites 2 weeks early by coordinating with engineering and operations teams\n- Ran weekly risk reviews for a 30-person program\n- Cut defect backlog by 35%\n\nSkills\nJira | Confluence | MS Project\n"
+    },
+    "gaps": {
+      "required": [],
+      "preferred": [
+        {
+          "text": "Agile/Scrum certification",
+          "quote": "Agile/Scrum certification",
+          "posting_bullet": "Technical Program Manager, MBA. Margie's Travel Tech, Austin, TX. Start date: June 1, 2027. Drive cross-team programs from planning to launch, track risks, and keep engineering, design, and operations aligned. Requirements: MBA or 4+ years of program management; experience working with engineering teams. Preferred: Agile/Scrum certification.",
+          "group": "preferred",
+          "note": "Preferred, so not having it usually won't rule you out.",
+          "related_line_ids": []
+        }
+      ],
+      "none_found": false
+    }
+  },
+  "cost": 0.0307
+}

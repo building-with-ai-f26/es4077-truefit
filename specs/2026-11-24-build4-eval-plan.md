@@ -57,3 +57,20 @@ Improvement candidates (prompt changes need the student's OK):
 3. Merge filler or duplicate bullets, and put the best match first (case 5).
 4. Tailor stays unlocked if the posting is changed after a check.
 5. Maybe: let bullets echo the posting's wording when the student's line supports it.
+
+## After run (Nov 24): 40/40
+
+Same 10 cases, after the improvements merged in PRs #62–#67. The scorecard is `tests/eval/results/build4/after/scorecard.md`. As in the before run, rule 3 scores (and rules 1 and 4 for case 9) were suggested by Claude and confirmed by the student.
+
+What changed:
+1. Pasted PDF resumes: broken lines rejoined, spaced-out headings fixed, dates split from job titles (#62). **Case 7 rule 3: 0 → 1.**
+2. Unreadable model replies: TrueFit now reads the model's last complete answer when it corrects itself (#63). No failures in three after runs.
+3. Best match first, each piece of work told once (#64). **Case 5 rule 3: 0 → 1.**
+4. Tailor locks again when the posting changes after a check (#62; spaces ignored, #66). Checked by hand on the live site.
+5. Bullets may echo the posting's wording when the student's line supports it (#64), and lead with the student's result when there is one (#67, the student's rule).
+6. Bullet endings match the student's own style, periods or none (#65).
+
+Notes:
+- The full after run was done three times ($0.25, $0.25, $0.26), because each later fix changed the outputs and every re-run covers all 10 cases. In the second run, case 8's start date came back "partly in window" instead of "flexible to discuss" (a script fail, 39/40); the start-date code hadn't changed, and the final run passed. The model isn't fully consistent on vague start dates.
+- Judgment calls the student accepted: case 1 "technical discovery" became "customer discovery" (both mean working with customers to write requirements); case 5's cloud-integration bullet came last again, and either order works.
+- Build 4 model spend: about $1.15 ($0.33 before, $0.05 diagnosing case 5, $0.76 for three after runs).

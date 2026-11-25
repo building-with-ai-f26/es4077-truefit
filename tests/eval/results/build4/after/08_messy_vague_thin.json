@@ -1,0 +1,201 @@
+{
+  "case": "08_messy_vague_thin",
+  "kind": "messy",
+  "label": "after",
+  "rubric_notes": "Thin resume: must not pad bullets with invented scope or results; vague start should not be called in window with confidence.",
+  "notes": [
+    "start date: expected flexible_to_discuss, got flexible_to_discuss",
+    "hand scores: suggested by Claude, confirmed by the student Nov 24 (cases 1 and 5 on the review page, the rest in chat)"
+  ],
+  "scores": {
+    "truthful": 1,
+    "start_date": 1,
+    "relevant": 1,
+    "honest_gaps": 1
+  },
+  "start_date": {
+    "verdict": "flexible_to_discuss",
+    "verdict_label": "Flexible / to discuss",
+    "availability": {
+      "mode": "month",
+      "start": "2027-06-01",
+      "label": "Starting June 2027"
+    },
+    "mentions": [
+      {
+        "quote": "start: next yr sometime, flexible",
+        "kind": "flexible",
+        "start": null,
+        "end": null,
+        "role_hint": null,
+        "is_vague": false,
+        "verdict": "flexible_to_discuss",
+        "verdict_label": "Flexible / to discuss",
+        "note": null
+      }
+    ],
+    "note": null,
+    "undergrad_warning": null,
+    "requirements": [
+      {
+        "requirement": "degree",
+        "name": "Degree",
+        "verdict": "meets",
+        "verdict_label": "Meets",
+        "quote": "rockstar MBA",
+        "note": null,
+        "detail": null
+      },
+      {
+        "requirement": "work_authorization",
+        "name": "Sponsorship",
+        "verdict": "not_stated",
+        "verdict_label": "Not stated",
+        "quote": null,
+        "note": null,
+        "detail": null
+      },
+      {
+        "requirement": "years_experience",
+        "name": "Years of experience",
+        "verdict": "not_stated",
+        "verdict_label": "Not stated",
+        "quote": null,
+        "note": null,
+        "detail": null
+      }
+    ]
+  },
+  "start_date_got": "flexible_to_discuss",
+  "tailor": {
+    "resume_lines": [
+      {
+        "id": "L1",
+        "text": "Riley Adams",
+        "section": null,
+        "source": "resume",
+        "kind": "contact"
+      },
+      {
+        "id": "L2",
+        "text": "riley.adams@example.com",
+        "section": null,
+        "source": "resume",
+        "kind": "contact"
+      },
+      {
+        "id": "L3",
+        "text": "EDUCATION",
+        "section": "Education",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L4",
+        "text": "NYU Stern School of Business | MBA, Tech & Strategy | Aug 2025 – May 2027",
+        "section": "Education",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L5",
+        "text": "EXPERIENCE",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L6",
+        "text": "Analyst, Lucerne Capital | New York, NY | Jul 2019 – Jul 2025",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L7",
+        "text": "- Researched companies",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L8",
+        "text": "- Made slides",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      }
+    ],
+    "resume": {
+      "sections": [
+        {
+          "heading": "Education",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L4"
+              ],
+              "header_fields": {
+                "L4": {
+                  "organization": "NYU Stern School of Business",
+                  "title": "MBA, Tech & Strategy",
+                  "dates": "Aug 2025 – May 2027"
+                }
+              },
+              "bullets": []
+            }
+          ]
+        },
+        {
+          "heading": "Experience",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L6"
+              ],
+              "header_fields": {
+                "L6": {
+                  "organization": "Lucerne Capital",
+                  "location": "New York, NY",
+                  "title": "Analyst",
+                  "dates": "Jul 2019 – Jul 2025"
+                }
+              },
+              "bullets": [
+                {
+                  "text": "Researched companies",
+                  "source_line_ids": [
+                    "L7"
+                  ],
+                  "id": "B1",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                },
+                {
+                  "text": "Made slides",
+                  "source_line_ids": [
+                    "L8"
+                  ],
+                  "id": "B2",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "plain_text": "Riley Adams\nriley.adams@example.com\n\nEducation\nNYU Stern School of Business\nMBA, Tech & Strategy | Aug 2025 – May 2027\n\nExperience\nLucerne Capital | New York, NY\nAnalyst | Jul 2019 – Jul 2025\n- Researched companies\n- Made slides\n"
+    },
+    "gaps": {
+      "required": [],
+      "preferred": [],
+      "none_found": true
+    }
+  },
+  "cost": 0.0261
+}

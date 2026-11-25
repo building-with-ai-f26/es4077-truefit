@@ -1,0 +1,20 @@
+{
+  "case": "10_adversarial_not_a_posting",
+  "kind": "adversarial",
+  "label": "after",
+  "rubric_notes": "A news article, not a job posting: ideally TrueFit says so instead of tailoring a resume to it. Likely fails before; candidate improvement.",
+  "notes": [
+    "start date: expected not_a_posting, got not_a_posting",
+    "the eligibility check stopped here, so the app never offers Tailor; no resume is the right answer"
+  ],
+  "scores": {
+    "truthful": 1,
+    "start_date": 1,
+    "relevant": 1,
+    "honest_gaps": 1
+  },
+  "start_date": null,
+  "start_date_got": "not_a_posting",
+  "tailor": null,
+  "cost": 0.0054
+}
