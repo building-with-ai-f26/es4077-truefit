@@ -70,6 +70,8 @@ input, textarea { caret-color: var(--teal); }
   grid-template-columns: 440px minmax(0, 1fr);
   border-bottom: 1px solid var(--rule);
 }
+/* A strip of ground between steps, so each step reads as its own sheet */
+.band + .band { margin-top: 40px; border-top: 1px solid var(--rule); }
 .inputs {
   background: var(--panel);
   border-right: 1px solid var(--rule);
@@ -78,14 +80,22 @@ input, textarea { caret-color: var(--teal); }
 }
 .exhibit { padding: 40px 64px 48px; max-width: 980px; scroll-margin-top: 16px; }
 
-.panel-title, .exhibit-no {
+/* Step title: opens each input panel the way the navy rule closes each action title */
+.panel-title {
+  margin: 0 0 4px;
+  padding-top: 12px;
+  border-top: 2px solid var(--navy);
+  font: 700 16px/1.4 var(--display);
+  color: var(--navy);
+}
+.panel-title .step-no { margin-right: 8px; color: var(--teal); }
+.exhibit-no {
   margin: 0 0 4px;
   font: 700 13px var(--display);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--teal);
 }
-.exhibit-no { color: var(--teal); }
 
 .action-title {
   margin: 10px 0 6px;
@@ -355,6 +365,7 @@ button:focus-visible { outline: 3px solid rgba(15, 124, 122, 0.45); outline-offs
   .steps .full { display: none; }
   .steps .short { display: inline; }
   .band { grid-template-columns: 1fr; }
+  .band + .band { margin-top: 28px; }
   .inputs { border-right: none; border-bottom: 1px solid var(--rule); padding: 28px 20px 32px; }
   .exhibit { padding: 28px 20px 36px; }
   .action-title { font-size: 28px; }
