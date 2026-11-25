@@ -1,0 +1,301 @@
+{
+  "case": "05_normal_partnerships_star",
+  "kind": "normal",
+  "label": "after",
+  "rubric_notes": "Must use the STAR story but keep the VP as the lead negotiator; must not claim developer-community work (only a hope).",
+  "notes": [
+    "start date: expected in_window, got in_window",
+    "hand scores: suggested by Claude, confirmed by the student Nov 24 (cases 1 and 5 on the review page, the rest in chat)",
+    "student's review note: Either order of the cloud-integration and renewal bullets could work."
+  ],
+  "scores": {
+    "truthful": 1,
+    "start_date": 1,
+    "relevant": 1,
+    "honest_gaps": 1
+  },
+  "start_date": {
+    "verdict": "in_window",
+    "verdict_label": "In window",
+    "availability": {
+      "mode": "month",
+      "start": "2027-06-01",
+      "label": "Starting June 2027"
+    },
+    "mentions": [
+      {
+        "quote": "Start date: August 2027",
+        "kind": "month",
+        "start": "2027-08-01",
+        "end": "2027-08-31",
+        "role_hint": null,
+        "is_vague": false,
+        "verdict": "in_window",
+        "verdict_label": "In window",
+        "note": null
+      }
+    ],
+    "note": null,
+    "undergrad_warning": null,
+    "requirements": [
+      {
+        "requirement": "degree",
+        "name": "Degree",
+        "verdict": "meets",
+        "verdict_label": "Meets",
+        "quote": "MBA",
+        "note": null,
+        "detail": null
+      },
+      {
+        "requirement": "work_authorization",
+        "name": "Sponsorship",
+        "verdict": "not_stated",
+        "verdict_label": "Not stated",
+        "quote": null,
+        "note": null,
+        "detail": null
+      },
+      {
+        "requirement": "years_experience",
+        "name": "Years of experience",
+        "verdict": "info",
+        "verdict_label": "3+ years required",
+        "quote": "3+ years in partnerships, business development, or consulting",
+        "note": "Required. Compare it with your own full-time experience before applying.",
+        "detail": "required:3"
+      }
+    ]
+  },
+  "start_date_got": "in_window",
+  "tailor": {
+    "resume_lines": [
+      {
+        "id": "L1",
+        "text": "Jordan Price",
+        "section": null,
+        "source": "resume",
+        "kind": "contact"
+      },
+      {
+        "id": "L2",
+        "text": "jordan.price@example.com",
+        "section": null,
+        "source": "resume",
+        "kind": "contact"
+      },
+      {
+        "id": "L3",
+        "text": "EDUCATION",
+        "section": "Education",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L4",
+        "text": "NYU Stern School of Business | MBA, Tech & Strategy | Aug 2025 – May 2027",
+        "section": "Education",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L5",
+        "text": "Rice University | BA, Political Science | Aug 2012 – May 2016",
+        "section": "Education",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L6",
+        "text": "EXPERIENCE",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L7",
+        "text": "Business Development Manager, Wingtip Software | Houston, TX | Jul 2016 – Jul 2025",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L8",
+        "text": "- Managed reseller partnerships",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L9",
+        "text": "- Negotiated contracts",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L10",
+        "text": "SKILLS",
+        "section": "Skills",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L11",
+        "text": "Salesforce, Excel",
+        "section": "Skills",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "N1",
+        "text": "STAR story: Our biggest reseller was about to leave.",
+        "section": "Your writing",
+        "source": "notes",
+        "kind": "bullet"
+      },
+      {
+        "id": "N2",
+        "text": "I rebuilt the relationship by running monthly joint pipeline reviews, and renewed the contract at $8M a year, up from $6M.",
+        "section": "Your writing",
+        "source": "notes",
+        "kind": "bullet"
+      },
+      {
+        "id": "N3",
+        "text": "Our VP of sales led the final negotiation and I prepared the pricing analysis.",
+        "section": "Your writing",
+        "source": "notes",
+        "kind": "bullet"
+      },
+      {
+        "id": "N4",
+        "text": "I also set up our first integration partnership with a cloud provider, working with 2 of our engineers on the technical requirements.",
+        "section": "Your writing",
+        "source": "notes",
+        "kind": "bullet"
+      },
+      {
+        "id": "N5",
+        "text": "I hope to learn more about developer communities in my next role.",
+        "section": "Your writing",
+        "source": "notes",
+        "kind": "bullet"
+      }
+    ],
+    "resume": {
+      "sections": [
+        {
+          "heading": "Education",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L4"
+              ],
+              "header_fields": {
+                "L4": {
+                  "organization": "NYU Stern School of Business",
+                  "title": "MBA, Tech & Strategy",
+                  "dates": "Aug 2025 – May 2027"
+                }
+              },
+              "bullets": []
+            },
+            {
+              "header_line_ids": [
+                "L5"
+              ],
+              "header_fields": {
+                "L5": {
+                  "organization": "Rice University",
+                  "title": "BA, Political Science",
+                  "dates": "Aug 2012 – May 2016"
+                }
+              },
+              "bullets": []
+            }
+          ]
+        },
+        {
+          "heading": "Experience",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L7"
+              ],
+              "header_fields": {
+                "L7": {
+                  "organization": "Wingtip Software",
+                  "location": "Houston, TX",
+                  "title": "Business Development Manager",
+                  "dates": "Jul 2016 – Jul 2025"
+                }
+              },
+              "bullets": [
+                {
+                  "text": "Renewed the largest reseller contract at $8M a year, up from $6M, after rebuilding the relationship through monthly joint pipeline reviews",
+                  "source_line_ids": [
+                    "L8",
+                    "N1",
+                    "N2"
+                  ],
+                  "id": "B1",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                },
+                {
+                  "text": "Supported the final reseller contract negotiation led by the VP of sales by preparing the pricing analysis",
+                  "source_line_ids": [
+                    "L9",
+                    "N3"
+                  ],
+                  "id": "B2",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                },
+                {
+                  "text": "Set up the company's first integration partnership with a cloud provider, working with 2 engineers on the technical requirements",
+                  "source_line_ids": [
+                    "N4"
+                  ],
+                  "id": "B3",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Skills",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L11"
+              ],
+              "header_fields": {
+                "L11": {
+                  "organization": "Salesforce, Excel"
+                }
+              },
+              "bullets": []
+            }
+          ]
+        }
+      ],
+      "plain_text": "Jordan Price\njordan.price@example.com\n\nEducation\nNYU Stern School of Business\nMBA, Tech & Strategy | Aug 2025 – May 2027\nRice University\nBA, Political Science | Aug 2012 – May 2016\n\nExperience\nWingtip Software | Houston, TX\nBusiness Development Manager | Jul 2016 – Jul 2025\n- Renewed the largest reseller contract at $8M a year, up from $6M, after rebuilding the relationship through monthly joint pipeline reviews\n- Supported the final reseller contract negotiation led by the VP of sales by preparing the pricing analysis\n- Set up the company's first integration partnership with a cloud provider, working with 2 engineers on the technical requirements\n\nSkills\nSalesforce, Excel\n"
+    },
+    "gaps": {
+      "required": [],
+      "preferred": [],
+      "none_found": true
+    }
+  },
+  "cost": 0.0275
+}

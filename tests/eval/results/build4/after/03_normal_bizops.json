@@ -1,0 +1,296 @@
+{
+  "case": "03_normal_bizops",
+  "kind": "normal",
+  "label": "after",
+  "rubric_notes": "Modeling and market sizing first; fintech coverage counts as related experience.",
+  "notes": [
+    "start date: expected in_window, got in_window",
+    "hand scores: suggested by Claude, confirmed by the student Nov 24 (cases 1 and 5 on the review page, the rest in chat)"
+  ],
+  "scores": {
+    "truthful": 1,
+    "start_date": 1,
+    "relevant": 1,
+    "honest_gaps": 1
+  },
+  "start_date": {
+    "verdict": "in_window",
+    "verdict_label": "In window",
+    "availability": {
+      "mode": "month",
+      "start": "2027-06-01",
+      "label": "Starting June 2027"
+    },
+    "mentions": [
+      {
+        "quote": "Start date: June 2027.",
+        "kind": "month",
+        "start": "2027-06-01",
+        "end": "2027-06-30",
+        "role_hint": null,
+        "is_vague": false,
+        "verdict": "in_window",
+        "verdict_label": "In window",
+        "note": null
+      }
+    ],
+    "note": null,
+    "undergrad_warning": null,
+    "requirements": [
+      {
+        "requirement": "degree",
+        "name": "Degree",
+        "verdict": "meets",
+        "verdict_label": "Meets",
+        "quote": "MBA",
+        "note": null,
+        "detail": null
+      },
+      {
+        "requirement": "work_authorization",
+        "name": "Sponsorship",
+        "verdict": "not_stated",
+        "verdict_label": "Not stated",
+        "quote": null,
+        "note": null,
+        "detail": null
+      },
+      {
+        "requirement": "years_experience",
+        "name": "Years of experience",
+        "verdict": "info",
+        "verdict_label": "3+ years required",
+        "quote": "3+ years in consulting, investment banking, or corporate strategy",
+        "note": "Required. Compare it with your own full-time experience before applying.",
+        "detail": "required:3"
+      }
+    ]
+  },
+  "start_date_got": "in_window",
+  "tailor": {
+    "resume_lines": [
+      {
+        "id": "L1",
+        "text": "Elena Ortiz",
+        "section": null,
+        "source": "resume",
+        "kind": "contact"
+      },
+      {
+        "id": "L2",
+        "text": "elena.ortiz@example.com | New York, NY",
+        "section": null,
+        "source": "resume",
+        "kind": "contact"
+      },
+      {
+        "id": "L3",
+        "text": "EDUCATION",
+        "section": "Education",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L4",
+        "text": "NYU Stern School of Business | MBA, Tech & Strategy | Aug 2025 – May 2027",
+        "section": "Education",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L5",
+        "text": "Boston College | BA, Economics | Sep 2013 – May 2017",
+        "section": "Education",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L6",
+        "text": "EXPERIENCE",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L7",
+        "text": "Associate, Woodgrove Bank Investment Banking | New York, NY | Jul 2017 – Jul 2025",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L8",
+        "text": "- Built operating and valuation models for 9 completed M&A deals totaling $3.2B",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L9",
+        "text": "- Prepared board materials on market sizing for 2 software clients",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L10",
+        "text": "- Managed 3 analysts and reviewed their models",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L11",
+        "text": "- Covered consumer fintech companies, including 2 payments processors",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L12",
+        "text": "SKILLS",
+        "section": "Skills",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L13",
+        "text": "Excel, PowerPoint, Capital IQ",
+        "section": "Skills",
+        "source": "resume",
+        "kind": "header"
+      }
+    ],
+    "resume": {
+      "sections": [
+        {
+          "heading": "Education",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L4"
+              ],
+              "header_fields": {
+                "L4": {
+                  "organization": "NYU Stern School of Business",
+                  "title": "MBA, Tech & Strategy",
+                  "dates": "Aug 2025 – May 2027"
+                }
+              },
+              "bullets": []
+            },
+            {
+              "header_line_ids": [
+                "L5"
+              ],
+              "header_fields": {
+                "L5": {
+                  "organization": "Boston College",
+                  "title": "BA, Economics",
+                  "dates": "Sep 2013 – May 2017"
+                }
+              },
+              "bullets": []
+            }
+          ]
+        },
+        {
+          "heading": "Experience",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L7"
+              ],
+              "header_fields": {
+                "L7": {
+                  "organization": "Woodgrove Bank Investment Banking",
+                  "title": "Associate",
+                  "location": "New York, NY",
+                  "dates": "Jul 2017 – Jul 2025"
+                }
+              },
+              "bullets": [
+                {
+                  "text": "Built operating and valuation models for 9 completed M&A deals totaling $3.2B",
+                  "source_line_ids": [
+                    "L8"
+                  ],
+                  "id": "B1",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                },
+                {
+                  "text": "Prepared board materials on market sizing for 2 software clients",
+                  "source_line_ids": [
+                    "L9"
+                  ],
+                  "id": "B2",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                },
+                {
+                  "text": "Covered consumer fintech companies, including 2 payments processors",
+                  "source_line_ids": [
+                    "L11"
+                  ],
+                  "id": "B3",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                },
+                {
+                  "text": "Managed 3 analysts and reviewed their models",
+                  "source_line_ids": [
+                    "L10"
+                  ],
+                  "id": "B4",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Skills",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L13"
+              ],
+              "header_fields": {
+                "L13": {
+                  "title": "Excel, PowerPoint, Capital IQ"
+                }
+              },
+              "bullets": []
+            }
+          ]
+        }
+      ],
+      "plain_text": "Elena Ortiz\nelena.ortiz@example.com | New York, NY\n\nEducation\nNYU Stern School of Business\nMBA, Tech & Strategy | Aug 2025 – May 2027\nBoston College\nBA, Economics | Sep 2013 – May 2017\n\nExperience\nWoodgrove Bank Investment Banking | New York, NY\nAssociate | Jul 2017 – Jul 2025\n- Built operating and valuation models for 9 completed M&A deals totaling $3.2B\n- Prepared board materials on market sizing for 2 software clients\n- Covered consumer fintech companies, including 2 payments processors\n- Managed 3 analysts and reviewed their models\n\nSkills\nExcel, PowerPoint, Capital IQ\n"
+    },
+    "gaps": {
+      "required": [],
+      "preferred": [
+        {
+          "text": "SQL",
+          "quote": "SQL",
+          "posting_bullet": "Strategy & Business Operations Associate. Tailspin Payments, New York, NY. Start date: June 2027. Build the models and analyses leadership uses to run the business: pricing, market sizing, and quarterly planning. Requirements: MBA; 3+ years in consulting, investment banking, or corporate strategy; advanced Excel and financial modeling. Preferred: SQL; fintech or payments experience.",
+          "group": "preferred",
+          "note": "Usually something you can learn. If you've used something similar, say so.",
+          "related_line_ids": []
+        }
+      ],
+      "none_found": false
+    }
+  },
+  "cost": 0.0273
+}

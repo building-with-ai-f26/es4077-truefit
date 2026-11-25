@@ -1,0 +1,305 @@
+{
+  "case": "02_normal_product_marketing",
+  "kind": "normal",
+  "label": "after",
+  "rubric_notes": "Positioning/research/launch bullets first; must not claim SaaS or AI.",
+  "notes": [
+    "start date: expected likely_in_window_vague, got likely_in_window_vague",
+    "hand scores: suggested by Claude, confirmed by the student Nov 24 (cases 1 and 5 on the review page, the rest in chat)"
+  ],
+  "scores": {
+    "truthful": 1,
+    "start_date": 1,
+    "relevant": 1,
+    "honest_gaps": 1
+  },
+  "start_date": {
+    "verdict": "likely_in_window_vague",
+    "verdict_label": "Likely in window (vague)",
+    "availability": {
+      "mode": "month",
+      "start": "2027-06-01",
+      "label": "Starting June 2027"
+    },
+    "mentions": [
+      {
+        "quote": "Start: Summer 2027.",
+        "kind": "season",
+        "start": "2027-06-01",
+        "end": "2027-08-31",
+        "role_hint": null,
+        "is_vague": true,
+        "verdict": "likely_in_window_vague",
+        "verdict_label": "Likely in window (vague)",
+        "note": "Exact date not specified"
+      }
+    ],
+    "note": "Exact date not specified",
+    "undergrad_warning": null,
+    "requirements": [
+      {
+        "requirement": "degree",
+        "name": "Degree",
+        "verdict": "meets",
+        "verdict_label": "Meets",
+        "quote": "MBA",
+        "note": null,
+        "detail": null
+      },
+      {
+        "requirement": "work_authorization",
+        "name": "Sponsorship",
+        "verdict": "not_stated",
+        "verdict_label": "Not stated",
+        "quote": null,
+        "note": null,
+        "detail": null
+      },
+      {
+        "requirement": "years_experience",
+        "name": "Years of experience",
+        "verdict": "info",
+        "verdict_label": "3+ years required",
+        "quote": "3+ years in marketing, brand management, or consulting",
+        "note": "Required. Compare it with your own full-time experience before applying.",
+        "detail": "required:3"
+      }
+    ]
+  },
+  "start_date_got": "likely_in_window_vague",
+  "tailor": {
+    "resume_lines": [
+      {
+        "id": "L1",
+        "text": "Marcus Bell",
+        "section": null,
+        "source": "resume",
+        "kind": "contact"
+      },
+      {
+        "id": "L2",
+        "text": "marcus.bell@example.com",
+        "section": null,
+        "source": "resume",
+        "kind": "contact"
+      },
+      {
+        "id": "L3",
+        "text": "EDUCATION",
+        "section": "Education",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L4",
+        "text": "NYU Stern School of Business | MBA, Tech & Strategy | Aug 2025 – May 2027",
+        "section": "Education",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L5",
+        "text": "University of Georgia | BBA, Marketing | Aug 2012 – May 2016",
+        "section": "Education",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L6",
+        "text": "EXPERIENCE",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L7",
+        "text": "Associate Brand Manager, Tailspin Foods | Atlanta, GA | Jul 2016 – Jul 2025",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "header"
+      },
+      {
+        "id": "L8",
+        "text": "- Led the relaunch of a $45M snack brand, including new positioning and packaging",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L9",
+        "text": "- Ran 12 consumer focus groups and 2 segmentation studies to pick target customers",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L10",
+        "text": "- Wrote launch messaging used by a 60-person sales team",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L11",
+        "text": "- Grew household penetration 2.1 points in 18 months",
+        "section": "Experience",
+        "source": "resume",
+        "kind": "bullet"
+      },
+      {
+        "id": "L12",
+        "text": "SKILLS",
+        "section": "Skills",
+        "source": "resume",
+        "kind": "heading"
+      },
+      {
+        "id": "L13",
+        "text": "Nielsen, Qualtrics, Excel, PowerPoint",
+        "section": "Skills",
+        "source": "resume",
+        "kind": "header"
+      }
+    ],
+    "resume": {
+      "sections": [
+        {
+          "heading": "Education",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L4"
+              ],
+              "header_fields": {
+                "L4": {
+                  "organization": "NYU Stern School of Business",
+                  "title": "MBA, Tech & Strategy",
+                  "dates": "Aug 2025 – May 2027"
+                }
+              },
+              "bullets": []
+            },
+            {
+              "header_line_ids": [
+                "L5"
+              ],
+              "header_fields": {
+                "L5": {
+                  "organization": "University of Georgia",
+                  "title": "BBA, Marketing",
+                  "dates": "Aug 2012 – May 2016"
+                }
+              },
+              "bullets": []
+            }
+          ]
+        },
+        {
+          "heading": "Experience",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L7"
+              ],
+              "header_fields": {
+                "L7": {
+                  "title": "Associate Brand Manager",
+                  "organization": "Tailspin Foods",
+                  "location": "Atlanta, GA",
+                  "dates": "Jul 2016 – Jul 2025"
+                }
+              },
+              "bullets": [
+                {
+                  "text": "Led the relaunch of a $45M snack brand, including new positioning and packaging",
+                  "source_line_ids": [
+                    "L8"
+                  ],
+                  "id": "B1",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                },
+                {
+                  "text": "Wrote launch messaging used by a 60-person sales team",
+                  "source_line_ids": [
+                    "L10"
+                  ],
+                  "id": "B2",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                },
+                {
+                  "text": "Ran 12 consumer focus groups and 2 segmentation studies to pick target customers",
+                  "source_line_ids": [
+                    "L9"
+                  ],
+                  "id": "B3",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                },
+                {
+                  "text": "Grew household penetration 2.1 points in 18 months",
+                  "source_line_ids": [
+                    "L11"
+                  ],
+                  "id": "B4",
+                  "flag_reason": null,
+                  "status": "traced",
+                  "included": true,
+                  "edited": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Skills",
+          "entries": [
+            {
+              "header_line_ids": [
+                "L13"
+              ],
+              "header_fields": {},
+              "bullets": []
+            }
+          ]
+        }
+      ],
+      "plain_text": "Marcus Bell\nmarcus.bell@example.com\n\nEducation\nNYU Stern School of Business\nMBA, Tech & Strategy | Aug 2025 – May 2027\nUniversity of Georgia\nBBA, Marketing | Aug 2012 – May 2016\n\nExperience\nTailspin Foods | Atlanta, GA\nAssociate Brand Manager | Jul 2016 – Jul 2025\n- Led the relaunch of a $45M snack brand, including new positioning and packaging\n- Wrote launch messaging used by a 60-person sales team\n- Ran 12 consumer focus groups and 2 segmentation studies to pick target customers\n- Grew household penetration 2.1 points in 18 months\n\nSkills\nNielsen, Qualtrics, Excel, PowerPoint\n"
+    },
+    "gaps": {
+      "required": [],
+      "preferred": [
+        {
+          "text": "B2B SaaS experience",
+          "quote": "B2B SaaS experience",
+          "posting_bullet": "B2B SaaS experience",
+          "group": "preferred",
+          "note": "Your resume doesn't show this. If you have it, add it to your master resume.",
+          "related_line_ids": [
+            "L10"
+          ]
+        },
+        {
+          "text": "Launching AI products",
+          "quote": "experience launching AI products",
+          "posting_bullet": "experience launching AI products",
+          "group": "preferred",
+          "note": "Your resume doesn't show this. If you have it, add it to your master resume.",
+          "related_line_ids": [
+            "L8",
+            "L10"
+          ]
+        }
+      ],
+      "none_found": false
+    }
+  },
+  "cost": 0.0279
+}
