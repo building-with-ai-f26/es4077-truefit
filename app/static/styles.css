@@ -142,6 +142,8 @@ textarea.locked { background: var(--ground); color: var(--ink); cursor: default;
   font: 13px/1.45 var(--body); background: var(--ground); border: 1px solid var(--rule); border-radius: 4px; }
 .save-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; margin-top: 14px; }
 .save-row .hint { margin: 0; }
+.save-status { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
+.save-status:empty, .save-status:not(:has(#saved-at:not(:empty))) { display: none; }
 
 input[type="text"], textarea {
   width: 100%;

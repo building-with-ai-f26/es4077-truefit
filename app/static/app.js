@@ -420,10 +420,52 @@ function fillSavedProfile() {
 
 document.getElementById("save-profile").addEventListener("click", () => {
   const profile = saveProfile({ masterResume: masterResumeInput.value, backgroundNotes: notesInput.value, noteFiles });
+  forgetUndo();
   showSavedAt(profile.savedAt);
 });
 
+// "Clear saved" empties the boxes too, so a mis-tap could lose a pasted resume. Undo puts back
+// everything it removed, on the page and on this device, until the student types or saves again.
+const undoClearButton = document.getElementById("undo-clear");
+let beforeClear = null;
+
+function forgetUndo() {
+  beforeClear = null;
+  undoClearButton.hidden = true;
+}
+
+undoClearButton.addEventListener("click", () => {
+  if (!beforeClear) return;
+  const b = beforeClear;
+  if (b.stored !== null) localStorage.setItem(PROFILE_KEY, b.stored);
+  masterResumeInput.value = b.masterResume;
+  masterResumeInput.readOnly = b.resumeLocked;
+  masterResumeInput.classList.toggle("locked", b.resumeLocked);
+  resumeFileStatus.hidden = b.resumeFileHidden;
+  resumeFileName.textContent = b.resumeFileName;
+  notesInput.value = b.notes;
+  noteFiles = b.noteFiles;
+  renderNoteFiles();
+  availabilityInput.value = b.availability;
+  savedAtLabel.textContent = b.savedAtText;
+  forgetUndo();
+  document.getElementById("clear-profile").focus(); // the Undo button is gone, so keep keyboard focus nearby
+});
+
+for (const box of [masterResumeInput, notesInput, availabilityInput]) box.addEventListener("input", forgetUndo);
+
 document.getElementById("clear-profile").addEventListener("click", () => {
+  beforeClear = {
+    stored: localStorage.getItem(PROFILE_KEY),
+    masterResume: masterResumeInput.value,
+    resumeLocked: masterResumeInput.readOnly,
+    resumeFileHidden: resumeFileStatus.hidden,
+    resumeFileName: resumeFileName.textContent,
+    notes: notesInput.value,
+    noteFiles,
+    availability: availabilityInput.value,
+    savedAtText: savedAtLabel.textContent,
+  };
   clearProfile(); // FR-021: removes the resume, notes, and availability from this device
   clearResumeFile();
   notesInput.value = "";
@@ -431,7 +473,8 @@ document.getElementById("clear-profile").addEventListener("click", () => {
   renderNoteFiles();
   clearFileError("notes");
   availabilityInput.value = "";
-  showSavedAt(null);
+  savedAtLabel.textContent = "Cleared from this device.";
+  undoClearButton.hidden = false;
   track("resume_cleared");
 });
 

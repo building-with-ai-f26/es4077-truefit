@@ -104,7 +104,10 @@
         <div class="save-row">
           <button id="save-profile" class="link-button" type="button">Save on this device</button>
           <button id="clear-profile" class="link-button" type="button">Clear saved</button>
-          <span id="saved-at" class="hint" aria-live="polite"></span>
+          <span class="save-status">
+            <span id="saved-at" class="hint" aria-live="polite"></span>
+            <button id="undo-clear" class="link-button" type="button" hidden>Undo</button>
+          </span>
         </div>
 
         <button id="tailor" class="primary" type="button" disabled>Tailor resume</button>
