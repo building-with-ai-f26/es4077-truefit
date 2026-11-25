@@ -234,6 +234,7 @@
     <a class="brand" href="#top">TrueFit</a>
     <nav aria-label="Page sections">
       <a href="#live-demo">Product</a>
+      <a href="#output-quality">Testing</a>
       <a href="#prd">Living PRD</a>
       <a href="#build-log">Build log</a>
     </nav>
@@ -257,7 +258,7 @@
     <section id="live-demo">
       <h2>Product Showcase</h2>
       <p>
-        <strong>Current Status:</strong> Build 3: live on the web, with rate limits and a security audit<br />
+        <strong>Current Status:</strong> Build 4: tested on 10 inputs and improved (output quality score 38/40 before, 40/40 after; see <a href="#output-quality">Output Quality</a>)<br />
         <strong>Live app:</strong> <a href="https://es4077-truefit.onrender.com">es4077-truefit.onrender.com</a> (free hosting; the first visit after a quiet spell can take 30–60 seconds to wake up). Screenshots below.
       </p>
       <figure>
@@ -276,6 +277,77 @@
       </figure>
     </section>
 
+    <!-- BUILD 4 EVIDENCE: OUTPUT QUALITY (Track A) -->
+    <section id="output-quality">
+      <h2>Output Quality: Before and After</h2>
+      <p>Build 4, Track A. TrueFit's biggest risk is its AI output: a resume that reads as generic, invents something, or tailors confidently to text that isn't a real posting. I wrote four rules for good output, built 10 test inputs for tech roles, scored the live version, improved it, and re-scored the same 10 inputs. Before: <strong>38/40</strong>. After: <strong>40/40</strong>.</p>
+
+      <h3>Rubric: four rules, pass or fail for each case</h3>
+      <table>
+        <tr><th scope="row">1. Truthful</th><td>Every bullet traces to the student's own lines: no number, skill, tool, or result that isn't there, and the student's role isn't inflated. <span class="meta">Checked by script, plus a read of any flagged bullet.</span></td></tr>
+        <tr><th scope="row">2. Grounded start date</th><td>The verdict matches the posting and quotes it; a missing or vague date is called missing or vague, never made up. <span class="meta">Checked by script.</span></td></tr>
+        <tr><th scope="row">3. Relevant and specific</th><td>The resume leads with the experience that best matches the posting's top requirements and keeps concrete results instead of generic phrasing. <span class="meta">Scored by hand.</span></td></tr>
+        <tr><th scope="row">4. Honest about gaps and bad input</th><td>The gap list names what the student really lacks, under the right heading (Required or Preferred); text that isn't a posting, or tries to instruct TrueFit, gets a clear answer instead of a confident resume. <span class="meta">Checked by script, plus a read of cases 9 and 10.</span></td></tr>
+      </table>
+      <p class="meta">Test set: 5 normal tech postings (product management, product marketing, BizOps, growth with no start date, partnerships), 3 messy ones (a LinkedIn page pasted with its menus and a typo in the date, a resume pasted from a PDF with broken lines, a thin resume with a vague posting), and 2 adversarial ones (a posting with a hidden instruction to TrueFit, and a news article instead of a posting). Hand scores were suggested by my coding agent and confirmed by me, case by case. The cases, outputs, and scorecards are in the repo: <a href="https://github.com/building-with-ai-f26/es4077-truefit/tree/main/tests/eval/results/build4">tests/eval/results/build4</a>.</p>
+
+      <h3>Scorecard</h3>
+      <table>
+        <thead><tr><th>Case</th><th>Kind</th><th>Before</th><th>After</th><th>What changed</th></tr></thead>
+        <tbody>
+          <tr><td>1. Product manager</td><td>Normal</td><td>4/4</td><td>4/4</td><td>Bullets now lead with the result</td></tr>
+          <tr><td>2. Product marketing</td><td>Normal</td><td>4/4</td><td>4/4</td><td>—</td></tr>
+          <tr><td>3. BizOps</td><td>Normal</td><td>4/4</td><td>4/4</td><td>—</td></tr>
+          <tr><td>4. Growth, no start date</td><td>Normal</td><td>4/4</td><td>4/4</td><td>—</td></tr>
+          <tr><td>5. Partnerships</td><td>Normal</td><td>3/4</td><td>4/4</td><td>Rule 3: filler and repeated bullets gone. Also no more unreadable AI replies</td></tr>
+          <tr><td>6. LinkedIn paste</td><td>Messy</td><td>4/4</td><td>4/4</td><td>—</td></tr>
+          <tr><td>7. Resume pasted from a PDF</td><td>Messy</td><td>3/4</td><td>4/4</td><td>Rule 3: broken lines rejoined, result and skills kept</td></tr>
+          <tr><td>8. Thin resume, vague posting</td><td>Messy</td><td>4/4</td><td>4/4</td><td>—</td></tr>
+          <tr><td>9. Hidden instruction</td><td>Adversarial</td><td>4/4</td><td>4/4</td><td>—</td></tr>
+          <tr><td>10. Not a job posting</td><td>Adversarial</td><td>4/4</td><td>4/4</td><td>—</td></tr>
+          <tr><td><strong>Total</strong></td><td></td><td><strong>38/40</strong></td><td><strong>40/40</strong></td><td>Rules 1, 2, 4 passed every case both times</td></tr>
+        </tbody>
+      </table>
+      <p class="meta">Before: Nov 24, 2026 on the live version. After: Nov 24, 2026, after the fixes in pull requests #62–#67 (all deployed). Rules 1, 2 and 4 already passed everywhere, so the gains are in rule 3: whether the resume reads as tailored.</p>
+
+      <h3>Examples</h3>
+      <p><strong>Case 7, resume pasted from a PDF.</strong> PDF copy-paste breaks lines. Before, half of the student's best bullet was glued under the job title, so it lost its result, and the Skills section was dropped.</p>
+      <table>
+        <thead><tr><th>Before</th><th>After</th></tr></thead>
+        <tbody><tr>
+          <td>Program Manager | 2016 – 2025<br />engineering and operations teams, finishing 2 weeks early<br />- Coordinated the launch of a new warehouse system across 6 sites<br /><span class="meta">(no Skills section)</span></td>
+          <td>Program Manager | 2016 – 2025<br />- Finished a new warehouse system launch across 6 sites 2 weeks early by coordinating with engineering and operations teams<br />Skills: Jira | Confluence | MS Project</td>
+        </tr></tbody>
+      </table>
+      <p><strong>Case 5, partnerships.</strong> Before, the resume told the reseller story twice and kept a filler bullet. After, each piece of work appears once, and the VP still leads the negotiation, as in the student's own notes.</p>
+      <table>
+        <thead><tr><th>Before</th><th>After</th></tr></thead>
+        <tbody><tr>
+          <td>- Managed reseller partnerships, including rebuilding the relationship with the largest reseller through monthly joint pipeline reviews.<br />- Renewed the largest reseller's contract at $8M a year, up from $6M, after rebuilding the relationship through monthly joint pipeline reviews.<br />- Prepared the pricing analysis that supported the VP of sales, who led the final reseller negotiation.<br />- Negotiated contracts as a Business Development Manager.<br />- Set up the first integration partnership with a cloud provider&hellip;</td>
+          <td>- Renewed the largest reseller contract at $8M a year, up from $6M, after rebuilding the relationship through monthly joint pipeline reviews<br />- Supported the final reseller contract negotiation led by the VP of sales by preparing the pricing analysis<br />- Set up the company's first integration partnership with a cloud provider&hellip;</td>
+        </tr></tbody>
+      </table>
+      <p><strong>Case 1, product manager.</strong> Before, TrueFit reordered jobs but kept every bullet word for word. After, bullets lead with the result and can use the posting's wording when the student's line already says the same thing.</p>
+      <table>
+        <thead><tr><th>Before</th><th>After</th></tr></thead>
+        <tbody><tr>
+          <td>- Ran an A/B test on reminder timing that raised appointment confirmations 9%<br />- Ran technical discovery with 40+ enterprise customers and wrote requirements for the product team<br />- Led onboarding redesign that cut time-to-first-value from 30 to 12 days</td>
+          <td>- Raised appointment confirmations 9% after running an A/B test on reminder timing<br />- Ran customer discovery with 40+ enterprise customers and wrote requirements for the product team<br />- Cut time-to-first-value from 30 to 12 days by leading an onboarding redesign</td>
+        </tr></tbody>
+      </table>
+
+      <h3>What still feels off</h3>
+      <ul>
+        <li>Vague start dates aren't fully consistent: in one of three after runs, case 8 ("start date flexible") came back "partly in window" instead of "flexible to discuss," with no code change. The final run passed.</li>
+        <li>In case 7, the degree "BS Industrial Engineering" is still split across two lines in the education section.</li>
+        <li>Using the posting's wording is a judgment call: "technical discovery" became "customer discovery" in case 1. I accepted it because both describe working with customers to write requirements.</li>
+      </ul>
+
+      <h3>Outside check</h3>
+      <p>On Nov 24, a target user outside class tried the live app with their own posting and resume, before the improvements above were deployed. PostHog shows they got through it end to end in about four minutes: they pasted a posting link, ran the eligibility check, tailored, and downloaded a PDF. Their comment was that everything worked. They didn't review the improved outputs, so the before-and-after changes above haven't had an outside check yet.</p>
+      <p>Their visit still found a real problem. Their Word resume, a normal text-only file, was refused twice as too large. Word can save font files inside a document, which is invisible but adds megabytes. TrueFit now reads only a Word file's text and allows files up to 20 MB, up from 5 MB. I checked the fix on the live site with an 8.4 MB test file that has fonts saved inside it. The reviewer hasn't re-tried their own file yet.</p>
+    </section>
+
     <!-- LIVING PRD (Updated every week!) -->
     <section id="prd">
       <h2>Living PRD (Product Requirements Document)</h2>
@@ -283,12 +355,12 @@
 
       <table>
         <tr><th scope="row">Owner</th><td>Emma Schmidt (builder; product, design, and engineering)</td></tr>
-        <tr><th scope="row">Document status</th><td>v3 · Build 3 (live on the web, with rate limits and a security audit)</td></tr>
+        <tr><th scope="row">Document status</th><td>v4 · Build 4 (output quality tested on 10 inputs and improved, 38/40 to 40/40)</td></tr>
         <tr><th scope="row">Target release</th><td>Live since Nov 18, 2026 at <a href="https://es4077-truefit.onrender.com">es4077-truefit.onrender.com</a> for class testing; launch to classmates with Build 5 (Dec 7, 2026)</td></tr>
         <tr><th scope="row">Testers</th><td>Second-year Stern MBA classmates in my section, pod, and recruiting clubs</td></tr>
         <tr><th scope="row">Detailed spec</th><td><a href="https://github.com/building-with-ai-f26/es4077-truefit/tree/main/specs/001-start-date-truthful-resume">specs/001-start-date-truthful-resume</a> (requirements, plan, and tasks)</td></tr>
         <tr><th scope="row">Security audit</th><td><a href="https://github.com/building-with-ai-f26/es4077-truefit/blob/main/SECURITY.md">SECURITY.md</a> (what TrueFit holds, what I checked, and what's left)</td></tr>
-        <tr><th scope="row">Last updated</th><td>Nov 19, 2026</td></tr>
+        <tr><th scope="row">Last updated</th><td>Nov 25, 2026</td></tr>
       </table>
 
       <p><strong>Objective:</strong> Help MBA students spend their limited recruiting time only on roles they can actually start, and send a resume for each one that gets through applicant tracking systems without containing a single claim they can't back up. The test of success is simple: classmates use it instead of their current mix of reading postings closely, ChatGPT, and manual fact-checking.</p>
@@ -309,7 +381,7 @@
       </ul>
 
       <h3>3. How It Works Under the Hood & Riskiest Assumption (Week 2+)</h3>
-      <p><strong>Riskiest Assumption:</strong> That an AI model can tailor a resume without slipping in skills, numbers, or claims that aren't in the student's master resume. If one invented claim gets through, the "100% true" promise breaks and students go back to checking every line. <em>How we test it:</em> the model only drafts; plain code then checks every bullet against the resume lines it cites (exact numbers, no posting keywords the student doesn't have), plus a second AI support check. Anything that fails is flagged and left out by default. Fixed eval sets (16 tailoring cases; 31 start-date and eligibility cases) are re-run whenever prompts or models change.</p>
+      <p><strong>Riskiest Assumption:</strong> That an AI model can tailor a resume without slipping in skills, numbers, or claims that aren't in the student's master resume. If one invented claim gets through, the "100% true" promise breaks and students go back to checking every line. <em>How we test it:</em> the model only drafts; plain code then checks every bullet against the resume lines it cites (exact numbers, no posting keywords the student doesn't have), plus a second AI support check. Anything that fails is flagged and left out by default. Fixed eval sets (16 tailoring cases; 31 start-date and eligibility cases; the 10-case Build 4 output-quality scorecard) are re-run whenever prompts or models change.</p>
       <p><strong>How Build 2 tests it:</strong> Build 2 tests the risk directly. Tailoring is built: the model only drafts bullets and must cite the numbered resume or note lines behind each one, then plain Python flags any bullet whose numbers aren't in those lines or that names a skill or tool found only in the posting (acronyms like SQL and CFA, and capitalized names like Tableau), and a second model call checks every remaining claim. Ordinary posting words the student never used ("forecasting", "shape") are sent to that check as words to verify, so fair synonyms pass but unbacked skills don't. Flagged bullets are left out unless the student puts them back. On a 15-case tailoring eval (6 normal, 3 messy, 6 adversarial: a posting demanding SQL, Python, Tableau, and a CFA the student doesn't have; a metric-dense resume; a cover letter that's only "eager to build SQL skills"; a STAR story where the student supported a launch their manager led; a posting asking for forecasting, underwriting, and machine learning in lowercase; and tools listed at the start of bullet lines, where Python's skill check can't see them), 0 kept bullets contained an untraceable number, skill, or requirement, or turned a goal or a supporting role into a claim (rerun Nov 12 after narrowing the skill check). One fair-looking bullet of 63 was flagged for review. Limitation: in the two newest cases the model never tried to use the missing skills, so the words-to-verify path is covered by a unit test, not yet by an eval failure it caught. The start-date check uses the same pattern and is also tested: will the model report only text that is really in the posting? The model's only job is to find and quote start-date lines. Plain Python code then confirms each quote appears word for word in the posting, drops any that don't, and works out the verdict itself, so the model never decides whether a date fits. On the 22-case start-date eval run against the real model, TrueFit got 22 of 22 right and never stated a date the posting didn't contain (still 22 of 22 after the eligibility questions were added to the same call, Nov 13).</p>
       <p><strong>How the app works (Build 3, live):</strong> [Web page: paste posting text or link + availability; a link is read by the server from the site's public job data] → [Small Python (FastAPI) server on Render's free plan that holds the API key in Render's secret settings, stores nothing, and limits AI requests before they run] → [AI model via OpenRouter: finds and quotes start-date lines and the degree, sponsorship, and years-of-experience requirements] → [Python checks: every quote really in posting, date rules, start-date and degree verdicts] → [Eligibility exhibit: a row per requirement with the quoted evidence]. Then: [master resume + optional writing about their experience (notes, cover letters, STAR stories, essays), pasted or read from Word files by the server, saved only on the student's device] → [server numbers every line] → [AI drafts tailored bullets citing line numbers] → [Python checks numbers and posting-only words; a second AI call checks each claim] → [bullets with sources and Traced/Unverified badges; remove, put back, edit and re-check]. At the same time, a third AI call lists the posting's requirements → [Python checks each quote and line, and lists what the student's writing doesn't show as Required / Preferred gaps]. Last: [copy-ready plain text, or a one-page Word or PDF file built by the server with no AI call]. PostHog records page views, clicks, and funnel events from the web page (never posting or resume text; session replays hide all text) and errors from the server.</p>
       <p><strong>Going live and security (Build 3, Nov 18):</strong> TrueFit runs as one free web service on Render, deployed from this repo on every merge to <code>main</code>. There's no database or sign-in, because TrueFit has nothing to keep: the master resume stays on the student's own device, and the server forgets each request when it answers. That removes the biggest risks for a student app (a leaked table, one student seeing another's data), so the main risk left is someone spending my OpenRouter credit. Every AI request is rate limited before it runs: 10 a minute and 50 a day per visitor, and 200 a day for the whole site (about $4 on a bad day), and the OpenRouter key has its own $10 cap. The audit also covers secrets, libraries, logs, posting links, uploads, browser headers, and analytics; see <a href="https://github.com/building-with-ai-f26/es4077-truefit/blob/main/SECURITY.md">SECURITY.md</a>. Trade-offs I accepted: the free plan sleeps after 15 minutes idle, so the first visit can take 30–60 seconds; the limits are kept in memory and reset when it restarts (the site cap and the key's cap still bound the cost); and people on one network, like school Wi-Fi, share one visitor limit.</p>
@@ -317,6 +389,7 @@
       <p><strong>Gap list (Build 3, Nov 17):</strong> a third model call, run at the same time as tailoring so it adds no waiting, lists the posting's requirements with a quote for each and the student's lines that back them. Python confirms every quote and line number, then lists what's left as gaps, grouped Required / Preferred (unlabeled counts as Required). Each gap can carry a short note on how serious it is, written by Python, not the model (a required license is often a dealbreaker; a tool is usually learnable), and the closest related line from the student's own writing. The wording guide and notes are adapted from an outside skill, job-description-analyzer; its match score and red-flag scan were left out. Soft skills and eligibility items are never gaps.</p>
       <p><strong>Word download (Build 3, Nov 17):</strong> "Download Word" gives the same kept bullets (with the student's edits) as the copy-ready text, as a one-page .docx in one plain column: no tables, columns, text boxes, or Word header/footer, so ATS parsers read it. Each job keeps the page's layout, company left and location right, then title left and dates right, using a right-aligned tab stop rather than a table. US Letter, Calibri, name 16 pt, headings 12 pt. TrueFit fits it to one page with Word's standard 1-inch margins while the text is 10 pt or larger; a longer resume narrows the margins (down to 0.5 in) before shrinking all the text together in half-point steps (body 11 pt down to 8 pt at the smallest, the name 16 pt down to 11 pt, headings always 1 pt above the body). A resume that fits fills the page: spare space is shared between sections and between each school and job (up to one blank line each), then up to 2 pt between bullets. <em>Update, Nov 18:</em> margins were 0.75 in and short resumes left space at the bottom. If it still won't fit, it says about how many bullets to remove instead of cutting the student's content itself. It adds one library, python-docx, and no model call. The layout rules are adapted from an outside skill, resume-formatter. The name and contact line are centered (student's rule after opening the file). "Download PDF" gives the same layout as a text-based PDF that ATS can read; because a PDF's page count can be measured exactly, TrueFit says exactly how many bullets would need to go if it can't fit one page.</p>
       <p><strong>Easier review (Build 3, Nov 17):</strong> a jump bar stays at the top while scrolling the results (next unverified bullet, gaps, copy and download, and an "only unverified" filter); traced bullets hide their source lines behind "Show source" (unverified bullets always show them); each job can fold to one line; and the copy-ready text shows as a short preview until Copy is pressed.</p>
+      <p><strong>Output quality (Build 4, Nov 24):</strong> passing the truthfulness checks wasn't enough: on the 10-case scorecard (see <a href="#output-quality">Output Quality</a>), every resume was true, but two didn't read as tailored. Now a resume pasted from a PDF is repaired before tailoring (broken lines rejoined, spaced-out headings like "E D U C A T I O N" fixed, dates split from job titles). Tailoring tells each piece of work once, puts each job's best match first, leads a bullet with the student's result when there is one, may use the posting's wording for something the student's line already says, and keeps the student's own bullet endings (periods or none). When the model corrects itself mid-reply, TrueFit reads its last complete answer instead of showing an error. Tailor locks again if the posting is changed after a check. The truthfulness rules didn't change.</p>
       <p><strong>Pitch (updated Nov 13, when eligibility shipped):</strong> "Paste a job posting. Know if you're eligible, starting with the start date, and get a resume for it that's ATS-ready and 100% true." Start date and degree get a verdict; sponsorship and years of experience are shown with the posting's own words so students can judge them.</p>
 
       <h3>4. Unit Economics & Analytics Snapshot (Updated Weekly)</h3>
@@ -324,7 +397,7 @@
         <div class="ledger-row">
           <div class="stat-label">Cumulative Build Spend</div>
           <div class="stat-value">$32.00</div>
-          <p class="meta">$15.00 OpenRouter credits ($4.37 used; $10 added Nov 18 after the first $5 ran low) + $17 Claude Pro (annual plan, one month prorated). As of Nov 20, 2026.</p>
+          <p class="meta">$15.00 OpenRouter credits ($5.82 used; $10 added Nov 18 after the first $5 ran low) + $17 Claude Pro (annual plan, one month prorated). As of Nov 25, 2026.</p>
         </div>
         <div class="ledger-row">
           <div class="stat-label">Est. Cost Per User Run</div>
@@ -359,6 +432,7 @@
           <tr><td>Correct eligibility</td><td>Each requirement's verdict matches a human reviewer on 20+ real postings</td><td>≥ 9 of 10 per requirement, and never a requirement the posting doesn't state</td></tr>
           <tr><td>Useful gap list</td><td>Unsupported requirements caught vs. a human reviewer; Required/Preferred grouping agreement</td><td>≥ 80%; ≥ 90%</td></tr>
           <tr><td>Affordable to run</td><td>OpenRouter spend on the live site per day; requests refused by the site-wide cap</td><td>≤ $4 a day; zero checks refused by the site cap (PostHog <code>start_date_check_failed</code> with <code>site_daily_limit</code>)</td></tr>
+          <tr><td>Tailored, not generic</td><td>Build 4 scorecard: 10 test inputs, 4 rules each (Build 4)</td><td>40 of 40, re-run on all 10 after every prompt change; was 38 before Build 4 fixes</td></tr>
           <tr><td>Worth using</td><td>Classmate testers who say it's faster and they don't re-check every line</td><td>≥ 3</td></tr>
         </tbody>
       </table>
@@ -379,7 +453,7 @@
         <li><strong>Inputs:</strong> Postings and resumes are in English, pasted as text, read from a Word file, or (postings) read from a link to a site with public job data.</li>
         <li><strong>Vague dates:</strong> Spring = Mar–May, Summer = Jun–Aug, Fall = Sep–Nov.</li>
         <li><strong>Graduation windows:</strong> When a posting gives no start date but says who it hires by graduation date (e.g., "graduating between December 2026 and June 2027"), the role starts after graduation. TrueFit quotes that line and says "In window" (with a note that it's based on the graduation window) if the window reaches the student's start month. A class year alone ("Class of 2027") still counts as not stated.</li>
-        <li><strong>Rewording:</strong> Allowed (new verbs, reordering, shortening) as long as no facts are added and numbers stay exact.</li>
+        <li><strong>Rewording:</strong> Allowed (new verbs, reordering, shortening, leading with the result, and the posting's wording for something the student's line already says) as long as no facts are added and numbers stay exact.</li>
         <li><strong>Privacy:</strong> No accounts. Nothing is stored on a server; the master resume is saved only on the student's device and can be cleared anytime. Each check sends the posting and resume to the AI model through OpenRouter; analytics never include them, and session replays hide all text.</li>
         <li><strong>Usage:</strong> Class testing stays well under 200 AI requests a day; if real use reaches the cap, I'll raise it on purpose rather than by accident.</li>
         <li><strong>No eligibility profile:</strong> TrueFit assumes the student is finishing an MBA and asks only when they can start. It never asks about visas or years of work; it shows what the posting says about them.</li>
@@ -464,12 +538,13 @@
       </div>
 
       <div class="log-entry">
-        <h3>Build 4 · Test.py: Choose Track A or Track B (Due Nov 30)</h3>
+        <h3>Build 4 · Test &amp; Improve: Output Quality (Due Nov 30)</h3>
         <ul>
-          <li><strong>Chosen track:</strong> [A: 10-case domain eval and one outside target-user review; OR B: 3–5 outside users and replay findings]</li>
-          <li><strong>Results and improvements:</strong> [Before/after evidence; for Track B, fixes to the top three friction points]</li>
-          <li><strong>PRD v4 changes:</strong> [What the evidence changed]</li>
-          <li><strong>Cost & time this week:</strong> $[0.00] · [0] hours</li>
+          <li><strong>Chosen track:</strong> Track A, output quality. TrueFit's main risk is its AI output: a resume that invents something, reads as generic, or tailors confidently to text that isn't a posting. Evidence is in <a href="#output-quality">Output Quality</a>.</li>
+          <li><strong>What shipped:</strong> A four-rule rubric (truthful, grounded start date, relevant and specific, honest about gaps and bad input) and a 10-case test set for tech roles: 5 normal, 3 messy, 2 adversarial. A scorecard runner scores rules 1, 2 and 4 automatically and saves every output for hand scoring of rule 3. Scored before: 38/40. Fixed, all deployed to the live app: resumes pasted from a PDF are repaired before tailoring; tailoring tells each piece of work once, puts the best match first, leads with the student's result, may use the posting's wording, and keeps the student's own bullet endings; an AI reply that corrects itself is read instead of failing; Tailor locks again when the posting changes after a check. Scored after on the same 10: 40/40. Word uploads now read only the file's text, up to 20 MB, after my outside reviewer's resume was refused. 331 automated tests passing.</li>
+          <li><strong>What broke / changed in PRD:</strong> My plan said TrueFit couldn't tell a news article from a job posting; the first scoring run proved that wrong (the eligibility check already says "That doesn't look like a job posting" and keeps Tailor locked). It was the scoring script that tailored anyway, so I fixed the script, not the app. In the before run, case 5's AI reply was unreadable on all three tries, so a student would have seen an error: the model wrote a valid answer, then added "Wait, I must correct&hellip;" and a second one. Reviewing the before run also showed Tailor stayed unlocked if the posting was changed after a check. After that fix, my hand test on the live site found Tailor stayed locked even after I undid my edit, because of a leftover space; both fixed. I re-ran all 10 cases after every fix rather than just the cases that changed, and one of those re-runs caught case 8's vague start date coming back differently with no code change; the final run passed, but the model isn't fully consistent on vague dates. My outside reviewer's Word resume was refused as "over 5 MB" because Word had saved fonts inside it. PRD v4: tailoring now leads with results and may use the posting's wording; output quality is a success metric, with the scorecard re-run after every prompt change; the decisions table records the scoring rule for gaps under the wrong heading, combining bullets, leading with results, and the 20 MB limit.</li>
+          <li><strong>Lessons:</strong> Passing every automated check isn't the same as being good: all 10 resumes were true before any fix, but reading them showed two that didn't look tailored. Hand scoring was quick because my coding agent suggested each score on a review page and I agreed or changed it, case by case. Some fixes changed other cases' output, so re-running all 10 each time was worth the extra $0.25 a run. My outside reviewer said "everything worked," but what they ran into (a refused upload) was more useful than their comment.</li>
+          <li><strong>Cost &amp; time this week:</strong> $1.45 OpenRouter (credits used went from $4.37 to $5.82, including about $1.15 for scorecard runs: $0.33 before, $0.05 diagnosing case 5, and three after runs at about $0.25 each) · 4 hours</li>
         </ul>
       </div>
 
